@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
-const auth = require("../middleware/auth");
+const { requireAuth, requireRole } = require("../middleware/auth");
 
 // GET creator profile
-router.get("/creator", auth, async (req, res) => {
-  if (req.user.role !== "creator") return res.status(403).json({ error: "Access denied" });
+router.get("/creator", requireAuth, requireRole("creator"), async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM creator_profiles WHERE user_id = $1",
@@ -19,8 +18,7 @@ router.get("/creator", auth, async (req, res) => {
 });
 
 // UPDATE creator profile
-router.put("/creator", auth, async (req, res) => {
-  if (req.user.role !== "creator") return res.status(403).json({ error: "Access denied" });
+router.put("/creator", requireAuth, requireRole("creator"), async (req, res) => {
   const { bio, niche, social_links } = req.body;
   try {
     const result = await pool.query(
@@ -39,8 +37,7 @@ router.put("/creator", auth, async (req, res) => {
 });
 
 // GET business profile
-router.get("/business", auth, async (req, res) => {
-  if (req.user.role !== "business") return res.status(403).json({ error: "Access denied" });
+router.get("/business", requireAuth, requireRole("business"), async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM business_profiles WHERE user_id = $1",
@@ -54,8 +51,7 @@ router.get("/business", auth, async (req, res) => {
 });
 
 // UPDATE business profile
-router.put("/business", auth, async (req, res) => {
-  if (req.user.role !== "business") return res.status(403).json({ error: "Access denied" });
+router.put("/business", requireAuth, requireRole("business"), async (req, res) => {
   const { company_name, industry, description, website } = req.body;
   try {
     const result = await pool.query(
