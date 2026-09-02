@@ -8,6 +8,7 @@ const profileRoutes = require("./routes/profiles");
 const campaignRoutes = require("./routes/campaigns");
 const applicationRoutes = require("./routes/applications");
 const deliverableRoutes = require("./routes/deliverables");
+const payoutRoutes = require("./routes/payouts");
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ app.use("/profile", profileRoutes);
 app.use("/campaigns", campaignRoutes);
 app.use("/applications", applicationRoutes);
 app.use("/deliverables", deliverableRoutes);
+app.use("/payouts", payoutRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
