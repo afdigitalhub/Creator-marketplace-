@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const dashboardRoutes = require("./routes/dashboard");
 const profileRoutes = require("./routes/profiles");
 const campaignRoutes = require("./routes/campaigns");
+const applicationRoutes = require("./routes/applications");
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use("/auth", authRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/profile", profileRoutes);
 app.use("/campaigns", campaignRoutes);
+app.use("/applications", applicationRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
