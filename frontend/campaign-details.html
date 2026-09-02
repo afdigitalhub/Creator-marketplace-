@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Details | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --accent-purple: #8b5cf6;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --error: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  .main-content { padding: 20px 16px; }
+
+  .hero-card {
+    background: linear-gradient(135deg, rgba(79,110,247,0.15), rgba(124,58,237,0.15));
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 22px 18px;
+    margin-bottom: 20px;
+  }
+
+  .business-tag {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .camp-title {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .budget-pill {
+    display: inline-flex;
+    align-items: center;
+    background: var(--gradient);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 12px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .info-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .info-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .info-value { font-size: 14.5px; font-weight: 600; }
+
+  .section { margin-bottom: 22px; }
+
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+
+  .section-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  .tags-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .tag {
+    font-size: 12.5px;
+    color: var(--text-light);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 9px;
+  }
+
+  .sticky-action {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 26, 0.97);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 14px 16px 22px;
+    z-index: 50;
+  }
+
+  .apply-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: var(--gradient);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+  }
+
+  .apply-btn:disabled { opacity: 0.5; }
+
+  .apply-form { display: none; margin-top: 16px; }
+
+  .field { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 13px 15px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    color: var(--text-light);
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+    resize: none;
+  }
+
+  input:focus, textarea:focus { border-color: var(--accent-blue); }
+
+  .msg-box {
+    padding: 11px 13px;
+    border-radius: 11px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+    line-height: 1.4;
+  }
+
+  .msg-box.error {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: var(--error);
+  }
+
+  .msg-box.success {
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: var(--success);
+  }
+
+  .loading-text { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">Campaign Details</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="loading-text">Loading campaign...</div>
+</div>
+
+<div class="sticky-action" id="stickyAction" style="display:none;">
+  <div class="msg-box" id="msgBox"></div>
+  <div id="applyFormWrap" class="apply-form">
+    <div class="field">
+      <label>Your Pitch</label>
+      <textarea id="pitch" rows="3" placeholder="Tell them why you're a great fit..."></textarea>
+    </div>
+    <div class="field">
+      <label>Your Proposed Price ($)</label>
+      <input type="number" id="proposedPrice" placeholder="e.g. 400">
+    </div>
+  </div>
+  <button class="apply-btn" id="applyBtn">Apply Now</button>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+
+  if (!token) window.location.href = 'login.html';
+
+  const params = new URLSearchParams(window.location.search);
+  const campaignId = params.get('id');
+  let showingForm = false;
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function loadCampaign() {
+    try {
+      const response = await fetch(`${API_BASE}/campaigns/${campaignId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        document.getElementById('mainContent').innerHTML = `<div class="loading-text">Campaign not found.</div>`;
+        return;
+      }
+
+      const c = data.campaign;
+
+      document.getElementById('mainContent').innerHTML = `
+        <div class="hero-card">
+          <div class="business-tag">${escapeHtml(c.business_name || 'Business')}</div>
+          <div class="camp-title">${escapeHtml(c.title)}</div>
+          <div class="budget-pill">💰 ${c.budget ? '$' + c.budget : 'Budget TBD'}</div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="info-label">Creators Needed</div>
+            <div class="info-value">${c.creators_needed || 'N/A'}</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Deadline</div>
+            <div class="info-value">${c.deadline ? new Date(c.deadline).toLocaleDateString() : 'N/A'}</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Min Followers</div>
+            <div class="info-value">${c.min_followers || 'None'}</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Apply By</div>
+            <div class="info-value">${c.application_deadline ? new Date(c.application_deadline).toLocaleDateString() : 'N/A'}</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Description</div>
+          <div class="section-text">${escapeHtml(c.description || 'No description provided.')}</div>
+        </div>
+
+        ${c.objective ? `
+        <div class="section">
+          <div class="section-title">Objective</div>
+          <div class="section-text">${escapeHtml(c.objective)}</div>
+        </div>` : ''}
+
+        ${c.deliverables ? `
+        <div class="section">
+          <div class="section-title">Deliverables</div>
+          <div class="section-text">${escapeHtml(c.deliverables)}</div>
+        </div>` : ''}
+
+        <div class="section">
+          <div class="section-title">Details</div>
+          <div class="tags-row">
+            ${c.required_platform ? `<span class="tag">${escapeHtml(c.required_platform)}</span>` : ''}
+            ${c.required_niche ? `<span class="tag">${escapeHtml(c.required_niche)}</span>` : ''}
+          </div>
+        </div>
+      `;
+
+      if (role === 'creator') {
+        document.getElementById('stickyAction').style.display = 'block';
+      }
+
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="loading-text">Connection error. Please try again.</div>`;
+    }
+  }
+
+  function showMsg(text, isError) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg-box ' + (isError ? 'error' : 'success');
+    box.style.display = 'block';
+  }
+
+  document.getElementById('applyBtn').addEventListener('click', async function() {
+    if (!showingForm) {
+      showingForm = true;
+      document.getElementById('applyFormWrap').style.display = 'block';
+      this.textContent = 'Submit Application';
+      return;
+    }
+
+    const pitch = document.getElementById('pitch').value.trim();
+    const proposed_price = document.getElementById('proposedPrice').value;
+
+    if (!pitch) {
+      showMsg('Please write a pitch before applying.', true);
+      return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Submitting...';
+
+    try {
+      const response = await fetch(`${API_BASE}/applications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ campaign_id: campaignId, pitch, proposed_price: proposed_price || null })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showMsg(data.error || 'Something went wrong.', true);
+        this.disabled = false;
+        this.textContent = 'Submit Application';
+        return;
+      }
+
+      showMsg('Application submitted successfully!', false);
+      document.getElementById('applyFormWrap').style.display = 'none';
+      this.textContent = 'Applied ✓';
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', true);
+      this.disabled = false;
+      this.textContent = 'Submit Application';
+    }
+  });
+
+  loadCampaign();
+</script>
+
+</body>
+  </html>
