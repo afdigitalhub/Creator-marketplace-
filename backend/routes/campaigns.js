@@ -60,7 +60,7 @@ router.post("/", requireAuth, requireRole("business"), async (req, res) => {
 router.get("/", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT c.*, u.name AS business_name
+      `SELECT c.*, u.full_name AS business_name
        FROM campaigns c
        JOIN users u ON c.business_id = u.id
        ORDER BY c.created_at DESC`
@@ -76,7 +76,7 @@ router.get("/", requireAuth, async (req, res) => {
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT c.*, u.name AS business_name
+      `SELECT c.*, u.full_name AS business_name
        FROM campaigns c
        JOIN users u ON c.business_id = u.id
        WHERE c.id = $1`,
