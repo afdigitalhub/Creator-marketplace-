@@ -5,6 +5,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth");
 const dashboardRoutes = require("./routes/dashboard");
 const profileRoutes = require("./routes/profiles");
+const campaignRoutes = require("./routes/campaigns");
 
 const app = express();
 app.use(cors());
@@ -13,8 +14,9 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/profile", profileRoutes);
+app.use("/campaigns", campaignRoutes);
 
-app.get("/", (req, res) => res.json({ status: "Creator Marketplace API — Phase 1 (auth + roles)" }));
+app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
 const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => console.log(`Creator Marketplace backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Creator Marketplace API running on port ${PORT}`));
