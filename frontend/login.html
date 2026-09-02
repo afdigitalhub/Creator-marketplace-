@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AF Digital Hub | Creator Marketplace</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --bg-glow-1: #1e1b4b;
+    --bg-glow-2: #312e81;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --accent-purple: #8b5cf6;
+    --accent-violet: #6d28d9;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --error: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    position: relative;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(79, 110, 247, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -15%;
+    right: -15%;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .logo-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 17px;
+    color: white;
+    letter-spacing: -0.5px;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+    position: relative;
+  }
+
+  .logo-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 50%);
+  }
+
+  .logo-text {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-light);
+  }
+
+  .logo-text .dim { color: var(--text-muted); font-weight: 500; }
+  .logo-text .hub { color: var(--af-yellow); }
+
+  .card {
+    background: linear-gradient(180deg, var(--card-bg) 0%, #0c0c16 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+
+  h1 {
+    font-size: 23px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 26px;
+    line-height: 1.4;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 13px 15px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    color: var(--text-light);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s ease;
+    font-family: inherit;
+  }
+
+  input::placeholder { color: var(--text-dim); }
+
+  input:focus, select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 13px;
+    background: var(--gradient);
+    color: white;
+    font-size: 15.5px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  }
+
+  .switch-row {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .switch-row a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .error-msg {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: var(--error);
+    padding: 11px 13px;
+    border-radius: 11px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+    line-height: 1.4;
+  }
+
+  .error-msg.success {
+    background: rgba(52, 211, 153, 0.08);
+    border-color: rgba(52, 211, 153, 0.25);
+    color: var(--success);
+  }
+
+  .role-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    background: var(--input-bg);
+    padding: 4px;
+    border-radius: 13px;
+    border: 1px solid var(--border);
+  }
+
+  .role-btn {
+    flex: 1;
+    padding: 11px 8px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .role-btn.active {
+    background: var(--gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  }
+
+  .hidden { display: none !important; }
+
+  .footer-tag {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="content-wrap">
+
+  <div class="logo-row">
+    <div class="logo-mark">AF</div>
+    <div class="logo-text">Digital<span class="hub">Hub</span></div>
+  </div>
+
+  <div class="card">
+    <h1 id="form-title">Welcome back</h1>
+    <p class="subtitle" id="form-subtitle">Log in to your creator marketplace account</p>
+
+    <div class="error-msg" id="error-box"></div>
+
+    <div class="role-toggle hidden" id="role-toggle">
+      <div class="role-btn active" data-role="creator" onclick="selectRole('creator')">I'm a Creator</div>
+      <div class="role-btn" data-role="business" onclick="selectRole('business')">I'm a Business</div>
+    </div>
+
+    <form id="auth-form">
+      <div class="field hidden" id="name-field">
+        <label>Full Name</label>
+        <input type="text" id="full_name" placeholder="Your full name">
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submit-btn">Log In</button>
+    </form>
+
+    <div class="switch-row">
+      <span id="switch-text">Don't have an account?</span>
+      <a href="#" onclick="toggleMode(event)" id="switch-link">Sign up</a>
+    </div>
+  </div>
+
+  <div class="footer-tag">AF Digital Hub &copy; 2026</div>
+
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  let isLogin = true;
+  let selectedRole = "creator";
+
+  function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.role === role);
+    });
+  }
+
+  function toggleMode(e) {
+    e.preventDefault();
+    isLogin = !isLogin;
+    document.getElementById('form-title').textContent = isLogin ? 'Welcome back' : 'Create your account';
+    document.getElementById('form-subtitle').textContent = isLogin
+      ? 'Log in to your creator marketplace account'
+      : 'Join AF Digital Hub as a creator or business';
+    document.getElementById('name-field').classList.toggle('hidden', isLogin);
+    document.getElementById('role-toggle').classList.toggle('hidden', isLogin);
+    document.getElementById('submit-btn').textContent = isLogin ? 'Log In' : 'Sign Up';
+    document.getElementById('switch-text').textContent = isLogin ? "Don't have an account?" : "Already have an account?";
+    document.getElementById('switch-link').textContent = isLogin ? 'Sign up' : 'Log in';
+    hideError();
+  }
+
+  function showError(msg, isSuccess) {
+    const box = document.getElementById('error-box');
+    box.textContent = msg;
+    box.classList.toggle('success', !!isSuccess);
+    box.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error-box').style.display = 'none';
+  }
+
+  document.getElementById('auth-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    hideError();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      let response, data;
+
+      if (isLogin) {
+        response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+      } else {
+        const full_name = document.getElementById('full_name').value.trim();
+        if (!full_name) {
+          showError('Please enter your full name');
+          return;
+        }
+        response = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name, email, password, role: selectedRole })
+        });
+      }
+
+      data = await response.json();
+
+      if (!response.ok) {
+        showError(data.error || 'Something went wrong');
+        return;
+      }
+
+      if (isLogin) {
+        localStorage.setItem('af_token', data.token);
+        localStorage.setItem('af_role', data.user.role);
+        localStorage.setItem('af_name', data.user.full_name);
+        window.location.href = 'dashboard.html';
+      } else {
+        showError('Account created! Please log in.', true);
+        toggleMode(e);
+      }
+
+    } catch (err) {
+      showError('Could not connect to server. Please try again.');
+    }
+  });
+</script>
+
+</body>
+  </html>
