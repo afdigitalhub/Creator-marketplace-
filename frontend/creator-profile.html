@@ -6,23 +6,185 @@
 <title>Creator Profile — AF Digital Hub</title>
 <style>
   :root {
-    --bg: #05050a; --card: #0f0f1a; --border: #1f1f2e; --text: #f2f2f7;
-    --muted: #9a9ab0; --accent1: #4f6ef7; --accent2: #7c3aed; --accent3: #6d28d9; --yellow: #f5c518;
+    --bg: #05050a;
+    --card: #0f0f1a;
+    --border: #1f1f2e;
+    --text: #f2f2f7;
+    --muted: #9a9ab0;
+    --accent1: #4f6ef7;
+    --accent2: #7c3aed;
+    --accent3: #6d28d9;
+    --yellow: #f5c518;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-  .logo { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
-  .logo span.hub { color: var(--yellow); }
-  h1 { font-size: 22px; margin: 0 0 6px 0; }
-  p.subtitle { color: var(--muted); margin: 0 0 24px 0; font-size: 14px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; margin-top: 18px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+  }
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 20px;
+  }
+  .top-title { font-size: 16px; font-weight: 700; }
+
+  .profile-hero {
+    padding: 28px 20px 20px;
+    text-align: center;
+  }
+  .avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    object-fit: cover;
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-name { font-size: 20px; font-weight: 700; }
+  .profile-role { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .profile-bio {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .profile-bio.empty { color: var(--muted); font-style: italic; }
+
+  .section {
+    padding: 0 20px;
+    margin-top: 24px;
+  }
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .empty-note {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .platform-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .platform-icon { font-size: 18px; }
+  .platform-name { font-size: 14px; font-weight: 600; }
+
+  .link-item {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    color: var(--accent1);
+    text-decoration: none;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+
+  .edit-toggle {
+    width: 100%;
+    margin-top: 28px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .edit-panel {
+    display: none;
+    padding: 0 20px;
+    margin-top: 20px;
+  }
+  .edit-panel.open { display: block; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
   label:first-of-type { margin-top: 0; }
-  input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: inherit; }
+  input, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
   textarea { resize: vertical; min-height: 90px; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  button { width: 100%; margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 15px; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: 0.6; }
+  .save-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .save-btn:disabled { opacity: 0.6; }
   #status { margin-top: 14px; font-size: 14px; text-align: center; }
   .status-ok { color: #4ade80; }
   .status-err { color: #f87171; }
@@ -30,37 +192,73 @@
 </head>
 <body>
 
-  <div class="logo">AF<span class="hub"> Digital Hub</span></div>
-  <h1>Creator Profile</h1>
-  <p class="subtitle">This is what businesses see when they review your applications.</p>
+  <div class="top-bar">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="top-title">Creator Profile</div>
+    <div style="width:20px;"></div>
+  </div>
 
-  <div class="card">
-    <label for="photo_url">Photo URL</label>
-    <input type="text" id="photo_url" placeholder="https://...">
-    <div class="hint">Paste a link to your profile photo.</div>
+  <div class="profile-hero">
+    <div class="avatar" id="avatar">?</div>
+    <div class="profile-name" id="displayName">Creator</div>
+    <div class="profile-role">Creator</div>
+    <div class="profile-bio" id="displayBio">No bio yet.</div>
+  </div>
 
-    <label for="bio">Bio</label>
-    <textarea id="bio" placeholder="Tell businesses who you are and what you create."></textarea>
+  <div class="section">
+    <div class="section-title">Niches</div>
+    <div class="chip-row" id="nicheChips"><span class="empty-note">No niches added yet.</span></div>
+  </div>
 
-    <label for="niches">Niches</label>
-    <input type="text" id="niches" placeholder="e.g. Fashion, Fitness, Tech">
-    <div class="hint">Separate multiple niches with commas.</div>
+  <div class="section">
+    <div class="section-title">Platforms</div>
+    <div id="platformCards"><span class="empty-note">No platforms added yet.</span></div>
+  </div>
 
-    <label for="platforms">Platforms</label>
-    <input type="text" id="platforms" placeholder="e.g. Instagram, TikTok, YouTube">
-    <div class="hint">Separate multiple platforms with commas.</div>
+  <div class="section">
+    <div class="section-title">Portfolio</div>
+    <div id="portfolioLinks"><span class="empty-note">No portfolio links added yet.</span></div>
+  </div>
 
-    <label for="portfolio_links">Portfolio Links</label>
-    <input type="text" id="portfolio_links" placeholder="e.g. https://..., https://...">
-    <div class="hint">Separate multiple links with commas.</div>
+  <div class="section">
+    <button class="edit-toggle" onclick="toggleEdit()">Edit Profile</button>
+  </div>
 
-    <button id="saveBtn" onclick="saveProfile()">Save Profile</button>
-    <div id="status"></div>
+  <div class="edit-panel" id="editPanel">
+    <div class="card">
+      <label for="photo_url">Photo URL</label>
+      <input type="text" id="photo_url" placeholder="https://...">
+      <div class="hint">Paste a link to your profile photo.</div>
+
+      <label for="bio">Bio</label>
+      <textarea id="bio" placeholder="Tell businesses who you are and what you create."></textarea>
+
+      <label for="niches">Niches</label>
+      <input type="text" id="niches" placeholder="e.g. Fashion, Fitness, Tech">
+      <div class="hint">Separate multiple niches with commas.</div>
+
+      <label for="platforms">Platforms</label>
+      <input type="text" id="platforms" placeholder="e.g. Instagram, TikTok, YouTube">
+      <div class="hint">Separate multiple platforms with commas.</div>
+
+      <label for="portfolio_links">Portfolio Links</label>
+      <input type="text" id="portfolio_links" placeholder="e.g. https://..., https://...">
+      <div class="hint">Separate multiple links with commas.</div>
+
+      <button id="saveBtn" class="save-btn" onclick="saveProfile()">Save Changes</button>
+      <div id="status"></div>
+    </div>
   </div>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const token = localStorage.getItem("af_token");
+  const name = localStorage.getItem("af_name");
+
+  const PLATFORM_ICONS = {
+    instagram: "📷", tiktok: "🎵", youtube: "▶️", twitter: "🐦", x: "✕",
+    facebook: "📘", linkedin: "💼", pinterest: "📌", snapchat: "👻"
+  };
 
   function toArray(str) {
     return str.split(",").map(s => s.trim()).filter(s => s.length > 0);
@@ -69,18 +267,84 @@
     return Array.isArray(arr) ? arr.join(", ") : "";
   }
 
+  function renderChips(container, items, emptyText) {
+    if (!items || items.length === 0) {
+      container.innerHTML = `<span class="empty-note">${emptyText}</span>`;
+      return;
+    }
+    container.innerHTML = items.map(i => `<span class="chip">${escapeHtml(i)}</span>`).join("");
+  }
+
+  function renderPlatforms(container, items) {
+    if (!items || items.length === 0) {
+      container.innerHTML = `<span class="empty-note">No platforms added yet.</span>`;
+      return;
+    }
+    container.innerHTML = items.map(p => {
+      const icon = PLATFORM_ICONS[p.toLowerCase().trim()] || "🔗";
+      return `<div class="platform-card"><span class="platform-icon">${icon}</span><span class="platform-name">${escapeHtml(p)}</span></div>`;
+    }).join("");
+  }
+
+  function renderLinks(container, items) {
+    if (!items || items.length === 0) {
+      container.innerHTML = `<span class="empty-note">No portfolio links added yet.</span>`;
+      return;
+    }
+    container.innerHTML = items.map(link => {
+      const safeLink = escapeHtml(link);
+      return `<a href="${safeLink}" target="_blank" class="link-item">${safeLink}</a>`;
+    }).join("");
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function updateDisplay(data) {
+    document.getElementById("displayName").textContent = name || "Creator";
+    const bioEl = document.getElementById("displayBio");
+    if (data.bio) {
+      bioEl.textContent = data.bio;
+      bioEl.classList.remove("empty");
+    } else {
+      bioEl.textContent = "No bio yet.";
+      bioEl.classList.add("empty");
+    }
+
+    const avatar = document.getElementById("avatar");
+    if (data.photo_url) {
+      avatar.innerHTML = `<img src="${escapeHtml(data.photo_url)}" alt="Profile photo">`;
+    } else {
+      avatar.textContent = (name || "C").charAt(0).toUpperCase();
+    }
+
+    renderChips(document.getElementById("nicheChips"), data.niches, "No niches added yet.");
+    renderPlatforms(document.getElementById("platformCards"), data.platforms);
+    renderLinks(document.getElementById("portfolioLinks"), data.portfolio_links);
+  }
+
   async function loadProfile() {
     try {
       const res = await fetch(`${API_BASE}/profiles/creator`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
+      updateDisplay(data);
+
       document.getElementById("photo_url").value = data.photo_url || "";
       document.getElementById("bio").value = data.bio || "";
       document.getElementById("niches").value = toCsv(data.niches);
       document.getElementById("platforms").value = toCsv(data.platforms);
       document.getElementById("portfolio_links").value = toCsv(data.portfolio_links);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function toggleEdit() {
+    document.getElementById("editPanel").classList.toggle("open");
   }
 
   async function saveProfile() {
@@ -105,16 +369,21 @@
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error("Save failed");
+      const updated = await res.json();
+      updateDisplay(updated);
       status.textContent = "Profile saved.";
       status.className = "status-ok";
     } catch (err) {
       console.error(err);
       status.textContent = "Something went wrong. Try again.";
       status.className = "status-err";
-    } finally { btn.disabled = false; }
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   loadProfile();
 </script>
+
 </body>
 </html>
