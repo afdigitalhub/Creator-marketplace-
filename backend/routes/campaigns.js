@@ -66,6 +66,15 @@ router.post("/", requireAuth, requireRole("business"), async (req, res) => {
   }
 
   try {
+    const bizProfile = await pool.query(
+      "SELECT id FROM business_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    if (bizProfile.rows.length === 0) {
+      return res.status(400).json({ error: "No business profile found for this account" });
+    }
+    const businessProfileId = bizProfile.rows[0].id;
+
     const result = await pool.query(
       `INSERT INTO campaigns
         (business_id, title, description, objective, deliverables, budget, currency,
@@ -74,7 +83,7 @@ router.post("/", requireAuth, requireRole("business"), async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'applications_open')
        RETURNING *`,
       [
-        req.user.id,
+        businessProfileId,
         title,
         description,
         objective,
