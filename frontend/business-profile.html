@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -266,14 +267,19 @@
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body)
       });
-      if (!res.ok) throw new Error("Save failed");
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || `Server returned ${res.status}`);
+      }
+
       const updated = await res.json();
       updateDisplay(updated);
       status.textContent = "Profile saved.";
       status.className = "status-ok";
     } catch (err) {
       console.error(err);
-      status.textContent = "Something went wrong. Try again.";
+      status.textContent = "Error: " + err.message;
       status.className = "status-err";
     } finally {
       btn.disabled = false;
