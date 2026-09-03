@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -624,7 +625,7 @@
       const data = await res.json();
 
       if(!res.ok){
-        showError(data.error || data.message || "Could not post campaign. Please try again.");
+        showError((data.error || data.message || "Could not post campaign.") + (data.detail ? " — " + data.detail : ""));
         btn.disabled = false;
         btn.textContent = "Publish Campaign";
         return;
@@ -643,4 +644,4 @@
 </script>
 
 </body>
-</html>
+      </html>
