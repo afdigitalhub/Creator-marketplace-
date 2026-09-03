@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile — AF Digital Hub</title>
+</head>
+<body style="background:#05050a;color:#f2f2f7;font-family:sans-serif;padding:20px;">
+  <p>Loading your profile...</p>
+<script>
+  const role = localStorage.getItem('af_role');
+  if (role === 'business') {
+    window.location.href = 'business-profile.html';
+  } else if (role === 'creator') {
+    window.location.href = 'creator-profile.html';
+  } else {
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>
