@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -419,7 +420,7 @@
       const data = await response.json();
 
       if (!response.ok) {
-        showMsg(data.error || 'Something went wrong.', true);
+        showMsg((data.error || 'Something went wrong.') + (data.detail ? ' — ' + data.detail : ''), true);
         this.disabled = false;
         this.textContent = 'Submit Application';
         return;
