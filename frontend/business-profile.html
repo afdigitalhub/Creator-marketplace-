@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,6 +185,7 @@
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const token = localStorage.getItem("af_token");
+  document.title = "Role: " + localStorage.getItem("af_role") + " | Business Profile";
 
   function escapeHtml(str) {
     if (!str) return "";
