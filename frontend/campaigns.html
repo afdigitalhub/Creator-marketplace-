@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -456,6 +457,13 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
+  function formatMoney(amount, currency) {
+    if (!amount) return 'N/A';
+    const symbol = CURRENCY_SYMBOLS[currency] || (currency ? currency + ' ' : '$');
+    return `${symbol}${amount}`;
+  }
+
   async function loadCampaigns() {
     try {
       const response = await fetch(`${API_BASE}/campaigns`, {
@@ -502,7 +510,7 @@
             <div class="campaign-title">${escapeHtml(c.title)}</div>
             <div class="campaign-meta">${escapeHtml(c.business_name || 'Business')}</div>
           </div>
-          <div class="campaign-budget">${c.budget ? '$' + c.budget : 'N/A'}</div>
+          <div class="campaign-budget">${formatMoney(c.budget, c.currency)}</div>
         </div>
         <div class="campaign-desc">${escapeHtml(c.description || '')}</div>
         <div class="tags-row">
@@ -529,4 +537,4 @@
 </script>
 
 </body>
-    </html>
+</html>
