@@ -7,9 +7,10 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 router.get("/", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT c.*, u.full_name AS business_name, u.email AS business_email
+      `SELECT c.*, bp.business_name, u.email AS business_email
        FROM campaigns c
-       JOIN users u ON c.business_id = u.id
+       JOIN business_profiles bp ON c.business_id = bp.id
+       JOIN users u ON bp.user_id = u.id
        ORDER BY c.created_at DESC`
     );
     res.json({ campaigns: result.rows });
@@ -23,9 +24,10 @@ router.get("/", requireAuth, async (req, res) => {
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT c.*, u.full_name AS business_name, u.email AS business_email
+      `SELECT c.*, bp.business_name, u.email AS business_email
        FROM campaigns c
-       JOIN users u ON c.business_id = u.id
+       JOIN business_profiles bp ON c.business_id = bp.id
+       JOIN users u ON bp.user_id = u.id
        WHERE c.id = $1`,
       [req.params.id]
     );
@@ -112,8 +114,16 @@ router.put("/:id", requireAuth, async (req, res) => {
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: "Campaign not found" });
     }
-    if (existing.rows[0].business_id !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to edit this campaign" });
+
+    if (req.user.role !== "admin") {
+      const bizProfile = await pool.query(
+        "SELECT id FROM business_profiles WHERE user_id = $1",
+        [req.user.id]
+      );
+      const ownBusinessId = bizProfile.rows[0] ? bizProfile.rows[0].id : null;
+      if (existing.rows[0].business_id !== ownBusinessId) {
+        return res.status(403).json({ error: "Not authorized to edit this campaign" });
+      }
     }
 
     const {
@@ -160,8 +170,16 @@ router.delete("/:id", requireAuth, async (req, res) => {
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: "Campaign not found" });
     }
-    if (existing.rows[0].business_id !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to delete this campaign" });
+
+    if (req.user.role !== "admin") {
+      const bizProfile = await pool.query(
+        "SELECT id FROM business_profiles WHERE user_id = $1",
+        [req.user.id]
+      );
+      const ownBusinessId = bizProfile.rows[0] ? bizProfile.rows[0].id : null;
+      if (existing.rows[0].business_id !== ownBusinessId) {
+        return res.status(403).json({ error: "Not authorized to delete this campaign" });
+      }
     }
 
     await pool.query("DELETE FROM campaigns WHERE id = $1", [req.params.id]);
