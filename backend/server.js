@@ -19,7 +19,7 @@ app.use(express.json());
 
 app.use("/auth", authRoutes);
 app.use("/dashboard", dashboardRoutes);
-app.use("/profile", profileRoutes);
+app.use("/profiles", profileRoutes);
 app.use("/campaigns", campaignRoutes);
 app.use("/applications", applicationRoutes);
 app.use("/deliverables", deliverableRoutes);
