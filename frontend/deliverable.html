@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Deliverable | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --error: #f87171;
+    --pending: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+
+  .select-wrap { margin-bottom: 22px; }
+
+  .select-wrap label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  select, input, textarea {
+    width: 100%;
+    padding: 13px 15px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    color: var(--text-light);
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  select:focus, input:focus, textarea:focus { border-color: var(--accent-blue); }
+
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .field { margin-bottom: 18px; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    font-weight: 500;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: var(--gradient);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  .submit-btn:disabled { opacity: 0.6; }
+
+  .error-box {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    color: var(--error);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .success-box {
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.3);
+    color: var(--success);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+
+  .past-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 26px 0 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .deliverable-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .deliverable-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .deliverable-campaign { font-size: 13.5px; font-weight: 700; }
+
+  .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .status-pill.approved { background: rgba(52,211,153,0.12); color: var(--success); }
+  .status-pill.pending { background: rgba(251,191,36,0.12); color: var(--pending); }
+
+  .deliverable-link {
+    font-size: 12.5px;
+    color: var(--accent-blue);
+    word-break: break-all;
+    margin-top: 4px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">Submit Deliverable</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="loading-text">Loading your accepted campaigns...</div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+
+  if (!token) window.location.href = 'login.html';
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let acceptedApps = [];
+
+  async function init() {
+    if (role !== 'creator') {
+      document.getElementById('mainContent').innerHTML = `<div class="empty-state">Only creators can submit deliverables.</div>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/applications/mine`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('mainContent').innerHTML = `<div class="empty-state">Could not load your applications.</div>`;
+        return;
+      }
+
+      acceptedApps = (data.applications || []).filter(a => a.status === 'accepted');
+
+      if (acceptedApps.length === 0) {
+        document.getElementById('mainContent').innerHTML = `<div class="empty-state">You don't have any accepted campaigns yet. Once a business accepts your application, you can submit your work here.</div>`;
+        return;
+      }
+
+      renderForm();
+      loadMyDeliverables();
+
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  function renderForm() {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="error-box" id="errorBox"></div>
+      <div class="success-box" id="successBox"></div>
+
+      <div class="select-wrap">
+        <label>Campaign</label>
+        <select id="campaignSelect">
+          ${acceptedApps.map(a => `<option value="${a.campaign_id}">${escapeHtml(a.campaign_title || 'Campaign')}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="submissionUrl">Link to your work</label>
+        <input type="url" id="submissionUrl" placeholder="https://instagram.com/reel/...">
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes for the business (optional)</label>
+        <textarea id="notes" placeholder="Anything you'd like to mention about your submission"></textarea>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitDeliverable()">Submit Deliverable</button>
+
+      <div id="pastDeliverables"></div>
+    `;
+  }
+
+  async function submitDeliverable() {
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+
+    const campaignId = document.getElementById('campaignSelect').value;
+    const submissionUrl = document.getElementById('submissionUrl').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+
+    if (!submissionUrl) {
+      errorBox.textContent = 'Please add a link to your work.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/deliverables`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ campaign_id: campaignId, submission_url: submissionUrl, notes })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.error || data.message || 'Could not submit. Please try again.';
+        errorBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Submit Deliverable';
+        return;
+      }
+
+      successBox.textContent = 'Deliverable submitted successfully!';
+      successBox.style.display = 'block';
+      document.getElementById('submissionUrl').value = '';
+      document.getElementById('notes').value = '';
+      btn.disabled = false;
+      btn.textContent = 'Submit Deliverable';
+      loadMyDeliverables();
+
+    } catch (err) {
+      errorBox.textContent = 'Network error. Check your connection and try again.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Submit Deliverable';
+    }
+  }
+
+  async function loadMyDeliverables() {
+    try {
+      const res = await fetch(`${API_BASE}/deliverables/mine`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) return;
+
+      const deliverables = data.deliverables || [];
+      const container = document.getElementById('pastDeliverables');
+
+      if (deliverables.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="past-title">Your Submissions</div>
+        ${deliverables.map(d => `
+          <div class="deliverable-card">
+            <div class="deliverable-top">
+              <div class="deliverable-campaign">${escapeHtml(d.campaign_title || 'Campaign')}</div>
+              <div class="status-pill ${d.approved ? 'approved' : 'pending'}">${d.approved ? 'Approved' : 'Pending review'}</div>
+            </div>
+            <a href="${d.submission_url}" target="_blank" class="deliverable-link">${escapeHtml(d.submission_url)}</a>
+          </div>
+        `).join('')}
+      `;
+    } catch (err) {}
+  }
+
+  init();
+</script>
+
+</body>
+</html>
