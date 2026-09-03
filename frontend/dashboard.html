@@ -468,6 +468,9 @@
     document.getElementById('ctaCard').style.display = 'flex';
     document.getElementById('ctaTitle').textContent = 'Post a Campaign';
     document.getElementById('ctaSub').textContent = 'Reach the right creators for your brand';
+  } else if (role === 'admin') {
+    document.getElementById('greetingSub').textContent = 'Monitor platform activity and manage the marketplace';
+    document.getElementById('feedTitle').textContent = 'All Campaigns';
   } else {
     document.getElementById('greetingSub').textContent = 'Find campaigns that match your style';
     document.getElementById('feedTitle').textContent = 'Available Campaigns';
@@ -503,7 +506,7 @@
       let campaigns = data.campaigns || [];
 
       if (campaigns.length === 0) {
-        document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">No campaigns yet.</div>`;
+        document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">Nothing here yet.</div>`;
         return;
       }
 
