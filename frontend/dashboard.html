@@ -451,6 +451,13 @@
     window.location.href = 'login.html';
   }
 
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵' };
+  function formatMoney(amount, currency) {
+    if (!amount) return 'N/A';
+    const symbol = CURRENCY_SYMBOLS[currency] || '$';
+    return `${symbol}${amount}`;
+  }
+
   document.getElementById('menuUserName').textContent = name || 'User';
   document.getElementById('menuUserRole').textContent = role || '';
   document.getElementById('greeting').textContent = `Good day, ${name ? name.split(' ')[0] : ''} 👋`;
@@ -507,7 +514,7 @@
               <div class="campaign-title">${escapeHtml(c.title)}</div>
               <div class="campaign-meta">${escapeHtml(c.business_name || 'Business')}</div>
             </div>
-            <div class="campaign-budget">${c.budget ? '$' + c.budget : 'N/A'}</div>
+            <div class="campaign-budget">${formatMoney(c.budget, c.currency)}</div>
           </div>
           <div class="campaign-desc">${escapeHtml(c.description || '')}</div>
           <div class="tags-row">
@@ -532,4 +539,4 @@
 </script>
 
 </body>
-  </html>
+</html>
