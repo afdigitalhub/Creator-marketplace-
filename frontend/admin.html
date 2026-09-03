@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --error: #f87171;
+    --pending: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 90px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  .tab-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab-chip {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .tab-chip.active {
+    background: var(--gradient);
+    color: white;
+    border-color: transparent;
+  }
+
+  .main-content { padding: 18px 16px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .stat-value { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); }
+
+  .row-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .row-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .row-meta { font-size: 12px; color: var(--text-muted); }
+
+  .role-pill, .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    text-transform: capitalize;
+  }
+
+  .role-pill.admin { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .role-pill.business { background: rgba(79,110,247,0.12); color: var(--accent-blue); }
+  .role-pill.creator { background: rgba(52,211,153,0.12); color: var(--success); }
+
+  .status-pill.open { background: rgba(52,211,153,0.12); color: var(--success); }
+  .status-pill.pending, .status-pill.open_report { background: rgba(251,191,36,0.12); color: var(--pending); }
+  .status-pill.resolved { background: rgba(107,107,128,0.15); color: var(--text-muted); }
+
+  .row-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+  .action-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 10px;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .action-btn.danger { background: rgba(248,113,113,0.12); color: var(--error); }
+  .action-btn.resolve { background: rgba(52,211,153,0.12); color: var(--success); }
+  .action-btn:disabled { opacity: 0.5; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">Admin</div>
+</div>
+
+<div class="tab-row">
+  <div class="tab-chip active" data-tab="overview">Overview</div>
+  <div class="tab-chip" data-tab="users">Users</div>
+  <div class="tab-chip" data-tab="campaigns">Campaigns</div>
+  <div class="tab-chip" data-tab="reports">Reports</div>
+</div>
+
+<div class="main-content">
+
+  <div class="panel active" id="panel-overview">
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value" id="statUsers">—</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statCampaigns">—</div>
+        <div class="stat-label">Total Campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statOpenReports">—</div>
+        <div class="stat-label">Open Reports</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statBusinesses">—</div>
+        <div class="stat-label">Businesses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-users">
+    <div id="usersList"><div class="loading-text">Loading users...</div></div>
+  </div>
+
+  <div class="panel" id="panel-campaigns">
+    <div id="campaignsList"><div class="loading-text">Loading campaigns...</div></div>
+  </div>
+
+  <div class="panel" id="panel-reports">
+    <div id="reportsList"><div class="loading-text">Loading reports...</div></div>
+  </div>
+
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+
+  if (!token) window.location.href = 'login.html';
+  if (role !== 'admin') {
+    document.querySelector('.tab-row').style.display = 'none';
+    document.querySelector('.main-content').innerHTML = `<div class="empty-state">Admin access only.</div>`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let allUsers = [];
+  let allCampaigns = [];
+  let allReports = [];
+
+  document.querySelectorAll('.tab-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.tab-chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      chip.classList.add('active');
+      document.getElementById('panel-' + chip.dataset.tab).classList.add('active');
+    });
+  });
+
+  async function loadOverview() {
+    try {
+      const [usersRes, campaignsRes, reportsRes] = await Promise.all([
+        fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE}/campaigns`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${API_BASE}/admin/reports`, { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+
+      const usersData = await usersRes.json();
+      const campaignsData = await campaignsRes.json();
+      const reportsData = await reportsRes.json();
+
+      allUsers = usersData.users || [];
+      allCampaigns = campaignsData.campaigns || [];
+      allReports = reportsData.reports || [];
+
+      document.getElementById('statUsers').textContent = allUsers.length;
+      document.getElementById('statCampaigns').textContent = allCampaigns.length;
+      document.getElementById('statOpenReports').textContent = allReports.filter(r => r.status !== 'resolved').length;
+      document.getElementById('statBusinesses').textContent = allUsers.filter(u => u.role === 'business').length;
+
+      renderUsers();
+      renderCampaigns();
+      renderReports();
+
+    } catch (err) {
+      document.getElementById('statUsers').textContent = '—';
+    }
+  }
+
+  function renderUsers() {
+    if (allUsers.length === 0) {
+      document.getElementById('usersList').innerHTML = `<div class="empty-state">No users found.</div>`;
+      return;
+    }
+    document.getElementById('usersList').innerHTML = allUsers.map(u => `
+      <div class="row-card">
+        <div class="row-top">
+          <div>
+            <div class="row-title">${escapeHtml(u.full_name || 'User')}</div>
+            <div class="row-meta">${escapeHtml(u.email)}</div>
+          </div>
+          <div class="role-pill ${u.role}">${u.role}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderCampaigns() {
+    if (allCampaigns.length === 0) {
+      document.getElementById('campaignsList').innerHTML = `<div class="empty-state">No campaigns found.</div>`;
+      return;
+    }
+    document.getElementById('campaignsList').innerHTML = allCampaigns.map(c => `
+      <div class="row-card">
+        <div class="row-top">
+          <div>
+            <div class="row-title">${escapeHtml(c.title)}</div>
+            <div class="row-meta">${escapeHtml(c.business_name || 'Business')}</div>
+          </div>
+          <div class="status-pill ${c.status}">${c.status}</div>
+        </div>
+        <div class="row-actions">
+          <button class="action-btn danger" onclick="deleteCampaign('${c.id}', this)">Delete Campaign</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderReports() {
+    if (allReports.length === 0) {
+      document.getElementById('reportsList').innerHTML = `<div class="empty-state">No reports filed.</div>`;
+      return;
+    }
+    document.getElementById('reportsList').innerHTML = allReports.map(r => `
+      <div class="row-card">
+        <div class="row-top">
+          <div>
+            <div class="row-title">${escapeHtml(r.target_type || 'Report')}</div>
+            <div class="row-meta">${escapeHtml(r.reason || '')}</div>
+          </div>
+          <div class="status-pill ${r.status === 'resolved' ? 'resolved' : 'open_report'}">${r.status === 'resolved' ? 'Resolved' : 'Open'}</div>
+        </div>
+        ${r.status !== 'resolved' ? `
+          <div class="row-actions">
+            <button class="action-btn resolve" onclick="resolveReport('${r.id}', this)">Mark Resolved</button>
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function deleteCampaign(campaignId, btn) {
+    if (!confirm('Delete this campaign? This cannot be undone.')) return;
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/campaigns/${campaignId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = 'Delete Campaign';
+        return;
+      }
+      loadOverview();
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Delete Campaign';
+    }
+  }
+
+  async function resolveReport(reportId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Resolving...';
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/reports/${reportId}/resolve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = 'Mark Resolved';
+        return;
+      }
+      loadOverview();
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Mark Resolved';
+    }
+  }
+
+  if (role === 'admin') loadOverview();
+</script>
+
+</body>
+</html>
