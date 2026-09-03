@@ -34,16 +34,26 @@ router.post("/", requireAuth, requireRole("creator"), async (req, res) => {
     );
 
     const campaign = campaignCheck.rows[0];
-    await createNotification(
-      campaign.business_id,
-      "new_application",
-      `You have a new application for "${campaign.title}"`
+
+    // campaign.business_id is a business_profiles.id — look up the
+    // actual user_id behind it before creating a notification, since
+    // notifications.user_id references users.id, not business_profiles.id.
+    const bizOwner = await pool.query(
+      "SELECT user_id FROM business_profiles WHERE id = $1",
+      [campaign.business_id]
     );
+    if (bizOwner.rows.length > 0) {
+      await createNotification(
+        bizOwner.rows[0].user_id,
+        "new_application",
+        `You have a new application for "${campaign.title}"`
+      );
+    }
 
     res.status(201).json({ application: result.rows[0] });
   } catch (err) {
     console.error("Create application error:", err);
-    res.status(500).json({ error: "Server error creating application" });
+    res.status(500).json({ error: "Server error creating application", detail: err.message });
   }
 });
 
@@ -54,7 +64,14 @@ router.get("/campaign/:campaignId", requireAuth, requireRole("business"), async 
     if (campaignCheck.rows.length === 0) {
       return res.status(404).json({ error: "Campaign not found" });
     }
-    if (campaignCheck.rows[0].business_id !== req.user.id) {
+
+    const bizProfile = await pool.query(
+      "SELECT id FROM business_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    const ownBusinessId = bizProfile.rows[0] ? bizProfile.rows[0].id : null;
+
+    if (campaignCheck.rows[0].business_id !== ownBusinessId) {
       return res.status(403).json({ error: "Not authorized to view these applications" });
     }
 
@@ -115,7 +132,13 @@ router.put("/:id/status", requireAuth, requireRole("business"), async (req, res)
       return res.status(404).json({ error: "Application not found" });
     }
 
-    if (appCheck.rows[0].business_id !== req.user.id) {
+    const bizProfile = await pool.query(
+      "SELECT id FROM business_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    const ownBusinessId = bizProfile.rows[0] ? bizProfile.rows[0].id : null;
+
+    if (appCheck.rows[0].business_id !== ownBusinessId) {
       return res.status(403).json({ error: "Not authorized to update this application" });
     }
 
