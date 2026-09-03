@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Profile — AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card: #0f0f1a;
+    --border: #1f1f2e;
+    --text: #f2f2f7;
+    --muted: #9a9ab0;
+    --accent1: #4f6ef7;
+    --accent2: #7c3aed;
+    --accent3: #6d28d9;
+    --yellow: #f5c518;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .logo span.hub { color: var(--yellow); }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 6px 0;
+  }
+  p.subtitle {
+    color: var(--muted);
+    margin: 0 0 24px 0;
+    font-size: 14px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 18px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.6; }
+  #status {
+    margin-top: 14px;
+    font-size: 14px;
+    text-align: center;
+  }
+  .status-ok { color: #4ade80; }
+  .status-err { color: #f87171; }
+</style>
+</head>
+<body>
+
+  <div class="logo">AF<span class="hub"> Digital Hub</span></div>
+  <h1>Creator Profile</h1>
+  <p class="subtitle">This is what businesses see when they review your applications.</p>
+
+  <div class="card">
+    <label for="photo_url">Photo URL</label>
+    <input type="text" id="photo_url" placeholder="https://...">
+    <div class="hint">Paste a link to your profile photo.</div>
+
+    <label for="bio">Bio</label>
+    <textarea id="bio" placeholder="Tell businesses who you are and what you create."></textarea>
+
+    <label for="niches">Niches</label>
+    <input type="text" id="niches" placeholder="e.g. Fashion, Fitness, Tech">
+    <div class="hint">Separate multiple niches with commas.</div>
+
+    <label for="platforms">Platforms</label>
+    <input type="text" id="platforms" placeholder="e.g. Instagram, TikTok, YouTube">
+    <div class="hint">Separate multiple platforms with commas.</div>
+
+    <label for="portfolio_links">Portfolio Links</label>
+    <input type="text" id="portfolio_links" placeholder="e.g. https://..., https://...">
+    <div class="hint">Separate multiple links with commas.</div>
+
+    <button id="saveBtn" onclick="saveProfile()">Save Profile</button>
+    <div id="status"></div>
+  </div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem("token");
+
+  function toArray(str) {
+    return str.split(",").map(s => s.trim()).filter(s => s.length > 0);
+  }
+
+  function toCsv(arr) {
+    return Array.isArray(arr) ? arr.join(", ") : "";
+  }
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API_BASE}/profiles/creator`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      document.getElementById("photo_url").value = data.photo_url || "";
+      document.getElementById("bio").value = data.bio || "";
+      document.getElementById("niches").value = toCsv(data.niches);
+      document.getElementById("platforms").value = toCsv(data.platforms);
+      document.getElementById("portfolio_links").value = toCsv(data.portfolio_links);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById("saveBtn");
+    const status = document.getElementById("status");
+    btn.disabled = true;
+    status.textContent = "Saving...";
+    status.className = "";
+
+    const body = {
+      photo_url: document.getElementById("photo_url").value.trim(),
+      bio: document.getElementById("bio").value.trim(),
+      niches: toArray(document.getElementById("niches").value),
+      platforms: toArray(document.getElementById("platforms").value),
+      portfolio_links: toArray(document.getElementById("portfolio_links").value)
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/profiles/creator`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error("Save failed");
+      status.textContent = "Profile saved.";
+      status.className = "status-ok";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Something went wrong. Try again.";
+      status.className = "status-err";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  loadProfile();
+</script>
+
+</body>
+  </html>
