@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post a Campaign — AF Digital Hub</title>
+<style>
+  :root{
+    --bg:#05050a;
+    --card:#0e0e18;
+    --card-border:rgba(255,255,255,0.08);
+    --grad1:#4f6ef7;
+    --grad2:#7c3aed;
+    --grad3:#6d28d9;
+    --yellow:#f5c518;
+    --text:#f2f2f7;
+    --muted:#9a9aad;
+    --danger:#f87171;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    top:-120px; left:-80px;
+    width:340px; height:340px;
+    background:radial-gradient(circle, var(--grad1) 0%, transparent 70%);
+    opacity:0.25;
+    filter:blur(40px);
+    z-index:0;
+  }
+  body::after{
+    content:"";
+    position:fixed;
+    bottom:-140px; right:-100px;
+    width:380px; height:380px;
+    background:radial-gradient(circle, var(--grad3) 0%, transparent 70%);
+    opacity:0.25;
+    filter:blur(40px);
+    z-index:0;
+  }
+  header{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:18px 20px;
+    border-bottom:1px solid var(--card-border);
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    font-size:22px;
+    cursor:pointer;
+    padding:4px 8px;
+  }
+  header h1{
+    font-size:17px;
+    margin:0;
+    font-weight:600;
+  }
+  main{
+    position:relative;
+    z-index:1;
+    padding:20px 20px 100px;
+    max-width:480px;
+    margin:0 auto;
+  }
+  .intro{
+    margin-bottom:22px;
+  }
+  .intro h2{
+    font-size:22px;
+    margin:0 0 6px;
+    font-weight:700;
+  }
+  .intro p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.5;
+  }
+  .field{
+    margin-bottom:18px;
+  }
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:7px;
+    font-weight:500;
+  }
+  input, textarea, select{
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:13px 14px;
+    color:var(--text);
+    font-size:15px;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:none;
+    border-color:var(--grad2);
+  }
+  textarea{
+    resize:vertical;
+    min-height:90px;
+    line-height:1.5;
+  }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  select{
+    -webkit-appearance:none;
+    appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%239a9aad' stroke-width='1.5' fill='none'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+  }
+  .hint{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .submit-bar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--bg) 60%, transparent);
+    z-index:2;
+  }
+  .submit-btn{
+    width:100%;
+    max-width:480px;
+    margin:0 auto;
+    display:block;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg, var(--grad1), var(--grad2) 55%, var(--grad3));
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .submit-btn:disabled{
+    opacity:0.6;
+  }
+  .error-box{
+    background:rgba(248,113,113,0.1);
+    border:1px solid rgba(248,113,113,0.3);
+    color:var(--danger);
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13px;
+    margin-bottom:18px;
+    display:none;
+  }
+  .success-screen{
+    display:none;
+    position:relative;
+    z-index:1;
+    padding:60px 24px;
+    text-align:center;
+  }
+  .success-screen .icon{
+    width:64px;height:64px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--grad1), var(--grad2));
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 20px;
+    font-size:30px;
+  }
+  .success-screen h2{
+    font-size:20px;
+    margin:0 0 8px;
+  }
+  .success-screen p{
+    color:var(--muted);
+    font-size:14px;
+    margin:0 0 24px;
+  }
+  .success-screen a{
+    display:inline-block;
+    padding:13px 28px;
+    border-radius:12px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    color:var(--text);
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+  }
+  .blocked-screen{
+    display:none;
+    position:relative;
+    z-index:1;
+    padding:80px 24px;
+    text-align:center;
+    color:var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">←</button>
+  <h1>Post a Campaign</h1>
+</header>
+
+<main id="formView">
+  <div class="intro">
+    <h2>Tell us about your campaign</h2>
+    <p>Fill in the details below and creators matching your niche will be able to apply.</p>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <form id="campaignForm">
+    <div class="field">
+      <label for="title">Campaign title</label>
+      <input type="text" id="title" placeholder="e.g. Summer skincare launch" required>
+    </div>
+
+    <div class="field">
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Describe the campaign, the product, and what you're looking for" required></textarea>
+    </div>
+
+    <div class="field">
+      <label for="objective">Objective</label>
+      <input type="text" id="objective" placeholder="e.g. Drive brand awareness on Instagram" required>
+    </div>
+
+    <div class="field">
+      <label for="deliverables">Deliverables</label>
+      <textarea id="deliverables" placeholder="e.g. 2 Reels, 1 TikTok, 3 Stories" required></textarea>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="budget">Budget (GHS)</label>
+        <input type="number" id="budget" min="0" placeholder="500" required>
+      </div>
+      <div class="field">
+        <label for="creators_needed">Creators needed</label>
+        <input type="number" id="creators_needed" min="1" placeholder="3" required>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="min_followers">Min. followers</label>
+        <input type="number" id="min_followers" min="0" placeholder="1000" required>
+      </div>
+      <div class="field">
+        <label for="required_platform">Platform</label>
+        <select id="required_platform" required>
+          <option value="">Select</option>
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>YouTube</option>
+          <option>Twitter/X</option>
+          <option>Facebook</option>
+          <option>Any</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="required_niche">Niche</label>
+      <select id="required_niche" required>
+        <option value="">Select</option>
+        <option>Fashion</option>
+        <option>Beauty</option>
+        <option>Tech</option>
+        <option>Fitness</option>
+        <option>Food</option>
+        <option>Lifestyle</option>
+        <option>Business</option>
+        <option>Comedy</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="application_deadline">Apply by</label>
+        <input type="date" id="application_deadline" required>
+      </div>
+      <div class="field">
+        <label for="deadline">Deliverable deadline</label>
+        <input type="date" id="deadline" required>
+      </div>
+    </div>
+    <div class="hint">Creators must apply before "Apply by", and submit their work before the deliverable deadline.</div>
+  </form>
+</main>
+
+<div class="submit-bar" id="submitBar">
+  <button class="submit-btn" id="submitBtn" onclick="submitCampaign()">Post campaign</button>
+</div>
+
+<div class="success-screen" id="successView">
+  <div class="icon">✓</div>
+  <h2>Campaign posted</h2>
+  <p>Creators can now find and apply to your campaign.</p>
+  <a href="dashboard.html">Back to dashboard</a>
+</div>
+
+<div class="blocked-screen" id="blockedView">
+  <p>Only business accounts can post campaigns.</p>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem("af_token");
+  const role = localStorage.getItem("af_role");
+
+  if(!token){
+    window.location.href = "login.html";
+  } else if(role !== "business" && role !== "admin"){
+    document.getElementById("formView").style.display = "none";
+    document.getElementById("submitBar").style.display = "none";
+    document.getElementById("blockedView").style.display = "block";
+  }
+
+  function showError(msg){
+    const box = document.getElementById("errorBox");
+    box.textContent = msg;
+    box.style.display = "block";
+  }
+
+  async function submitCampaign(){
+    const errorBox = document.getElementById("errorBox");
+    errorBox.style.display = "none";
+
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const objective = document.getElementById("objective").value.trim();
+    const deliverables = document.getElementById("deliverables").value.trim();
+    const budget = document.getElementById("budget").value;
+    const creators_needed = document.getElementById("creators_needed").value;
+    const min_followers = document.getElementById("min_followers").value;
+    const required_platform = document.getElementById("required_platform").value;
+    const required_niche = document.getElementById("required_niche").value;
+    const application_deadline = document.getElementById("application_deadline").value;
+    const deadline = document.getElementById("deadline").value;
+
+    if(!title || !description || !objective || !deliverables || !budget || !creators_needed || !min_followers || !required_platform || !required_niche || !application_deadline || !deadline){
+      showError("Please fill in every field before posting.");
+      return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Posting...";
+
+    try{
+      const res = await fetch(`${API_BASE}/campaigns`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title, description, objective, deliverables,
+          budget: Number(budget),
+          creators_needed: Number(creators_needed),
+          min_followers: Number(min_followers),
+          required_platform, required_niche,
+          application_deadline, deadline
+        })
+      });
+
+      const data = await res.json();
+
+      if(!res.ok){
+        showError(data.error || data.message || "Could not post campaign. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "Post campaign";
+        return;
+      }
+
+      document.getElementById("formView").style.display = "none";
+      document.getElementById("submitBar").style.display = "none";
+      document.getElementById("successView").style.display = "block";
+
+    } catch(err){
+      showError("Network error. Check your connection and try again.");
+      btn.disabled = false;
+      btn.textContent = "Post campaign";
+    }
+  }
+</script>
+
+</body>
+  </html>
