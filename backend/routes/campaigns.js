@@ -71,7 +71,7 @@ router.post("/", requireAuth, requireRole("business"), async (req, res) => {
         (business_id, title, description, objective, deliverables, budget, currency,
          creators_needed, min_followers, required_platform, required_niche,
          application_deadline, deadline, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'open')
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'applications_open')
        RETURNING *`,
       [
         req.user.id,
