@@ -71,10 +71,29 @@
     margin-bottom: 20px;
   }
 
+  .hero-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
   .business-tag {
     font-size: 12.5px;
     color: var(--text-muted);
-    margin-bottom: 8px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(52, 211, 153, 0.12);
+    color: var(--success);
+    white-space: nowrap;
   }
 
   .camp-title {
@@ -119,18 +138,24 @@
 
   .info-value { font-size: 14.5px; font-weight: 600; }
 
-  .section { margin-bottom: 22px; }
+  .section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
 
   .section-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
 
-  .section-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .section-text { font-size: 14px; color: var(--text-muted); line-height: 1.6; white-space: pre-line; }
 
   .tags-row { display: flex; gap: 8px; flex-wrap: wrap; }
 
   .tag {
     font-size: 12.5px;
     color: var(--text-light);
-    background: var(--card-bg);
+    background: var(--input-bg);
     border: 1px solid var(--border);
     padding: 6px 12px;
     border-radius: 9px;
@@ -235,7 +260,7 @@
       <textarea id="pitch" rows="3" placeholder="Tell them why you're a great fit..."></textarea>
     </div>
     <div class="field">
-      <label>Your Proposed Price ($)</label>
+      <label>Your Proposed Price</label>
       <input type="number" id="proposedPrice" placeholder="e.g. 400">
     </div>
   </div>
@@ -252,6 +277,24 @@
   const params = new URLSearchParams(window.location.search);
   const campaignId = params.get('id');
   let showingForm = false;
+
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
+  function formatMoney(amount, currency) {
+    if (!amount) return 'Budget TBD';
+    const symbol = CURRENCY_SYMBOLS[currency] || '$';
+    return `${symbol}${amount}`;
+  }
+
+  const STATUS_LABELS = {
+    draft: 'Draft',
+    pending_approval: 'Pending Approval',
+    published: 'Published',
+    applications_open: 'Applications Open',
+    in_progress: 'In Progress',
+    submitted: 'Submitted',
+    completed: 'Completed',
+    cancelled: 'Cancelled'
+  };
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -271,12 +314,16 @@
       }
 
       const c = data.campaign;
+      const statusLabel = STATUS_LABELS[c.status] || c.status || '';
 
       document.getElementById('mainContent').innerHTML = `
         <div class="hero-card">
-          <div class="business-tag">${escapeHtml(c.business_name || 'Business')}</div>
+          <div class="hero-top-row">
+            <div class="business-tag">${escapeHtml(c.business_name || 'Business')}</div>
+            ${statusLabel ? `<div class="status-badge">${escapeHtml(statusLabel)}</div>` : ''}
+          </div>
           <div class="camp-title">${escapeHtml(c.title)}</div>
-          <div class="budget-pill">💰 ${c.budget ? '$' + c.budget : 'Budget TBD'}</div>
+          <div class="budget-pill">💰 ${formatMoney(c.budget, c.currency)}</div>
         </div>
 
         <div class="info-grid">
@@ -285,15 +332,15 @@
             <div class="info-value">${c.creators_needed || 'N/A'}</div>
           </div>
           <div class="info-box">
-            <div class="info-label">Deadline</div>
+            <div class="info-label">Campaign Deadline</div>
             <div class="info-value">${c.deadline ? new Date(c.deadline).toLocaleDateString() : 'N/A'}</div>
           </div>
           <div class="info-box">
-            <div class="info-label">Min Followers</div>
+            <div class="info-label">Min. Followers</div>
             <div class="info-value">${c.min_followers || 'None'}</div>
           </div>
           <div class="info-box">
-            <div class="info-label">Apply By</div>
+            <div class="info-label">Application Deadline</div>
             <div class="info-value">${c.application_deadline ? new Date(c.application_deadline).toLocaleDateString() : 'N/A'}</div>
           </div>
         </div>
@@ -316,7 +363,7 @@
         </div>` : ''}
 
         <div class="section">
-          <div class="section-title">Details</div>
+          <div class="section-title">Requirements</div>
           <div class="tags-row">
             ${c.required_platform ? `<span class="tag">${escapeHtml(c.required_platform)}</span>` : ''}
             ${c.required_niche ? `<span class="tag">${escapeHtml(c.required_niche)}</span>` : ''}
@@ -393,4 +440,4 @@
 </script>
 
 </body>
-  </html>
+</html>
