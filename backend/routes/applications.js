@@ -18,9 +18,20 @@ router.post("/", requireAuth, requireRole("creator"), async (req, res) => {
       return res.status(404).json({ error: "Campaign not found" });
     }
 
+    // campaign_applications.creator_id references creator_profiles.id,
+    // not users.id — look up the real creator profile ID first.
+    const creatorProfile = await pool.query(
+      "SELECT id FROM creator_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    if (creatorProfile.rows.length === 0) {
+      return res.status(400).json({ error: "No creator profile found for this account" });
+    }
+    const creatorProfileId = creatorProfile.rows[0].id;
+
     const dupCheck = await pool.query(
       "SELECT * FROM campaign_applications WHERE campaign_id = $1 AND creator_id = $2",
-      [campaign_id, req.user.id]
+      [campaign_id, creatorProfileId]
     );
     if (dupCheck.rows.length > 0) {
       return res.status(400).json({ error: "You already applied to this campaign" });
@@ -30,14 +41,13 @@ router.post("/", requireAuth, requireRole("creator"), async (req, res) => {
       `INSERT INTO campaign_applications (campaign_id, creator_id, proposed_price, pitch, status, created_at)
        VALUES ($1, $2, $3, $4, 'pending', NOW())
        RETURNING *`,
-      [campaign_id, req.user.id, proposed_price || null, pitch]
+      [campaign_id, creatorProfileId, proposed_price || null, pitch]
     );
 
     const campaign = campaignCheck.rows[0];
 
     // campaign.business_id is a business_profiles.id — look up the
-    // actual user_id behind it before creating a notification, since
-    // notifications.user_id references users.id, not business_profiles.id.
+    // actual user_id behind it before creating a notification.
     const bizOwner = await pool.query(
       "SELECT user_id FROM business_profiles WHERE id = $1",
       [campaign.business_id]
@@ -76,9 +86,10 @@ router.get("/campaign/:campaignId", requireAuth, requireRole("business"), async 
     }
 
     const result = await pool.query(
-      `SELECT a.*, u.full_name AS creator_name, u.email AS creator_email
+      `SELECT a.*, cp.bio AS creator_bio, u.full_name AS creator_name, u.email AS creator_email
        FROM campaign_applications a
-       JOIN users u ON a.creator_id = u.id
+       JOIN creator_profiles cp ON a.creator_id = cp.id
+       JOIN users u ON cp.user_id = u.id
        WHERE a.campaign_id = $1
        ORDER BY a.created_at DESC`,
       [req.params.campaignId]
@@ -94,13 +105,22 @@ router.get("/campaign/:campaignId", requireAuth, requireRole("business"), async 
 // Creator views their own applications
 router.get("/mine", requireAuth, requireRole("creator"), async (req, res) => {
   try {
+    const creatorProfile = await pool.query(
+      "SELECT id FROM creator_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    if (creatorProfile.rows.length === 0) {
+      return res.json({ applications: [] });
+    }
+    const creatorProfileId = creatorProfile.rows[0].id;
+
     const result = await pool.query(
       `SELECT a.*, c.title AS campaign_title, c.budget
        FROM campaign_applications a
        JOIN campaigns c ON a.campaign_id = c.id
        WHERE a.creator_id = $1
        ORDER BY a.created_at DESC`,
-      [req.user.id]
+      [creatorProfileId]
     );
 
     res.json({ applications: result.rows });
@@ -147,12 +167,20 @@ router.put("/:id/status", requireAuth, requireRole("business"), async (req, res)
       [status, req.params.id]
     );
 
+    // app.creator_id here is a creator_profiles.id — look up the real
+    // user_id before creating a notification.
     const app = appCheck.rows[0];
-    await createNotification(
-      app.creator_id,
-      status === "accepted" ? "application_accepted" : "application_rejected",
-      `Your application for "${app.title}" was ${status}`
+    const creatorOwner = await pool.query(
+      "SELECT user_id FROM creator_profiles WHERE id = $1",
+      [app.creator_id]
     );
+    if (creatorOwner.rows.length > 0) {
+      await createNotification(
+        creatorOwner.rows[0].user_id,
+        status === "accepted" ? "application_accepted" : "application_rejected",
+        `Your application for "${app.title}" was ${status}`
+      );
+    }
 
     res.json({ application: result.rows[0] });
   } catch (err) {
