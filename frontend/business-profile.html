@@ -6,23 +6,127 @@
 <title>Business Profile — AF Digital Hub</title>
 <style>
   :root {
-    --bg: #05050a; --card: #0f0f1a; --border: #1f1f2e; --text: #f2f2f7;
-    --muted: #9a9ab0; --accent1: #4f6ef7; --accent2: #7c3aed; --accent3: #6d28d9; --yellow: #f5c518;
+    --bg: #05050a;
+    --card: #0f0f1a;
+    --border: #1f1f2e;
+    --text: #f2f2f7;
+    --muted: #9a9ab0;
+    --accent1: #4f6ef7;
+    --accent2: #7c3aed;
+    --accent3: #6d28d9;
+    --yellow: #f5c518;
   }
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-  .logo { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
-  .logo span.hub { color: var(--yellow); }
-  h1 { font-size: 22px; margin: 0 0 6px 0; }
-  p.subtitle { color: var(--muted); margin: 0 0 24px 0; font-size: 14px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 40px;
+  }
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn { color: var(--text); text-decoration: none; font-size: 20px; }
+  .top-title { font-size: 16px; font-weight: 700; }
+
+  .profile-hero { padding: 28px 20px 20px; text-align: center; }
+  .avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 20px;
+    margin: 0 auto 14px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-name { font-size: 20px; font-weight: 700; }
+  .profile-category { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .profile-desc {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .profile-desc.empty { color: var(--muted); font-style: italic; }
+
+  .section { padding: 0 20px; margin-top: 24px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .contact-icon { font-size: 16px; }
+  .empty-note { color: var(--muted); font-size: 13px; }
+
+  .edit-toggle {
+    width: 100%;
+    margin-top: 28px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .edit-panel { display: none; padding: 0 20px; margin-top: 20px; }
+  .edit-panel.open { display: block; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
   label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; margin-top: 18px; }
   label:first-of-type { margin-top: 0; }
-  input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: inherit; }
+  input, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
   textarea { resize: vertical; min-height: 90px; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  button { width: 100%; margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 15px; font-weight: 600; cursor: pointer; }
-  button:disabled { opacity: 0.6; }
+  .save-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .save-btn:disabled { opacity: 0.6; }
   #status { margin-top: 14px; font-size: 14px; text-align: center; }
   .status-ok { color: #4ade80; }
   .status-err { color: #f87171; }
@@ -30,37 +134,92 @@
 </head>
 <body>
 
-  <div class="logo">AF<span class="hub"> Digital Hub</span></div>
-  <h1>Business Profile</h1>
-  <p class="subtitle">This is what creators see before applying to your campaigns.</p>
+  <div class="top-bar">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="top-title">Business Profile</div>
+    <div style="width:20px;"></div>
+  </div>
 
-  <div class="card">
-    <label for="logo_url">Logo URL</label>
-    <input type="text" id="logo_url" placeholder="https://...">
-    <div class="hint">Paste a link to your business logo.</div>
+  <div class="profile-hero">
+    <div class="avatar" id="avatar">?</div>
+    <div class="profile-name" id="displayName">Business</div>
+    <div class="profile-category" id="displayCategory"></div>
+    <div class="profile-desc" id="displayDesc">No description yet.</div>
+  </div>
 
-    <label for="business_name">Business Name</label>
-    <input type="text" id="business_name" placeholder="e.g. AF Digital Hub">
+  <div class="section">
+    <div class="section-title">Contact</div>
+    <div id="contactInfo"><span class="empty-note">No contact info added yet.</span></div>
+  </div>
 
-    <label for="description">Description</label>
-    <textarea id="description" placeholder="Tell creators what your business does."></textarea>
+  <div class="section">
+    <button class="edit-toggle" onclick="toggleEdit()">Edit Profile</button>
+  </div>
 
-    <label for="category">Category</label>
-    <input type="text" id="category" placeholder="e.g. Fashion, Tech, Food">
+  <div class="edit-panel" id="editPanel">
+    <div class="card">
+      <label for="logo_url">Logo URL</label>
+      <input type="text" id="logo_url" placeholder="https://...">
+      <div class="hint">Paste a link to your business logo.</div>
 
-    <label for="contact_email">Contact Email</label>
-    <input type="text" id="contact_email" placeholder="you@business.com">
+      <label for="business_name">Business Name</label>
+      <input type="text" id="business_name" placeholder="e.g. AF Digital Hub">
 
-    <label for="contact_phone">Contact Phone</label>
-    <input type="text" id="contact_phone" placeholder="+233...">
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Tell creators what your business does."></textarea>
 
-    <button id="saveBtn" onclick="saveProfile()">Save Profile</button>
-    <div id="status"></div>
+      <label for="category">Category</label>
+      <input type="text" id="category" placeholder="e.g. Fashion, Tech, Food">
+
+      <label for="contact_email">Contact Email</label>
+      <input type="text" id="contact_email" placeholder="you@business.com">
+
+      <label for="contact_phone">Contact Phone</label>
+      <input type="text" id="contact_phone" placeholder="+233...">
+
+      <button id="saveBtn" class="save-btn" onclick="saveProfile()">Save Changes</button>
+      <div id="status"></div>
+    </div>
   </div>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const token = localStorage.getItem("af_token");
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderContact(container, email, phone) {
+    let html = "";
+    if (email) html += `<div class="contact-card"><span class="contact-icon">✉️</span>${escapeHtml(email)}</div>`;
+    if (phone) html += `<div class="contact-card"><span class="contact-icon">📞</span>${escapeHtml(phone)}</div>`;
+    container.innerHTML = html || `<span class="empty-note">No contact info added yet.</span>`;
+  }
+
+  function updateDisplay(data) {
+    document.getElementById("displayName").textContent = data.business_name || "Business";
+    document.getElementById("displayCategory").textContent = data.category || "";
+
+    const descEl = document.getElementById("displayDesc");
+    if (data.description) {
+      descEl.textContent = data.description;
+      descEl.classList.remove("empty");
+    } else {
+      descEl.textContent = "No description yet.";
+      descEl.classList.add("empty");
+    }
+
+    const avatar = document.getElementById("avatar");
+    if (data.logo_url) {
+      avatar.innerHTML = `<img src="${escapeHtml(data.logo_url)}" alt="Business logo">`;
+    } else {
+      avatar.textContent = (data.business_name || "B").charAt(0).toUpperCase();
+    }
+
+    renderContact(document.getElementById("contactInfo"), data.contact_email, data.contact_phone);
+  }
 
   async function loadProfile() {
     try {
@@ -68,13 +227,21 @@
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
+      updateDisplay(data);
+
       document.getElementById("logo_url").value = data.logo_url || "";
       document.getElementById("business_name").value = data.business_name || "";
       document.getElementById("description").value = data.description || "";
       document.getElementById("category").value = data.category || "";
       document.getElementById("contact_email").value = data.contact_email || "";
       document.getElementById("contact_phone").value = data.contact_phone || "";
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function toggleEdit() {
+    document.getElementById("editPanel").classList.toggle("open");
   }
 
   async function saveProfile() {
@@ -100,16 +267,21 @@
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error("Save failed");
+      const updated = await res.json();
+      updateDisplay(updated);
       status.textContent = "Profile saved.";
       status.className = "status-ok";
     } catch (err) {
       console.error(err);
       status.textContent = "Something went wrong. Try again.";
       status.className = "status-err";
-    } finally { btn.disabled = false; }
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   loadProfile();
 </script>
+
 </body>
 </html>
