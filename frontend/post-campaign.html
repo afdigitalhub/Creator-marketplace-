@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -324,6 +325,7 @@
 
 <div class="blocked-screen" id="blockedView">
   <p>Only business accounts can post campaigns.</p>
+  <p style="font-size:12px;margin-top:20px;">(Debug — stored role: <span id="debugRole"></span>, token present: <span id="debugToken"></span>)</p>
 </div>
 
 <script>
@@ -337,6 +339,8 @@
     document.getElementById("formView").style.display = "none";
     document.getElementById("submitBar").style.display = "none";
     document.getElementById("blockedView").style.display = "block";
+    document.getElementById("debugRole").textContent = role;
+    document.getElementById("debugToken").textContent = token ? "yes" : "no";
   }
 
   function showError(msg){
