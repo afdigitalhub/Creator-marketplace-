@@ -44,19 +44,9 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
 
-  .hamburger {
-    width: 22px;
-    height: 16px;
-    position: relative;
-    cursor: pointer;
-  }
-
+  .hamburger { width: 22px; height: 16px; position: relative; cursor: pointer; }
   .hamburger span {
     display: block;
     position: absolute;
@@ -65,7 +55,6 @@
     background: var(--text-light);
     border-radius: 2px;
   }
-
   .hamburger span:nth-child(1) { top: 0; }
   .hamburger span:nth-child(2) { top: 7px; }
   .hamburger span:nth-child(3) { top: 14px; }
@@ -83,11 +72,7 @@
     color: white;
   }
 
-  .logo-text-sm {
-    font-size: 16px;
-    font-weight: 700;
-  }
-
+  .logo-text-sm { font-size: 16px; font-weight: 700; }
   .logo-text-sm .hub { color: var(--af-yellow); }
 
   .overlay {
@@ -115,12 +100,7 @@
   .side-menu.open { left: 0; }
   .overlay.open { display: block; }
 
-  .side-menu .logo-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
+  .side-menu .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
   .side-user {
     margin-top: 18px;
@@ -130,7 +110,6 @@
   }
 
   .side-user-name { font-size: 16px; font-weight: 700; }
-
   .side-user-role {
     font-size: 12.5px;
     color: var(--text-muted);
@@ -152,27 +131,13 @@
 
   .menu-link:active { background: var(--input-bg); }
 
-  .menu-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
+  .menu-divider { height: 1px; background: var(--border); margin: 14px 0; }
   .menu-link.logout { color: #f87171; }
 
   .main-content { padding: 20px 16px; }
 
-  .page-title {
-    font-size: 21px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .page-sub {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 18px;
-  }
+  .page-title { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 18px; }
 
   .search-bar {
     display: flex;
@@ -201,21 +166,24 @@
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    margin-bottom: 20px;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
+    margin-bottom: 22px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
+  .filter-row::-webkit-scrollbar { display: none; }
 
   .filter-chip {
     flex-shrink: 0;
-    padding: 8px 14px;
-    border-radius: 20px;
     background: var(--card-bg);
     border: 1px solid var(--border);
     color: var(--text-muted);
     font-size: 13px;
     font-weight: 600;
-    white-space: nowrap;
+    padding: 9px 16px;
+    border-radius: 20px;
     cursor: pointer;
+    white-space: nowrap;
   }
 
   .filter-chip.active {
@@ -224,10 +192,55 @@
     border-color: transparent;
   }
 
-  .result-count {
-    font-size: 12.5px;
-    color: var(--text-dim);
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .featured-card {
+    background: linear-gradient(135deg, rgba(79,110,247,0.18), rgba(124,58,237,0.18));
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 26px;
+    text-decoration: none;
+    color: var(--text-light);
+    display: block;
+  }
+
+  .featured-tag {
+    display: inline-block;
+    background: var(--af-yellow);
+    color: #1a1400;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
     margin-bottom: 12px;
+  }
+
+  .featured-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+  .featured-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+  .featured-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .featured-budget { font-size: 22px; font-weight: 800; }
+  .featured-budget-label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+
+  .featured-btn {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
   }
 
   .campaign-card {
@@ -246,6 +259,7 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
+    gap: 10px;
   }
 
   .campaign-title { font-size: 15.5px; font-weight: 700; margin-bottom: 3px; }
@@ -272,12 +286,7 @@
     overflow: hidden;
   }
 
-  .tags-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 10px;
-    flex-wrap: wrap;
-  }
+  .tags-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 
   .tag {
     font-size: 11px;
@@ -288,10 +297,31 @@
     border-radius: 7px;
   }
 
+  .card-actions { margin-top: 12px; }
+
+  .apply-btn {
+    display: inline-block;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
   .empty-state {
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 20px;
     color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
     font-size: 14px;
   }
 
@@ -321,15 +351,7 @@
   }
 
   .nav-item.active { color: var(--accent-blue); }
-
   .nav-icon { font-size: 20px; }
-
-  .loading-text {
-    text-align: center;
-    color: var(--text-muted);
-    padding: 30px;
-    font-size: 14px;
-  }
 </style>
 </head>
 <body>
@@ -390,12 +412,11 @@
     <div class="filter-chip" data-niche="Fitness">Fitness</div>
     <div class="filter-chip" data-niche="Food">Food</div>
     <div class="filter-chip" data-niche="Lifestyle">Lifestyle</div>
-    <div class="filter-chip" data-niche="Business">Business</div>
-    <div class="filter-chip" data-niche="Comedy">Comedy</div>
   </div>
 
-  <div class="result-count" id="resultCount"></div>
+  <div id="featuredSlot"></div>
 
+  <div class="section-title" id="feedTitle">Available Campaigns</div>
   <div id="campaignFeed">
     <div class="loading-text">Loading campaigns...</div>
   </div>
@@ -430,22 +451,25 @@
   document.getElementById('menuUserRole').textContent = role || '';
 
   if (role === 'business') {
-    document.getElementById('pageSub').textContent = 'Browse all campaigns on the platform';
+    document.getElementById('pageSub').textContent = 'Manage and review your campaigns';
+    document.getElementById('feedTitle').textContent = 'Your Campaigns';
   }
 
-  let allCampaigns = [];
-  let activeNiche = '';
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵' };
+  function formatMoney(amount, currency) {
+    if (!amount) return 'N/A';
+    const symbol = CURRENCY_SYMBOLS[currency] || '$';
+    return `${symbol}${amount}`;
+  }
 
   function openMenu() {
     document.getElementById('sideMenu').classList.add('open');
     document.getElementById('overlay').classList.add('open');
   }
-
   function closeMenu() {
     document.getElementById('sideMenu').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
   }
-
   function logout() {
     localStorage.clear();
     window.location.href = 'login.html';
@@ -456,12 +480,9 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
-  function formatMoney(amount, currency) {
-    if (!amount) return 'N/A';
-    const symbol = CURRENCY_SYMBOLS[currency] || (currency ? currency + ' ' : '$');
-    return `${symbol}${amount}`;
-  }
+  let allCampaigns = [];
+  let activeNiche = '';
+  let searchTerm = '';
 
   async function loadCampaigns() {
     try {
@@ -476,6 +497,7 @@
       }
 
       allCampaigns = data.campaigns || [];
+      renderFeatured();
       renderCampaigns();
 
     } catch (err) {
@@ -483,26 +505,60 @@
     }
   }
 
+  function renderFeatured() {
+    const slot = document.getElementById('featuredSlot');
+    if (allCampaigns.length === 0) {
+      slot.innerHTML = '';
+      return;
+    }
+    const featured = [...allCampaigns].sort((a, b) => (b.budget || 0) - (a.budget || 0))[0];
+    if (!featured || !featured.budget) {
+      slot.innerHTML = '';
+      return;
+    }
+    slot.innerHTML = `
+      <a href="campaign-details.html?id=${featured.id}" class="featured-card">
+        <div class="featured-tag">FEATURED</div>
+        <div class="featured-title">${escapeHtml(featured.title)}</div>
+        <div class="featured-meta">${escapeHtml(featured.business_name || 'Business')} · ${featured.creators_needed ? featured.creators_needed + ' creators needed' : ''}</div>
+        <div class="featured-bottom">
+          <div>
+            <div class="featured-budget">${formatMoney(featured.budget, featured.currency)}</div>
+            <div class="featured-budget-label">Budget</div>
+          </div>
+          <div class="featured-btn">View Details</div>
+        </div>
+      </a>
+    `;
+  }
+
   function renderCampaigns() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const feed = document.getElementById('campaignFeed');
+    let filtered = allCampaigns;
 
-    let filtered = allCampaigns.filter(c => {
-      const matchesNiche = !activeNiche || c.required_niche === activeNiche;
-      const matchesQuery = !query ||
-        (c.title && c.title.toLowerCase().includes(query)) ||
-        (c.description && c.description.toLowerCase().includes(query));
-      return matchesNiche && matchesQuery;
-    });
+    if (activeNiche) {
+      filtered = filtered.filter(c => (c.required_niche || '').toLowerCase() === activeNiche.toLowerCase());
+    }
 
-    document.getElementById('resultCount').textContent =
-      `${filtered.length} campaign${filtered.length === 1 ? '' : 's'} found`;
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(c =>
+        (c.title || '').toLowerCase().includes(term) ||
+        (c.description || '').toLowerCase().includes(term)
+      );
+    }
 
-    if (filtered.length === 0) {
-      document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">No campaigns match your search.</div>`;
+    if (allCampaigns.length === 0) {
+      feed.innerHTML = `<div class="empty-state">Nothing here yet.</div>`;
       return;
     }
 
-    document.getElementById('campaignFeed').innerHTML = filtered.map(c => `
+    if (filtered.length === 0) {
+      feed.innerHTML = `<div class="empty-state">No campaigns found.</div>`;
+      return;
+    }
+
+    feed.innerHTML = filtered.map(c => `
       <a href="campaign-details.html?id=${c.id}" class="campaign-card">
         <div class="campaign-top">
           <div>
@@ -516,19 +572,24 @@
           ${c.required_platform ? `<span class="tag">${escapeHtml(c.required_platform)}</span>` : ''}
           ${c.required_niche ? `<span class="tag">${escapeHtml(c.required_niche)}</span>` : ''}
           ${c.creators_needed ? `<span class="tag">${c.creators_needed} creators needed</span>` : ''}
+          ${c.application_deadline ? `<span class="tag">Deadline: ${new Date(c.application_deadline).toLocaleDateString()}</span>` : ''}
         </div>
+        ${role !== 'business' ? `<div class="card-actions"><span class="apply-btn">Apply Now</span></div>` : ''}
       </a>
     `).join('');
   }
 
-  document.getElementById('searchInput').addEventListener('input', renderCampaigns);
-
-  document.getElementById('filterRow').addEventListener('click', function(e) {
+  document.getElementById('filterRow').addEventListener('click', (e) => {
     const chip = e.target.closest('.filter-chip');
     if (!chip) return;
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    activeNiche = chip.dataset.niche;
+    activeNiche = chip.dataset.niche || '';
+    renderCampaigns();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
     renderCampaigns();
   });
 
@@ -536,4 +597,4 @@
 </script>
 
 </body>
-  </html>
+</html>
