@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payouts | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --pending: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+
+  .summary-card {
+    background: var(--gradient);
+    border-radius: 20px;
+    padding: 24px 20px;
+    margin-bottom: 22px;
+  }
+
+  .summary-label {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  .summary-amount {
+    font-size: 34px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+
+  .summary-split {
+    display: flex;
+    gap: 20px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .summary-split div { flex: 1; }
+
+  .split-label {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 3px;
+  }
+
+  .split-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .payout-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .payout-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .payout-name { font-size: 14.5px; font-weight: 700; margin-bottom: 3px; }
+  .payout-meta { font-size: 12.5px; color: var(--text-muted); }
+
+  .payout-amount {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent-blue);
+    white-space: nowrap;
+  }
+
+  .status-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  .status-pill.paid { background: rgba(52,211,153,0.12); color: var(--success); }
+  .status-pill.pending { background: rgba(251,191,36,0.12); color: var(--pending); }
+
+  .mark-paid-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 9px;
+    border-radius: 10px;
+    border: none;
+    background: var(--success);
+    color: #05050a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mark-paid-btn:disabled { opacity: 0.5; }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title" id="headerTitle">Earnings</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="loading-text">Loading...</div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+
+  if (!token) window.location.href = 'login.html';
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function init() {
+    if (role === 'creator') {
+      document.getElementById('headerTitle').textContent = 'Earnings';
+      loadCreatorPayouts();
+    } else if (role === 'business' || role === 'admin') {
+      document.getElementById('headerTitle').textContent = 'Payouts Issued';
+      loadBusinessPayouts();
+    }
+  }
+
+  // --- Creator view ---
+  async function loadCreatorPayouts() {
+    try {
+      const res = await fetch(`${API_BASE}/payouts/mine`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('mainContent').innerHTML = `<div class="empty-state">Could not load your earnings.</div>`;
+        return;
+      }
+
+      const payouts = data.payouts || [];
+      const totalPaid = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      const totalPending = payouts.filter(p => p.status !== 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+      let html = `
+        <div class="summary-card">
+          <div class="summary-label">Total Earned</div>
+          <div class="summary-amount">$${totalPaid.toFixed(2)}</div>
+          <div class="summary-split">
+            <div>
+              <div class="split-label">Paid</div>
+              <div class="split-value">$${totalPaid.toFixed(2)}</div>
+            </div>
+            <div>
+              <div class="split-label">Pending</div>
+              <div class="split-value">$${totalPending.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (payouts.length === 0) {
+        html += `<div class="empty-state">No payouts yet. Complete a campaign to start earning.</div>`;
+      } else {
+        html += payouts.map(p => `
+          <div class="payout-card">
+            <div class="payout-top">
+              <div>
+                <div class="payout-name">${escapeHtml(p.campaign_title || 'Campaign')}</div>
+                <div class="payout-meta">${new Date(p.created_at).toLocaleDateString()}</div>
+              </div>
+              <div class="payout-amount">$${Number(p.amount).toFixed(2)}</div>
+            </div>
+            <div class="status-pill ${p.status === 'paid' ? 'paid' : 'pending'}">${p.status === 'paid' ? 'Paid' : 'Pending'}</div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('mainContent').innerHTML = html;
+
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  // --- Business view ---
+  async function loadBusinessPayouts() {
+    try {
+      const res = await fetch(`${API_BASE}/payouts/mine/issued`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('mainContent').innerHTML = `<div class="empty-state">Could not load payouts.</div>`;
+        return;
+      }
+
+      const payouts = data.payouts || [];
+      const totalPaid = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      const totalPending = payouts.filter(p => p.status !== 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+      let html = `
+        <div class="summary-card">
+          <div class="summary-label">Total Issued</div>
+          <div class="summary-amount">$${(totalPaid + totalPending).toFixed(2)}</div>
+          <div class="summary-split">
+            <div>
+              <div class="split-label">Paid</div>
+              <div class="split-value">$${totalPaid.toFixed(2)}</div>
+            </div>
+            <div>
+              <div class="split-label">Pending</div>
+              <div class="split-value">$${totalPending.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (payouts.length === 0) {
+        html += `<div class="empty-state">No payouts issued yet.</div>`;
+      } else {
+        html += payouts.map(p => `
+          <div class="payout-card">
+            <div class="payout-top">
+              <div>
+                <div class="payout-name">${escapeHtml(p.creator_name || 'Creator')}</div>
+                <div class="payout-meta">${escapeHtml(p.campaign_title || '')}</div>
+              </div>
+              <div class="payout-amount">$${Number(p.amount).toFixed(2)}</div>
+            </div>
+            <div class="status-pill ${p.status === 'paid' ? 'paid' : 'pending'}">${p.status === 'paid' ? 'Paid' : 'Pending'}</div>
+            ${p.status !== 'paid' ? `<button class="mark-paid-btn" onclick="markPaid('${p.id}', this)">Mark as Paid</button>` : ''}
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('mainContent').innerHTML = html;
+
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  async function markPaid(payoutId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Marking...';
+
+    try {
+      const res = await fetch(`${API_BASE}/payouts/${payoutId}/paid`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = 'Mark as Paid';
+        return;
+      }
+
+      loadBusinessPayouts();
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Mark as Paid';
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>
