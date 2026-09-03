@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
@@ -93,7 +92,7 @@ router.post("/", requireAuth, requireRole("business"), async (req, res) => {
     res.status(201).json({ campaign: result.rows[0] });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Could not create campaign" });
+    res.status(500).json({ error: "Could not create campaign", detail: err.message });
   }
 });
 
