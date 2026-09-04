@@ -195,7 +195,36 @@
   .greeting-sub {
     color: var(--text-muted);
     font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
   }
 
   .search-bar {
@@ -407,6 +436,17 @@
   <div class="greeting" id="greeting">Good day 👋</div>
   <div class="greeting-sub" id="greetingSub">Find campaigns that match your style</div>
 
+  <div class="stat-row" id="statRow" style="display:none;">
+    <div class="stat-card">
+      <div class="stat-value" id="stat1Value">—</div>
+      <div class="stat-label" id="stat1Label">Loading...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat2Value">—</div>
+      <div class="stat-label" id="stat2Label">Loading...</div>
+    </div>
+  </div>
+
   <div class="search-bar">
     <span>🔍</span>
     <input type="text" placeholder="Search campaigns...">
@@ -491,6 +531,41 @@
     window.location.href = 'login.html';
   }
 
+  function showStats(v1, l1, v2, l2) {
+    document.getElementById('stat1Value').textContent = v1;
+    document.getElementById('stat1Label').textContent = l1;
+    document.getElementById('stat2Value').textContent = v2;
+    document.getElementById('stat2Label').textContent = l2;
+    document.getElementById('statRow').style.display = 'grid';
+  }
+
+  async function loadStats(campaigns) {
+    try {
+      if (role === 'creator') {
+        const res = await fetch(`${API_BASE}/applications/mine`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const myApps = data.applications || [];
+        showStats(campaigns.length, 'Campaigns Available', myApps.length, 'Applications Submitted');
+
+      } else if (role === 'business') {
+        const totalCreatorsNeeded = campaigns.reduce((sum, c) => sum + (c.creators_needed || 0), 0);
+        showStats(campaigns.length, 'Your Campaigns', totalCreatorsNeeded, 'Creators Needed Total');
+
+      } else if (role === 'admin') {
+        const res = await fetch(`${API_BASE}/admin/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const users = data.users || [];
+        showStats(users.length, 'Total Users', campaigns.length, 'Total Campaigns');
+      }
+    } catch (err) {
+      // Stats are a nice-to-have; fail silently and just hide the row.
+    }
+  }
+
   async function loadCampaigns() {
     try {
       const response = await fetch(`${API_BASE}/campaigns`, {
@@ -504,6 +579,8 @@
       }
 
       let campaigns = data.campaigns || [];
+
+      loadStats(campaigns);
 
       if (campaigns.length === 0) {
         document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">Nothing here yet.</div>`;
