@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campaigns | AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
 <style>
   :root {
     --bg: #05050a;
@@ -572,7 +574,6 @@
           ${c.required_platform ? `<span class="tag">${escapeHtml(c.required_platform)}</span>` : ''}
           ${c.required_niche ? `<span class="tag">${escapeHtml(c.required_niche)}</span>` : ''}
           ${c.creators_needed ? `<span class="tag">${c.creators_needed} creators needed</span>` : ''}
-          ${c.application_deadline ? `<span class="tag">Deadline: ${new Date(c.application_deadline).toLocaleDateString()}</span>` : ''}
         </div>
         ${role !== 'business' ? `<div class="card-actions"><span class="apply-btn">Apply Now</span></div>` : ''}
       </a>
@@ -597,4 +598,4 @@
 </script>
 
 </body>
-</html>
+  </html>
