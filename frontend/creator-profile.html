@@ -4,186 +4,56 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Creator Profile — AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
 <style>
   :root {
-    --bg: #05050a;
-    --card: #0f0f1a;
-    --border: #1f1f2e;
-    --text: #f2f2f7;
-    --muted: #9a9ab0;
-    --accent1: #4f6ef7;
-    --accent2: #7c3aed;
-    --accent3: #6d28d9;
-    --yellow: #f5c518;
+    --bg: #05050a; --card: #0f0f1a; --border: #1f1f2e; --text: #f2f2f7;
+    --muted: #9a9ab0; --accent1: #4f6ef7; --accent2: #7c3aed; --accent3: #6d28d9; --yellow: #f5c518;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    padding-bottom: 40px;
-  }
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .back-btn {
-    color: var(--text);
-    text-decoration: none;
-    font-size: 20px;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 40px; }
+  .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; border-bottom: 1px solid var(--border); }
+  .back-btn { color: var(--text); text-decoration: none; font-size: 20px; }
   .top-title { font-size: 16px; font-weight: 700; }
 
-  .profile-hero {
-    padding: 28px 20px 20px;
-    text-align: center;
-  }
+  .profile-hero { padding: 28px 20px 20px; text-align: center; }
   .avatar {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    margin: 0 auto 14px;
+    width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 14px;
     background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 700;
-    color: white;
-    object-fit: cover;
-    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: white; object-fit: cover; overflow: hidden;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   .profile-name { font-size: 20px; font-weight: 700; }
   .profile-role { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
-  .profile-bio {
-    margin-top: 14px;
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.5;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .profile-bio { margin-top: 14px; font-size: 14px; color: var(--text); line-height: 1.5; max-width: 320px; margin-left: auto; margin-right: auto; }
   .profile-bio.empty { color: var(--muted); font-style: italic; }
 
-  .section {
-    padding: 0 20px;
-    margin-top: 24px;
-  }
-  .section-title {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
+  .section { padding: 0 20px; margin-top: 24px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
 
-  .chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chip {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 8px 14px;
-    font-size: 13px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .empty-note {
-    color: var(--muted);
-    font-size: 13px;
-  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .empty-note { color: var(--muted); font-size: 13px; }
 
-  .platform-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
+  .platform-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .platform-icon { font-size: 18px; }
   .platform-name { font-size: 14px; font-weight: 600; }
 
-  .link-item {
-    display: block;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-size: 13.5px;
-    color: var(--accent1);
-    text-decoration: none;
-    margin-bottom: 8px;
-    word-break: break-all;
-  }
+  .link-item { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; color: var(--accent1); text-decoration: none; margin-bottom: 8px; word-break: break-all; }
 
-  .edit-toggle {
-    width: 100%;
-    margin-top: 28px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text);
-    font-size: 14.5px;
-    font-weight: 600;
-    cursor: pointer;
-  }
+  .edit-toggle { width: 100%; margin-top: 28px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; cursor: pointer; }
 
-  .edit-panel {
-    display: none;
-    padding: 0 20px;
-    margin-top: 20px;
-  }
+  .edit-panel { display: none; padding: 0 20px; margin-top: 20px; }
   .edit-panel.open { display: block; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-  }
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    margin-top: 18px;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; margin-top: 18px; }
   label:first-of-type { margin-top: 0; }
-  input, textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: inherit;
-  }
+  input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: inherit; }
   textarea { resize: vertical; min-height: 90px; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .save-btn {
-    width: 100%;
-    margin-top: 24px;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
-    color: white;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-  }
+  .save-btn { width: 100%; margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 15px; font-weight: 700; cursor: pointer; }
   .save-btn:disabled { opacity: 0.6; }
   #status { margin-top: 14px; font-size: 14px; text-align: center; }
   .status-ok { color: #4ade80; }
