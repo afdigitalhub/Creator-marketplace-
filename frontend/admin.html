@@ -237,6 +237,17 @@
     document.querySelector('.main-content').innerHTML = `<div class="empty-state">Admin access only.</div>`;
   }
 
+  const STATUS_LABELS = {
+    draft: 'Draft',
+    pending_approval: 'Pending Approval',
+    published: 'Published',
+    applications_open: 'Applications Open',
+    in_progress: 'In Progress',
+    submitted: 'Submitted',
+    completed: 'Completed',
+    cancelled: 'Cancelled'
+  };
+
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -315,7 +326,7 @@
             <div class="row-title">${escapeHtml(c.title)}</div>
             <div class="row-meta">${escapeHtml(c.business_name || 'Business')}</div>
           </div>
-          <div class="status-pill ${c.status}">${c.status}</div>
+          <div class="status-pill ${c.status}">${escapeHtml(STATUS_LABELS[c.status] || c.status)}</div>
         </div>
         <div class="row-actions">
           <button class="action-btn danger" onclick="deleteCampaign('${c.id}', this)">Delete Campaign</button>
