@@ -45,6 +45,7 @@
 
   .edit-toggle { width: 100%; margin-top: 28px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; cursor: pointer; }
   .edit-link { display: block; width: 100%; margin-top: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; text-align: center; text-decoration: none; }
+  .view-public-link { display: block; width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 14.5px; font-weight: 700; text-align: center; text-decoration: none; }
 
   .edit-panel { display: none; padding: 0 20px; margin-top: 20px; }
   .edit-panel.open { display: block; }
@@ -92,6 +93,7 @@
   </div>
 
   <div class="section">
+    <a href="#" class="view-public-link" id="viewPublicLink">View My Public Profile</a>
     <button class="edit-toggle" onclick="toggleEdit()">Edit Creator Details</button>
     <a href="profile-edit.html" class="edit-link">Edit Professional Profile</a>
   </div>
@@ -131,6 +133,18 @@
     instagram: "📷", tiktok: "🎵", youtube: "▶️", twitter: "🐦", x: "✕",
     facebook: "📘", linkedin: "💼", pinterest: "📌", snapchat: "👻"
   };
+
+  function parseJwt(tok) {
+    try { return JSON.parse(atob(tok.split('.')[1])); } catch (e) { return null; }
+  }
+
+  // Point the public profile link at this user's own profile.
+  const currentUser = token ? parseJwt(token) : null;
+  if (currentUser && currentUser.id) {
+    document.getElementById("viewPublicLink").href = `public-profile.html?id=${currentUser.id}`;
+  } else {
+    document.getElementById("viewPublicLink").style.display = "none";
+  }
 
   function toArray(str) {
     return str.split(",").map(s => s.trim()).filter(s => s.length > 0);
@@ -258,4 +272,4 @@
 </script>
 
 </body>
-  </html>
+      </html>
