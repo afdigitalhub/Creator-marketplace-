@@ -23,10 +23,13 @@ router.get("/users", requireAuth, requireRole("admin"), async (req, res) => {
 // View all campaigns (regardless of owner)
 router.get("/campaigns", requireAuth, requireRole("admin"), async (req, res) => {
   try {
+    // campaigns.business_id is a business_profiles.id, not users.id —
+    // join through business_profiles to reach the real business owner.
     const result = await pool.query(
       `SELECT c.*, u.full_name AS business_name
        FROM campaigns c
-       JOIN users u ON c.business_id = u.id
+       JOIN business_profiles bp ON c.business_id = bp.id
+       JOIN users u ON bp.user_id = u.id
        ORDER BY c.created_at DESC`
     );
     res.json({ campaigns: result.rows });
