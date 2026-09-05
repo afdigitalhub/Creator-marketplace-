@@ -28,9 +28,12 @@
   input:focus, textarea:focus { border-color: var(--accent-blue); }
   textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
   .hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
-  .char-count { font-size: 11.5px; color: var(--text-muted); text-align: right; margin-top: 4px; }
 
-  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .add-row { display: flex; gap: 8px; }
+  .add-row input { flex: 1; }
+  .add-btn { padding: 0 18px; border-radius: 12px; border: none; background: var(--gradient); color: white; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .chip { background: var(--input-bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
   .chip button { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 0; }
 
@@ -97,8 +100,11 @@
       <div class="section-card">
         <div class="section-title">Skills</div>
         <div class="field">
-          <label>Add a skill and press Enter</label>
-          <input type="text" id="skillInput" placeholder="e.g. Video editing">
+          <label>Add a skill</label>
+          <div class="add-row">
+            <input type="text" id="skillInput" placeholder="e.g. Video editing">
+            <button class="add-btn" onclick="addSkillFromInput()">Add</button>
+          </div>
         </div>
         <div class="chip-row" id="skillsChips"></div>
       </div>
@@ -125,14 +131,20 @@
     document.getElementById('skillInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        const val = this.value.trim();
-        if (val && !skills.includes(val)) {
-          skills.push(val);
-          renderSkillChips();
-        }
-        this.value = '';
+        addSkillFromInput();
       }
     });
+  }
+
+  function addSkillFromInput() {
+    const input = document.getElementById('skillInput');
+    const val = input.value.trim();
+    if (val && !skills.includes(val)) {
+      skills.push(val);
+      renderSkillChips();
+    }
+    input.value = '';
+    input.focus();
   }
 
   function renderSkillChips() {
@@ -235,4 +247,4 @@
 </script>
 
 </body>
-  </html>
+    </html>
