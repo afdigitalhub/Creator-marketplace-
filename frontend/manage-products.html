@@ -11,6 +11,7 @@
     --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
     --accent-blue: #4f6ef7; --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
     --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12; --success: #34d399;
+    --danger: #f87171;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding-bottom: 40px; }
@@ -27,9 +28,25 @@
   .status-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: capitalize; display: inline-block; margin-bottom: 8px; }
   .status-pill.published { background: rgba(52,211,153,0.12); color: var(--success); }
   .status-pill.draft { background: rgba(107,107,128,0.15); color: var(--text-muted); }
-  .edit-btn { display: block; text-align: center; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-light); text-decoration: none; font-size: 13.5px; font-weight: 600; }
+  .btn-row { display: flex; gap: 10px; }
+  .edit-btn { flex: 1; text-align: center; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-light); text-decoration: none; font-size: 13.5px; font-weight: 600; }
+  .delete-btn { flex: 1; text-align: center; padding: 10px; border-radius: 10px; border: 1px solid rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); color: var(--danger); font-size: 13.5px; font-weight: 600; cursor: pointer; }
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
   .loading-text { text-align: center; color: var(--text-muted); padding: 30px; font-size: 14px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+  .modal-overlay.active { display: flex; }
+  .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 480px; text-align: center; }
+  .modal-sheet .icon { font-size: 36px; margin-bottom: 12px; }
+  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .modal-sheet p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions button { flex: 1; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; }
+  .cancel-modal-btn { background: var(--input-bg); border: 1px solid var(--border) !important; color: var(--text-light); }
+  .confirm-delete-btn { background: var(--danger); color: #1a0505; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card-bg); border: 1px solid var(--border); color: var(--text-light); padding: 12px 20px; border-radius: 12px; font-size: 13.5px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 200; }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -43,6 +60,20 @@
   <a href="sell-product.html" class="add-btn">+ List New Product</a>
   <div id="productList"><div class="loading-text">Loading your products...</div></div>
 </div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-sheet">
+    <div class="icon">🗑️</div>
+    <h3>Delete this product?</h3>
+    <p id="deleteModalText">This will permanently remove it from the Shop. This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="cancel-modal-btn" onclick="closeDeleteModal()">Cancel</button>
+      <button class="confirm-delete-btn" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
@@ -62,6 +93,68 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  let pendingDeleteId = null;
+
+  function openDeleteModal(id, title) {
+    pendingDeleteId = id;
+    document.getElementById('deleteModalText').textContent = `"${title}" will be permanently removed from the Shop. This action cannot be undone.`;
+    document.getElementById('deleteModal').classList.add('active');
+  }
+
+  function closeDeleteModal() {
+    pendingDeleteId = null;
+    document.getElementById('deleteModal').classList.remove('active');
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    const idToDelete = pendingDeleteId;
+    const btn = document.getElementById('confirmDeleteBtn');
+    btn.disabled = true;
+    btn.textContent = 'Deleting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/products/${idToDelete}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || 'Could not delete product.');
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        closeDeleteModal();
+        return;
+      }
+
+      const card = document.querySelector(`[data-product-id="${idToDelete}"]`);
+      if (card) card.remove();
+
+      showToast('Product deleted.');
+      closeDeleteModal();
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+
+      const remaining = document.querySelectorAll('.product-card').length;
+      if (remaining === 0) {
+        document.getElementById('productList').innerHTML = `<div class="empty-state">No products listed yet.</div>`;
+      }
+
+    } catch (err) {
+      showToast('Connection error. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Delete';
+    }
+  });
+
   async function loadProducts() {
     if (role !== 'admin') {
       document.getElementById('productList').innerHTML = `<div class="empty-state">Only AF Digital Hub can manage products right now.</div>`;
@@ -69,7 +162,7 @@
     }
 
     try {
-      const res = await fetch(`${API_BASE}/products`, {
+      const res = await fetch(`${API_BASE}/products/admin/all`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -87,14 +180,17 @@
       }
 
       document.getElementById('productList').innerHTML = products.map(p => `
-        <div class="product-card">
+        <div class="product-card" data-product-id="${p.id}">
           <div class="status-pill ${p.status}">${p.status}</div>
           <div class="product-top">
             <div class="product-title">${escapeHtml(p.title)}</div>
             <div class="product-price">${formatMoney(p.price, p.currency)}</div>
           </div>
           <div class="product-meta">${escapeHtml(p.category || '')}</div>
-          <a href="edit-product.html?id=${p.id}" class="edit-btn">Edit Product</a>
+          <div class="btn-row">
+            <a href="edit-product.html?id=${p.id}" class="edit-btn">Edit</a>
+            <button class="delete-btn" onclick="openDeleteModal(${p.id}, '${escapeHtml(p.title).replace(/'/g,"\\'")}')">Delete</button>
+          </div>
         </div>
       `).join('');
 
