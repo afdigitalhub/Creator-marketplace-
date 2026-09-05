@@ -38,6 +38,7 @@
   .empty-note { color: var(--muted); font-size: 13px; }
 
   .edit-toggle { width: 100%; margin-top: 28px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; cursor: pointer; }
+  .edit-link { display: block; width: 100%; margin-top: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; text-align: center; text-decoration: none; }
 
   .edit-panel { display: none; padding: 0 20px; margin-top: 20px; }
   .edit-panel.open { display: block; }
@@ -75,7 +76,8 @@
   </div>
 
   <div class="section">
-    <button class="edit-toggle" onclick="toggleEdit()">Edit Profile</button>
+    <button class="edit-toggle" onclick="toggleEdit()">Edit Business Details</button>
+    <a href="profile-edit.html" class="edit-link">Edit Professional Profile</a>
   </div>
 
   <div class="edit-panel" id="editPanel">
@@ -211,4 +213,4 @@
 </script>
 
 </body>
-</html>
+  </html>
