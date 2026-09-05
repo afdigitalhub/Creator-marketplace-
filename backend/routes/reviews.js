@@ -27,16 +27,34 @@ router.post("/", requireAuth, async (req, res) => {
     }
 
     // Confirm the reviewer was actually involved in this campaign
-    // (either the business that owns it, or a creator with an accepted application)
+    // (either the business that owns it, or a creator with an accepted application).
+    // campaigns.business_id is a business_profiles.id, so resolve the
+    // authenticated user's own business profile before comparing.
     const campaign = campaignCheck.rows[0];
-    let involved = campaign.business_id === req.user.id;
+
+    const bizProfile = await pool.query(
+      "SELECT id FROM business_profiles WHERE user_id = $1",
+      [req.user.id]
+    );
+    const ownBusinessId = bizProfile.rows[0] ? bizProfile.rows[0].id : null;
+    let involved = ownBusinessId !== null && campaign.business_id === ownBusinessId;
 
     if (!involved) {
-      const appCheck = await pool.query(
-        `SELECT * FROM campaign_applications WHERE campaign_id = $1 AND creator_id = $2 AND status = 'accepted'`,
-        [campaign_id, req.user.id]
+      // campaign_applications.creator_id is a creator_profiles.id — resolve
+      // the authenticated user's own creator profile before comparing.
+      const creatorProfile = await pool.query(
+        "SELECT id FROM creator_profiles WHERE user_id = $1",
+        [req.user.id]
       );
-      involved = appCheck.rows.length > 0;
+      const ownCreatorId = creatorProfile.rows[0] ? creatorProfile.rows[0].id : null;
+
+      if (ownCreatorId !== null) {
+        const appCheck = await pool.query(
+          `SELECT * FROM campaign_applications WHERE campaign_id = $1 AND creator_id = $2 AND status = 'accepted'`,
+          [campaign_id, ownCreatorId]
+        );
+        involved = appCheck.rows.length > 0;
+      }
     }
 
     if (!involved) {
