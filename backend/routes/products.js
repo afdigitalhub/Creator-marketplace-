@@ -20,6 +20,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET all products regardless of status (admin only — for Manage Products page)
+router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT p.*, u.full_name AS seller_name
+       FROM products p
+       JOIN users u ON p.seller_id = u.id
+       ORDER BY p.created_at DESC`
+    );
+    res.json({ products: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not fetch products" });
+  }
+});
+
 // GET single product by id (public — no login required)
 router.get("/:id", async (req, res) => {
   try {
