@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Professional Profile — AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
+<style>
+  :root {
+    --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --accent-blue: #4f6ef7; --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12;
+    --success: #34d399; --error: #f87171; --af-yellow: #f5c518;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding-bottom: 60px; }
+  .top-header { display: flex; align-items: center; gap: 14px; padding: 18px 16px; position: sticky; top: 0; background: rgba(5,5,10,0.9); backdrop-filter: blur(12px); z-index: 50; border-bottom: 1px solid var(--border); }
+  .back-btn { font-size: 20px; color: var(--text-light); text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 10px; }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+  .section-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
+  input, textarea { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; color: var(--text-light); font-size: 14.5px; outline: none; font-family: inherit; }
+  input:focus, textarea:focus { border-color: var(--accent-blue); }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+  .char-count { font-size: 11.5px; color: var(--text-muted); text-align: right; margin-top: 4px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { background: var(--input-bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .chip button { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 0; }
+
+  .portfolio-item, .link-item { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; position: relative; }
+  .remove-item-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--error); font-size: 13px; cursor: pointer; font-weight: 700; }
+  .add-item-btn { width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed var(--border); background: transparent; color: var(--text-muted); font-size: 13.5px; font-weight: 600; cursor: pointer; margin-top: 6px; }
+
+  .save-btn { width: 100%; padding: 15px; border: none; border-radius: 14px; background: var(--gradient); color: white; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+  .save-btn:disabled { opacity: 0.6; }
+  .msg-box { padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; line-height: 1.4; }
+  .msg-box.error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+  .msg-box.success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: var(--success); }
+  .loading-text { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="profile.html" class="back-btn">←</a>
+  <div class="header-title">Edit Professional Profile</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="loading-text">Loading your profile...</div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  if (!token) window.location.href = 'login.html';
+
+  let skills = [];
+  let portfolio = [];
+  let links = [];
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+  }
+
+  function renderForm(data) {
+    skills = data.skills || [];
+    portfolio = data.portfolio || [];
+    links = data.links || [];
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="msg-box" id="msgBox"></div>
+
+      <div class="section-card">
+        <div class="section-title">About You</div>
+        <div class="field">
+          <label>Professional Headline</label>
+          <input type="text" id="headline" maxlength="150" value="${escapeAttr(data.headline || '')}" placeholder="e.g. Freelance graphic designer">
+        </div>
+        <div class="field">
+          <label>About</label>
+          <textarea id="about" maxlength="2000" placeholder="Tell people what you do and what you're good at.">${escapeHtml(data.about || '')}</textarea>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">Skills</div>
+        <div class="field">
+          <label>Add a skill and press Enter</label>
+          <input type="text" id="skillInput" placeholder="e.g. Video editing">
+        </div>
+        <div class="chip-row" id="skillsChips"></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">Portfolio</div>
+        <div id="portfolioList"></div>
+        <button class="add-item-btn" onclick="addPortfolioItem()">+ Add a project</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">Professional Links</div>
+        <div id="linksList"></div>
+        <button class="add-item-btn" onclick="addLinkItem()">+ Add a link</button>
+      </div>
+
+      <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Changes</button>
+    `;
+
+    renderSkillChips();
+    renderPortfolioItems();
+    renderLinkItems();
+
+    document.getElementById('skillInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = this.value.trim();
+        if (val && !skills.includes(val)) {
+          skills.push(val);
+          renderSkillChips();
+        }
+        this.value = '';
+      }
+    });
+  }
+
+  function renderSkillChips() {
+    document.getElementById('skillsChips').innerHTML = skills.length === 0
+      ? `<span style="color:var(--text-muted);font-size:13px;">No skills added yet.</span>`
+      : skills.map((s, i) => `<span class="chip">${escapeHtml(s)}<button onclick="removeSkill(${i})">✕</button></span>`).join('');
+  }
+  function removeSkill(i) { skills.splice(i, 1); renderSkillChips(); }
+
+  function renderPortfolioItems() {
+    document.getElementById('portfolioList').innerHTML = portfolio.length === 0
+      ? `<p style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">No portfolio items yet. Add your first project to showcase your work.</p>`
+      : portfolio.map((p, i) => `
+        <div class="portfolio-item">
+          <button class="remove-item-btn" onclick="removePortfolioItem(${i})">Remove</button>
+          <div class="field"><label>Title</label><input type="text" value="${escapeAttr(p.title || '')}" onchange="updatePortfolio(${i}, 'title', this.value)"></div>
+          <div class="field"><label>Description</label><textarea onchange="updatePortfolio(${i}, 'description', this.value)">${escapeHtml(p.description || '')}</textarea></div>
+          <div class="field"><label>Link (optional)</label><input type="url" value="${escapeAttr(p.url || '')}" onchange="updatePortfolio(${i}, 'url', this.value)" placeholder="https://..."></div>
+        </div>
+      `).join('');
+  }
+  function addPortfolioItem() { portfolio.push({ title: '', description: '', url: '' }); renderPortfolioItems(); }
+  function removePortfolioItem(i) { portfolio.splice(i, 1); renderPortfolioItems(); }
+  function updatePortfolio(i, field, val) { portfolio[i][field] = val; }
+
+  function renderLinkItems() {
+    document.getElementById('linksList').innerHTML = links.length === 0
+      ? `<p style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">No links added yet.</p>`
+      : links.map((l, i) => `
+        <div class="link-item">
+          <button class="remove-item-btn" onclick="removeLinkItem(${i})">Remove</button>
+          <div class="field"><label>Label</label><input type="text" value="${escapeAttr(l.label || '')}" onchange="updateLink(${i}, 'label', this.value)" placeholder="e.g. Instagram"></div>
+          <div class="field"><label>URL</label><input type="url" value="${escapeAttr(l.url || '')}" onchange="updateLink(${i}, 'url', this.value)" placeholder="https://..."></div>
+        </div>
+      `).join('');
+  }
+  function addLinkItem() { links.push({ label: '', url: '' }); renderLinkItems(); }
+  function removeLinkItem(i) { links.splice(i, 1); renderLinkItems(); }
+  function updateLink(i, field, val) { links[i][field] = val; }
+
+  function showMsg(text, isError) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg-box ' + (isError ? 'error' : 'success');
+    box.style.display = 'block';
+  }
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API_BASE}/professional-profiles/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      renderForm(data);
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="loading-text">Connection error. Please try again.</div>`;
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const body = {
+      headline: document.getElementById('headline').value.trim(),
+      about: document.getElementById('about').value.trim(),
+      skills,
+      portfolio: portfolio.filter(p => p.title.trim() !== ''),
+      links: links.filter(l => l.label.trim() !== '' && l.url.trim() !== '')
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/professional-profiles/me`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        showMsg(errData.error || 'Something went wrong. Try again.', true);
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+        return;
+      }
+
+      showMsg('Profile saved.', false);
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  }
+
+  loadProfile();
+</script>
+
+</body>
+  </html>
