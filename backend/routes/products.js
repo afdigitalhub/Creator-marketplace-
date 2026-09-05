@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
-// GET all published products (public browsing — no login required)
+// GET all published products (public browsing, no login required)
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET all products regardless of status (admin only — for Manage Products page)
+// GET all products regardless of status (admin only, for Manage Products page)
 router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const result = await pool.query(
@@ -36,7 +36,7 @@ router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => 
   }
 });
 
-// GET single product by id (public — no login required)
+// GET single product by id (public, no login required)
 router.get("/:id", async (req, res) => {
   try {
     const result = await pool.query(
@@ -100,7 +100,7 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
 
     const {
       title, subtitle, description, category, tags,
-      cover_url, preview_url, file_url, price, currency, status
+      cover_url, preview_url, file_url, price, currency, status, is_featured
     } = req.body;
 
     const result = await pool.query(
@@ -115,10 +115,11 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
         file_url = COALESCE($8, file_url),
         price = COALESCE($9, price),
         currency = COALESCE($10, currency),
-        status = COALESCE($11, status)
-       WHERE id = $12
+        status = COALESCE($11, status),
+        is_featured = COALESCE($12, is_featured)
+       WHERE id = $13
        RETURNING *`,
-      [title, subtitle, description, category, tags, cover_url, preview_url, file_url, price, currency, status, req.params.id]
+      [title, subtitle, description, category, tags, cover_url, preview_url, file_url, price, currency, status, is_featured, req.params.id]
     );
 
     res.json({ product: result.rows[0] });
