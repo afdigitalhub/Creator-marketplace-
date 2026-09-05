@@ -23,6 +23,7 @@ router.get("/conversations", requireAuth, async (req, res) => {
     const result = await pool.query(
       `SELECT c.*,
         p.title AS product_title,
+        p.cover_url AS product_cover_url,
         buyer.full_name AS buyer_name,
         seller.full_name AS seller_name,
         (SELECT content FROM messages m WHERE m.conversation_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
