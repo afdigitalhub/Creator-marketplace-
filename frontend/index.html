@@ -50,7 +50,7 @@
 
   .main-content { position: relative; z-index: 1; padding: 24px 20px 60px; max-width: 560px; margin: 0 auto; }
 
-  .path-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .path-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
   .path-card {
     display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 18px;
     background: var(--card-bg); border: 1px solid var(--card-border); text-decoration: none; color: var(--text-light);
@@ -64,6 +64,10 @@
   .path-text h3 { font-size: 15.5px; font-weight: 700; margin-bottom: 3px; }
   .path-text p { font-size: 12.5px; color: var(--text-muted); line-height: 1.4; }
   .path-arrow { font-size: 16px; color: var(--text-dim); }
+
+  .auth-actions { display: flex; gap: 10px; margin-bottom: 34px; }
+  .btn-primary { flex: 1; text-align: center; padding: 14px; border-radius: 13px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; text-decoration: none; }
+  .btn-secondary { flex: 1; text-align: center; padding: 14px; border-radius: 13px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-light); font-weight: 700; font-size: 14.5px; text-decoration: none; }
 
   .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .section-heading h2 { font-size: 16px; font-weight: 700; }
@@ -97,7 +101,7 @@
 </div>
 
 <div class="hero">
-  <h1>A place to <span class="accent">build</span>, sell, and grow — however you show up.</h1>
+  <h1>A place to <span class="accent">build</span>, sell, and grow.</h1>
   <p>AF Digital Hub brings together useful digital products, creator opportunities, and business collaborations, all in one place.</p>
 </div>
 
@@ -108,7 +112,7 @@
       <div class="path-icon">🛍️</div>
       <div class="path-text">
         <h3>Browse the Shop</h3>
-        <p>eBooks, guides, and digital products — no account needed to look around.</p>
+        <p>eBooks, guides, and digital products. No account needed to look around.</p>
       </div>
       <div class="path-arrow">→</div>
     </a>
@@ -117,7 +121,7 @@
       <div class="path-icon">🎨</div>
       <div class="path-text">
         <h3>I'm a Creator</h3>
-        <p>Find campaigns, apply, and get paid for the work you already do.</p>
+        <p>Build your professional profile and apply to campaigns from businesses.</p>
       </div>
       <div class="path-arrow">→</div>
     </a>
@@ -126,10 +130,15 @@
       <div class="path-icon">🏢</div>
       <div class="path-text">
         <h3>I'm a Business</h3>
-        <p>Post campaigns and connect with creators who fit your brand.</p>
+        <p>Present your business and post campaigns to find the right creators.</p>
       </div>
       <div class="path-arrow">→</div>
     </a>
+  </div>
+
+  <div class="auth-actions">
+    <a href="login.html" class="btn-primary">Create an Account</a>
+    <a href="login.html" class="btn-secondary">Log In</a>
   </div>
 
   <div class="section-heading">
@@ -166,14 +175,14 @@
       const data = await res.json();
 
       if (!res.ok) {
-        document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">Take a look around the Shop — new products are being added.</div>`;
+        document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">Take a look around the Shop. New products are being added.</div>`;
         return;
       }
 
       const products = (data.products || []).filter(p => p.status === 'published').slice(0, 3);
 
       if (products.length === 0) {
-        document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">The Shop is just getting started — check back soon.</div>`;
+        document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">The Shop is just getting started. Check back soon.</div>`;
         return;
       }
 
@@ -195,7 +204,7 @@
       `;
 
     } catch (err) {
-      document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">Take a look around the Shop — new products are being added.</div>`;
+      document.getElementById('shopPreview').outerHTML = `<div class="shop-empty">Take a look around the Shop. New products are being added.</div>`;
     }
   }
 
