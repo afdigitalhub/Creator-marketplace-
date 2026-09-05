@@ -19,9 +19,17 @@
   .back-btn { font-size: 20px; color: var(--text-light); text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 10px; }
   .header-title { font-size: 16px; font-weight: 700; }
   .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
-  .shop-intro { margin-bottom: 20px; }
+  .shop-intro { margin-bottom: 18px; }
   .shop-intro h1 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-  .shop-intro p { font-size: 13px; color: var(--text-muted); }
+  .shop-intro p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+  .topics-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; scrollbar-width: none; }
+  .topics-scroll::-webkit-scrollbar { display: none; }
+  .topic-chip { flex-shrink: 0; padding: 8px 15px; border-radius: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); font-size: 12.5px; font-weight: 600; cursor: pointer; text-transform: capitalize; white-space: nowrap; }
+  .topic-chip.active { background: var(--gradient); color: white; border-color: transparent; }
+
+  .results-count { font-size: 12.5px; color: var(--text-muted); margin-bottom: 14px; }
+
   .product-grid { display: flex; flex-direction: column; gap: 16px; }
   .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit; display: block; transition: transform 0.15s ease, border-color 0.15s ease; }
   .product-card:active { transform: scale(0.98); border-color: var(--accent-blue); }
@@ -49,13 +57,19 @@
 <div class="main-content">
   <div class="shop-intro">
     <h1>AF Digital Hub Shop</h1>
-    <p>eBooks, guides, and digital products to help you build.</p>
+    <p>Practical eBooks on money, work, and everyday digital skills, written to actually be used, not just read once.</p>
   </div>
+
+  <div class="topics-scroll" id="topicsScroll"></div>
+  <div class="results-count" id="resultsCount"></div>
+
   <div id="productList" class="product-grid"><div class="loading-text">Loading products...</div></div>
 </div>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  let allProducts = [];
+  let activeTopic = "all";
 
   const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
   function formatMoney(amount, currency) {
@@ -65,7 +79,61 @@
 
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function getTags(product) {
+    if (!product.tags) return [];
+    return product.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  }
+
+  function renderTopics() {
+    const tagSet = new Set();
+    allProducts.forEach(p => getTags(p).forEach(t => tagSet.add(t)));
+    const topics = ['all', ...Array.from(tagSet).sort()];
+
+    document.getElementById('topicsScroll').innerHTML = topics.map(t => `
+      <div class="topic-chip ${t === activeTopic ? 'active' : ''}" onclick="selectTopic('${t.replace(/'/g,"\\'")}')">${t === 'all' ? 'All' : escapeHtml(t)}</div>
+    `).join('');
+  }
+
+  function selectTopic(topic) {
+    activeTopic = topic;
+    renderTopics();
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const filtered = activeTopic === 'all'
+      ? allProducts
+      : allProducts.filter(p => getTags(p).includes(activeTopic));
+
+    document.getElementById('resultsCount').textContent =
+      filtered.length === allProducts.length
+        ? `${filtered.length} product${filtered.length === 1 ? '' : 's'}`
+        : `${filtered.length} product${filtered.length === 1 ? '' : 's'} in ${activeTopic}`;
+
+    if (filtered.length === 0) {
+      document.getElementById('productList').innerHTML = `<div class="empty-state">Nothing in this topic yet. Check back soon.</div>`;
+      return;
+    }
+
+    document.getElementById('productList').innerHTML = filtered.map(p => `
+      <a href="product-details.html?id=${p.id}" class="product-card">
+        <div class="product-cover ${p.cover_url ? '' : 'no-image'}">
+          ${p.cover_url ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.classList.add('no-image');this.remove();this.parentElement.textContent='No cover image'">` : 'No cover image'}
+        </div>
+        <div class="product-body">
+          <div class="product-category">${escapeHtml(p.category || '')}</div>
+          <div class="product-title">${escapeHtml(p.title)}</div>
+          ${p.subtitle ? `<div class="product-subtitle">${escapeHtml(p.subtitle)}</div>` : ''}
+          <div class="product-bottom">
+            <div class="product-price">${formatMoney(p.price, p.currency)}</div>
+            <span class="buy-btn">View</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
   }
 
   async function loadProducts() {
@@ -78,29 +146,15 @@
         return;
       }
 
-      const products = (data.products || []).filter(p => p.status === 'published');
+      allProducts = (data.products || []).filter(p => p.status === 'published');
 
-      if (products.length === 0) {
+      if (allProducts.length === 0) {
         document.getElementById('productList').innerHTML = `<div class="empty-state">No products available yet. Check back soon.</div>`;
         return;
       }
 
-      document.getElementById('productList').innerHTML = products.map(p => `
-        <a href="product-details.html?id=${encodeURIComponent(p.id)}" class="product-card">
-          <div class="product-cover ${p.cover_url ? '' : 'no-image'}">
-            ${p.cover_url ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.classList.add('no-image');this.remove();this.parentElement.textContent='No cover image'">` : 'No cover image'}
-          </div>
-          <div class="product-body">
-            <div class="product-category">${escapeHtml(p.category || '')}</div>
-            <div class="product-title">${escapeHtml(p.title)}</div>
-            ${p.subtitle ? `<div class="product-subtitle">${escapeHtml(p.subtitle)}</div>` : ''}
-            <div class="product-bottom">
-              <div class="product-price">${formatMoney(p.price, p.currency)}</div>
-              <span class="buy-btn">View</span>
-            </div>
-          </div>
-        </a>
-      `).join('');
+      renderTopics();
+      renderProducts();
 
     } catch (err) {
       document.getElementById('productList').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
