@@ -22,7 +22,6 @@
 
   .main-content { padding: 20px 16px 100px; max-width: 560px; margin: 0 auto; }
 
-  /* Loading skeleton */
   .skeleton { background: var(--card-bg); border-radius: 20px; overflow: hidden; }
   .skel-cover { width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #12121f 25%, #191930 50%, #12121f 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
   .skel-line { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #12121f 25%, #191930 50%, #12121f 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; margin: 16px 16px 0; }
@@ -30,7 +29,6 @@
   .skel-line.tall { height: 20px; width: 70%; }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  /* Product display */
   .product-cover-wrap { width: 100%; aspect-ratio: 3/4; border-radius: 20px; overflow: hidden; background: var(--card-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
   .product-cover-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .cover-fallback { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
@@ -49,14 +47,26 @@
   .description-block h3 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
   .description-block p { font-size: 14.5px; line-height: 1.65; color: #d8d8e6; white-space: pre-line; }
 
-  /* Sticky buy bar */
+  .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0 4px; }
+  .tag-pill { font-size: 11px; color: var(--text-muted); background: var(--input-bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; text-transform: capitalize; }
+
+  .related-section { margin-top: 32px; }
+  .related-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .related-grid { display: flex; flex-direction: column; gap: 12px; }
+  .related-card { display: flex; gap: 12px; padding: 12px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border); text-decoration: none; color: var(--text-light); }
+  .related-cover { width: 56px; height: 74px; border-radius: 8px; background: var(--input-bg); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .related-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .related-info { flex: 1; min-width: 0; }
+  .related-category { font-size: 10px; font-weight: 700; color: var(--af-yellow); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+  .related-title { font-size: 13.5px; font-weight: 700; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .related-price { font-size: 12.5px; font-weight: 700; color: var(--accent-blue); }
+
   .buy-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,18,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 60; }
   .buy-bar .price { font-size: 19px; font-weight: 800; color: var(--accent-blue); }
   .buy-bar .price span { display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); }
   .buy-btn { padding: 13px 28px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease; }
   .buy-btn:active { transform: scale(0.97); opacity: 0.9; }
 
-  /* Error / empty state */
   .state-block { text-align: center; padding: 80px 24px 40px; }
   .state-block .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.6; }
   .state-block h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
@@ -64,7 +74,6 @@
   .state-block a { display: inline-block; padding: 11px 24px; border-radius: 10px; background: var(--gradient); color: white; text-decoration: none; font-weight: 700; font-size: 13.5px; }
   .retry-btn { display: inline-block; padding: 11px 24px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-light); font-weight: 700; font-size: 13.5px; cursor: pointer; }
 
-  /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
   .modal-overlay.active { display: flex; }
   .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 560px; text-align: center; }
@@ -115,6 +124,11 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  function getTags(product) {
+    if (!product.tags) return [];
+    return product.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  }
+
   function showState(icon, title, message, showShopLink, showRetry) {
     document.getElementById('mainContent').innerHTML = `
       <div class="state-block">
@@ -129,6 +143,51 @@
 
   function openModal() { document.getElementById('checkoutModal').classList.add('active'); }
   function closeModal() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+  async function loadRelated(currentProduct) {
+    try {
+      const res = await fetch(`${API_BASE}/products`);
+      const data = await res.json();
+      if (!res.ok) return;
+
+      const currentTags = getTags(currentProduct);
+      if (currentTags.length === 0) return;
+
+      const candidates = (data.products || [])
+        .filter(p => p.status === 'published' && String(p.id) !== String(currentProduct.id))
+        .map(p => ({ product: p, shared: getTags(p).filter(t => currentTags.includes(t)).length }))
+        .filter(entry => entry.shared > 0)
+        .sort((a, b) => b.shared - a.shared)
+        .slice(0, 3)
+        .map(entry => entry.product);
+
+      if (candidates.length === 0) return;
+
+      const relatedHtml = `
+        <div class="related-section">
+          <h3>You might also find useful</h3>
+          <div class="related-grid">
+            ${candidates.map(p => `
+              <a href="product-details.html?id=${p.id}" class="related-card">
+                <div class="related-cover">
+                  ${p.cover_url ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.innerHTML=''">` : ''}
+                </div>
+                <div class="related-info">
+                  <div class="related-category">${escapeHtml(p.category || '')}</div>
+                  <div class="related-title">${escapeHtml(p.title)}</div>
+                  <div class="related-price">${formatMoney(p.price, p.currency)}</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      document.getElementById('mainContent').insertAdjacentHTML('beforeend', relatedHtml);
+
+    } catch (err) {
+      // Related products are a nice-to-have; fail silently.
+    }
+  }
 
   async function loadProduct() {
     if (!productId) {
@@ -164,6 +223,7 @@
       }
 
       document.getElementById('headerTitle').textContent = p.title;
+      const tags = getTags(p);
 
       document.getElementById('mainContent').innerHTML = `
         <div class="product-cover-wrap" id="coverWrap">
@@ -180,6 +240,12 @@
           <div class="description-block">
             <h3>About this product</h3>
             <p>${escapeHtml(p.description)}</p>
+          </div>
+        ` : ''}
+
+        ${tags.length > 0 ? `
+          <div class="tags-row">
+            ${tags.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
           </div>
         ` : ''}
 
@@ -201,6 +267,8 @@
         </div>
       `);
 
+      loadRelated(p);
+
     } catch (err) {
       showState('⚠️', 'Connection error', 'Please check your connection and try again.', false, true);
     }
@@ -210,4 +278,4 @@
 </script>
 
 </body>
-  </html>
+    </html>
