@@ -23,7 +23,8 @@
   .shop-intro h1 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
   .shop-intro p { font-size: 13px; color: var(--text-muted); }
   .product-grid { display: flex; flex-direction: column; gap: 16px; }
-  .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .product-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit; display: block; transition: transform 0.15s ease, border-color 0.15s ease; }
+  .product-card:active { transform: scale(0.98); border-color: var(--accent-blue); }
   .product-cover { width: 100%; aspect-ratio: 3 / 4; background: var(--input-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .product-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .product-cover.no-image { color: var(--text-muted); font-size: 13px; }
@@ -85,9 +86,9 @@
       }
 
       document.getElementById('productList').innerHTML = products.map(p => `
-        <div class="product-card">
+        <a href="product-details.html?id=${encodeURIComponent(p.id)}" class="product-card">
           <div class="product-cover ${p.cover_url ? '' : 'no-image'}">
-            ${p.cover_url ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}">` : 'No cover image'}
+            ${p.cover_url ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.classList.add('no-image');this.remove();this.parentElement.textContent='No cover image'">` : 'No cover image'}
           </div>
           <div class="product-body">
             <div class="product-category">${escapeHtml(p.category || '')}</div>
@@ -95,10 +96,10 @@
             ${p.subtitle ? `<div class="product-subtitle">${escapeHtml(p.subtitle)}</div>` : ''}
             <div class="product-bottom">
               <div class="product-price">${formatMoney(p.price, p.currency)}</div>
-              <button class="buy-btn" onclick="alert('Purchasing is coming soon!')">Buy Now</button>
+              <span class="buy-btn">View</span>
             </div>
           </div>
-        </div>
+        </a>
       `).join('');
 
     } catch (err) {
