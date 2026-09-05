@@ -38,10 +38,12 @@
   .product-title { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; }
   .product-subtitle { font-size: 14.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
 
+  .trust-section { margin: 20px 0; }
+  .trust-section h3 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
   .info-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
   .info-row:last-of-type { border-bottom: none; }
   .info-label { font-size: 13px; color: var(--text-muted); }
-  .info-value { font-size: 13.5px; font-weight: 600; }
+  .info-value { font-size: 13.5px; font-weight: 600; text-align: right; }
 
   .description-block { margin: 20px 0; }
   .description-block h3 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
@@ -127,6 +129,19 @@
   function getTags(product) {
     if (!product.tags) return [];
     return product.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  }
+
+  function getFileFormat(fileUrl) {
+    if (!fileUrl) return null;
+    const match = fileUrl.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+    return match ? match[1].toUpperCase() : null;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
   }
 
   function showState(icon, title, message, showShopLink, showRetry) {
@@ -224,6 +239,8 @@
 
       document.getElementById('headerTitle').textContent = p.title;
       const tags = getTags(p);
+      const fileFormat = getFileFormat(p.file_url);
+      const dateAdded = formatDate(p.created_at);
 
       document.getElementById('mainContent').innerHTML = `
         <div class="product-cover-wrap" id="coverWrap">
@@ -249,15 +266,31 @@
           </div>
         ` : ''}
 
-        <div class="info-row">
-          <div class="info-label">Category</div>
-          <div class="info-value">${escapeHtml(p.category || '—')}</div>
+        <div class="trust-section">
+          <div class="info-row">
+            <div class="info-label">Category</div>
+            <div class="info-value">${escapeHtml(p.category || '—')}</div>
+          </div>
+          ${fileFormat ? `
+          <div class="info-row">
+            <div class="info-label">File format</div>
+            <div class="info-value">${escapeHtml(fileFormat)}</div>
+          </div>` : ''}
+          ${p.seller_name ? `
+          <div class="info-row">
+            <div class="info-label">Sold by</div>
+            <div class="info-value">${escapeHtml(p.seller_name)}</div>
+          </div>` : ''}
+          ${dateAdded ? `
+          <div class="info-row">
+            <div class="info-label">Added to Shop</div>
+            <div class="info-value">${escapeHtml(dateAdded)}</div>
+          </div>` : ''}
+          <div class="info-row">
+            <div class="info-label">Availability</div>
+            <div class="info-value">In stock, digital delivery</div>
+          </div>
         </div>
-        ${p.seller_name ? `
-        <div class="info-row">
-          <div class="info-label">Sold by</div>
-          <div class="info-value">${escapeHtml(p.seller_name)}</div>
-        </div>` : ''}
       `;
 
       document.body.insertAdjacentHTML('beforeend', `
@@ -278,4 +311,4 @@
 </script>
 
 </body>
-    </html>
+      </html>
