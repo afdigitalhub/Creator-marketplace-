@@ -280,6 +280,25 @@
     text-decoration: none;
   }
 
+  .shop-promo-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-light);
+  }
+
+  .shop-promo-text h3 { font-size: 16px; margin-bottom: 4px; }
+  .shop-promo-text p { font-size: 13px; color: var(--text-muted); }
+
+  .shop-promo-arrow { font-size: 20px; color: var(--af-yellow); }
+
   .section-title {
     font-size: 16px;
     font-weight: 700;
@@ -404,6 +423,7 @@
   </div>
 
   <a href="dashboard.html" class="menu-link">🏠 Dashboard</a>
+  <a href="shop.html" class="menu-link">🛍️ Shop</a>
   <a href="campaigns.html" class="menu-link">📋 Campaigns</a>
   <a href="applications.html" class="menu-link">📨 Applications</a>
   <a href="profile.html" class="menu-link">👤 Profile</a>
@@ -454,6 +474,14 @@
     <input type="text" placeholder="Search campaigns...">
   </div>
 
+  <a href="shop.html" class="shop-promo-card">
+    <div class="shop-promo-text">
+      <h3>Visit the Shop</h3>
+      <p>eBooks and digital products to help you grow</p>
+    </div>
+    <div class="shop-promo-arrow">→</div>
+  </a>
+
   <div class="cta-card" id="ctaCard" style="display:none;">
     <div class="cta-text">
       <h3 id="ctaTitle">Post a Campaign</h3>
@@ -471,6 +499,9 @@
 <div class="bottom-nav">
   <a href="dashboard.html" class="nav-item active">
     <span class="nav-icon">🏠</span>Home
+  </a>
+  <a href="shop.html" class="nav-item">
+    <span class="nav-icon">🛍️</span>Shop
   </a>
   <a href="campaigns.html" class="nav-item">
     <span class="nav-icon">📋</span>Campaigns
@@ -621,4 +652,4 @@
 </script>
 
 </body>
-</html>
+  </html>
