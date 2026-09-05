@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AF Digital Hub | Creator Marketplace</title>
+<title>AF Digital Hub | Sign In</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#05050a">
 <style>
@@ -86,6 +86,7 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 40px;
+    text-decoration: none;
   }
 
   .logo-mark {
@@ -261,6 +262,14 @@
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
   }
 
+  .role-hint {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 18px;
+    margin-top: -8px;
+  }
+
   .hidden { display: none !important; }
 
   .footer-tag {
@@ -276,14 +285,14 @@
 
 <div class="content-wrap">
 
-  <div class="logo-row">
+  <a href="index.html" class="logo-row">
     <div class="logo-mark">AF</div>
     <div class="logo-text">Digital<span class="hub">Hub</span></div>
-  </div>
+  </a>
 
   <div class="card">
     <h1 id="form-title">Welcome back</h1>
-    <p class="subtitle" id="form-subtitle">Log in to your creator marketplace account</p>
+    <p class="subtitle" id="form-subtitle">Sign in to continue to your AF Digital Hub account.</p>
 
     <div class="error-msg" id="error-box"></div>
 
@@ -291,6 +300,8 @@
       <div class="role-btn active" data-role="creator" onclick="selectRole('creator')">I'm a Creator</div>
       <div class="role-btn" data-role="business" onclick="selectRole('business')">I'm a Business</div>
     </div>
+
+    <div class="role-hint hidden" id="role-hint"></div>
 
     <form id="auth-form">
       <div class="field hidden" id="name-field">
@@ -326,26 +337,38 @@
   let isLogin = true;
   let selectedRole = "creator";
 
+  const ROLE_HINTS = {
+    creator: "As a creator, you can build your professional profile and apply to campaigns posted by businesses.",
+    business: "As a business, you can present your business and post campaigns to find the right creators."
+  };
+
   function selectRole(role) {
     selectedRole = role;
     document.querySelectorAll('.role-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.role === role);
     });
+    document.getElementById('role-hint').textContent = ROLE_HINTS[role];
+  }
+
+  function setMode(login) {
+    isLogin = login;
+    document.getElementById('form-title').textContent = isLogin ? 'Welcome back' : 'Create your account';
+    document.getElementById('form-subtitle').textContent = isLogin
+      ? 'Sign in to continue to your AF Digital Hub account.'
+      : 'Join AF Digital Hub as a creator or a business.';
+    document.getElementById('name-field').classList.toggle('hidden', isLogin);
+    document.getElementById('role-toggle').classList.toggle('hidden', isLogin);
+    document.getElementById('role-hint').classList.toggle('hidden', isLogin);
+    document.getElementById('submit-btn').textContent = isLogin ? 'Log In' : 'Create Account';
+    document.getElementById('switch-text').textContent = isLogin ? "Don't have an account?" : "Already have an account?";
+    document.getElementById('switch-link').textContent = isLogin ? 'Sign up' : 'Log in';
+    if (!isLogin) document.getElementById('role-hint').textContent = ROLE_HINTS[selectedRole];
+    hideError();
   }
 
   function toggleMode(e) {
-    e.preventDefault();
-    isLogin = !isLogin;
-    document.getElementById('form-title').textContent = isLogin ? 'Welcome back' : 'Create your account';
-    document.getElementById('form-subtitle').textContent = isLogin
-      ? 'Log in to your creator marketplace account'
-      : 'Join AF Digital Hub as a creator or business';
-    document.getElementById('name-field').classList.toggle('hidden', isLogin);
-    document.getElementById('role-toggle').classList.toggle('hidden', isLogin);
-    document.getElementById('submit-btn').textContent = isLogin ? 'Log In' : 'Sign Up';
-    document.getElementById('switch-text').textContent = isLogin ? "Don't have an account?" : "Already have an account?";
-    document.getElementById('switch-link').textContent = isLogin ? 'Sign up' : 'Log in';
-    hideError();
+    if (e) e.preventDefault();
+    setMode(!isLogin);
   }
 
   function showError(msg, isSuccess) {
@@ -357,6 +380,12 @@
 
   function hideError() {
     document.getElementById('error-box').style.display = 'none';
+  }
+
+  // If arriving from a "Create an Account" link, open directly in signup mode.
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('mode') === 'signup') {
+    setMode(false);
   }
 
   document.getElementById('auth-form').addEventListener('submit', async function(e) {
@@ -399,10 +428,16 @@
         localStorage.setItem('af_token', data.token);
         localStorage.setItem('af_role', data.user.role);
         localStorage.setItem('af_name', data.user.full_name);
-        window.location.href = 'dashboard.html';
+        const redirect = localStorage.getItem('af_redirect_after_login');
+        if (redirect) {
+          localStorage.removeItem('af_redirect_after_login');
+          window.location.href = redirect;
+        } else {
+          window.location.href = 'dashboard.html';
+        }
       } else {
-        showError('Account created! Please log in.', true);
-        toggleMode(e);
+        showError('Account created. Please log in.', true);
+        setMode(true);
       }
 
     } catch (err) {
@@ -412,4 +447,4 @@
 </script>
 
 </body>
-</html>
+  </html>
