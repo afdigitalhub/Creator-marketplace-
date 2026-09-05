@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
+<style>
+  :root {
+    --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --accent-blue: #4f6ef7; --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12; --success: #34d399;
+    --af-yellow: #f5c518;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding-bottom: 48px; }
+
+  .top-header { display: flex; align-items: center; gap: 14px; padding: 18px 16px; position: sticky; top: 0; background: rgba(5,5,10,0.9); backdrop-filter: blur(12px); z-index: 50; border-bottom: 1px solid var(--border); }
+  .back-btn { font-size: 20px; color: var(--text-light); text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 10px; flex-shrink: 0; }
+  .header-title { font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .main-content { padding: 20px 16px 100px; max-width: 560px; margin: 0 auto; }
+
+  /* Loading skeleton */
+  .skeleton { background: var(--card-bg); border-radius: 20px; overflow: hidden; }
+  .skel-cover { width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #12121f 25%, #191930 50%, #12121f 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+  .skel-line { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #12121f 25%, #191930 50%, #12121f 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; margin: 16px 16px 0; }
+  .skel-line.short { width: 40%; }
+  .skel-line.tall { height: 20px; width: 70%; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Product display */
+  .product-cover-wrap { width: 100%; aspect-ratio: 3/4; border-radius: 20px; overflow: hidden; background: var(--card-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+  .product-cover-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-fallback { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; }
+  .cover-fallback .icon { font-size: 40px; opacity: 0.5; }
+
+  .product-category { font-size: 12px; font-weight: 700; color: var(--af-yellow); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .product-title { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; }
+  .product-subtitle { font-size: 14.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
+  .info-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .info-row:last-of-type { border-bottom: none; }
+  .info-label { font-size: 13px; color: var(--text-muted); }
+  .info-value { font-size: 13.5px; font-weight: 600; }
+
+  .description-block { margin: 20px 0; }
+  .description-block h3 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .description-block p { font-size: 14.5px; line-height: 1.65; color: #d8d8e6; white-space: pre-line; }
+
+  /* Sticky buy bar */
+  .buy-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,18,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 60; }
+  .buy-bar .price { font-size: 19px; font-weight: 800; color: var(--accent-blue); }
+  .buy-bar .price span { display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+  .buy-btn { padding: 13px 28px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease; }
+  .buy-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+  /* Error / empty state */
+  .state-block { text-align: center; padding: 80px 24px 40px; }
+  .state-block .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.6; }
+  .state-block h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .state-block p { font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px; }
+  .state-block a { display: inline-block; padding: 11px 24px; border-radius: 10px; background: var(--gradient); color: white; text-decoration: none; font-weight: 700; font-size: 13.5px; }
+  .retry-btn { display: inline-block; padding: 11px 24px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-light); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+  .modal-overlay.active { display: flex; }
+  .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 560px; text-align: center; }
+  .modal-sheet .icon { font-size: 36px; margin-bottom: 12px; }
+  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .modal-sheet p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; }
+  .modal-sheet button { width: 100%; padding: 13px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="shop.html" class="back-btn">←</a>
+  <div class="header-title" id="headerTitle">Product</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="skeleton">
+    <div class="skel-cover"></div>
+  </div>
+  <div class="skel-line tall"></div>
+  <div class="skel-line short"></div>
+  <div class="skel-line"></div>
+</div>
+
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-sheet">
+    <div class="icon">🛠️</div>
+    <h3>Checkout coming soon</h3>
+    <p>We're putting the finishing touches on secure payments. This product will be available to purchase very soon.</p>
+    <button onclick="closeModal()">Got it</button>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
+
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
+  function formatMoney(amount, currency) {
+    const symbol = CURRENCY_SYMBOLS[currency] || '$';
+    return `${symbol}${Number(amount).toFixed(2)}`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function showState(icon, title, message, showShopLink, showRetry) {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="state-block">
+        <div class="icon">${icon}</div>
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(message)}</p>
+        ${showShopLink ? `<a href="shop.html">Back to Shop</a>` : ''}
+        ${showRetry ? `<button class="retry-btn" onclick="loadProduct()">Try Again</button>` : ''}
+      </div>
+    `;
+  }
+
+  function openModal() { document.getElementById('checkoutModal').classList.add('active'); }
+  function closeModal() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+  async function loadProduct() {
+    if (!productId) {
+      showState('❓', 'Product unavailable', 'No product was specified.', true, false);
+      return;
+    }
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="skeleton"><div class="skel-cover"></div></div>
+      <div class="skel-line tall"></div>
+      <div class="skel-line short"></div>
+      <div class="skel-line"></div>
+    `;
+
+    try {
+      const res = await fetch(`${API_BASE}/products/${encodeURIComponent(productId)}`);
+
+      if (res.status === 404) {
+        showState('📦', 'Product unavailable', 'This product may have been removed or is no longer listed.', true, false);
+        return;
+      }
+      if (!res.ok) {
+        showState('⚠️', 'Something went wrong', 'We couldn\'t load this product right now.', false, true);
+        return;
+      }
+
+      const data = await res.json();
+      const p = data.product;
+
+      if (!p || p.status !== 'published') {
+        showState('📦', 'Product unavailable', 'This product may have been removed or is no longer listed.', true, false);
+        return;
+      }
+
+      document.getElementById('headerTitle').textContent = p.title;
+
+      document.getElementById('mainContent').innerHTML = `
+        <div class="product-cover-wrap" id="coverWrap">
+          ${p.cover_url
+            ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;cover-fallback&quot;><div class=&quot;icon&quot;>🖼️</div><div>Cover image unavailable</div></div>'">`
+            : `<div class="cover-fallback"><div class="icon">🖼️</div><div>No cover image</div></div>`}
+        </div>
+
+        <div class="product-category">${escapeHtml(p.category || '')}</div>
+        <div class="product-title">${escapeHtml(p.title)}</div>
+        ${p.subtitle ? `<div class="product-subtitle">${escapeHtml(p.subtitle)}</div>` : ''}
+
+        ${p.description ? `
+          <div class="description-block">
+            <h3>About this product</h3>
+            <p>${escapeHtml(p.description)}</p>
+          </div>
+        ` : ''}
+
+        <div class="info-row">
+          <div class="info-label">Category</div>
+          <div class="info-value">${escapeHtml(p.category || '—')}</div>
+        </div>
+        ${p.seller_name ? `
+        <div class="info-row">
+          <div class="info-label">Sold by</div>
+          <div class="info-value">${escapeHtml(p.seller_name)}</div>
+        </div>` : ''}
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', `
+        <div class="buy-bar">
+          <div class="price">${formatMoney(p.price, p.currency)}<span>Total price</span></div>
+          <button class="buy-btn" onclick="openModal()">Buy Now</button>
+        </div>
+      `);
+
+    } catch (err) {
+      showState('⚠️', 'Connection error', 'Please check your connection and try again.', false, true);
+    }
+  }
+
+  loadProduct();
+</script>
+
+</body>
+  </html>
