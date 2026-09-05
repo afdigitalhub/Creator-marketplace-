@@ -3,8 +3,8 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
-// GET all published products (public browsing — any logged-in user)
-router.get("/", requireAuth, async (req, res) => {
+// GET all published products (public browsing — no login required)
+router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.*, u.full_name AS seller_name
@@ -20,8 +20,8 @@ router.get("/", requireAuth, async (req, res) => {
   }
 });
 
-// GET single product by id
-router.get("/:id", requireAuth, async (req, res) => {
+// GET single product by id (public — no login required)
+router.get("/:id", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.*, u.full_name AS seller_name
