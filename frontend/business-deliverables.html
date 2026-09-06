@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deliverables — AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --border: #1c1c2e;
+    --accent-blue: #4f6ef7;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: 40px;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header .back-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  main {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    margin-bottom: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+
+  .creator-name {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .status-pill {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .status-pending {
+    background: rgba(245, 197, 24, 0.15);
+    color: var(--af-yellow);
+  }
+
+  .status-approved {
+    background: rgba(79, 110, 247, 0.15);
+    color: var(--accent-blue);
+  }
+
+  .meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .submission-link {
+    display: block;
+    word-break: break-all;
+    color: var(--accent-blue);
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-decoration: none;
+  }
+
+  .notes {
+    font-size: 14px;
+    color: var(--text-light);
+    background: var(--input-bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+
+  .approve-btn {
+    width: 100%;
+    background: var(--gradient);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .approve-btn:disabled {
+    opacity: 0.5;
+  }
+
+  .state-box {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .state-box.error { color: #f75f5f; }
+
+  .sheet-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+  }
+
+  .sheet-overlay.open { display: block; }
+
+  .sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    z-index: 101;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sheet.open { transform: translateY(0); }
+
+  .sheet h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+  }
+
+  .sheet p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 20px 0;
+  }
+
+  .sheet-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .sheet-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+
+  .sheet-cancel {
+    background: var(--input-bg);
+    color: var(--text-light);
+    border: 1px solid var(--border) !important;
+  }
+
+  .sheet-confirm {
+    background: var(--gradient);
+    color: white;
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-light);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 200;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="window.location.href='dashboard.html'">&#8592;</button>
+  <h1>Deliverables</h1>
+</header>
+
+<main>
+  <label for="campaignSelect">Campaign</label>
+  <select id="campaignSelect">
+    <option value="">Loading your campaigns...</option>
+  </select>
+
+  <div id="content">
+    <div class="state-box">Select a campaign to view submitted deliverables.</div>
+  </div>
+</main>
+
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <h3>Approve this deliverable?</h3>
+  <p>This confirms the work was received and meets your expectations. This cannot be undone from here.</p>
+  <div class="sheet-actions">
+    <button class="sheet-cancel" onclick="closeSheet()">Cancel</button>
+    <button class="sheet-confirm" id="sheetConfirmBtn">Approve</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  let pendingApproveId = null;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function openSheet(deliverableId) {
+    pendingApproveId = deliverableId;
+    document.getElementById('sheetOverlay').classList.add('open');
+    document.getElementById('sheet').classList.add('open');
+  }
+
+  function closeSheet() {
+    pendingApproveId = null;
+    document.getElementById('sheetOverlay').classList.remove('open');
+    document.getElementById('sheet').classList.remove('open');
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function escapeAttr(str) {
+    if (!str) return '#';
+    return str.replace(/"/g, '&quot;');
+  }
+
+  function renderDeliverables(items) {
+    const content = document.getElementById('content');
+
+    if (!items || items.length === 0) {
+      content.innerHTML = '<div class="state-box">No deliverables have been submitted for this campaign yet.</div>';
+      return;
+    }
+
+    content.innerHTML = items.map(d => {
+      const isApproved = d.approved === true;
+      const statusLabel = isApproved ? 'Approved' : 'Pending review';
+      const statusClass = isApproved ? 'status-approved' : 'status-pending';
+      const notesBlock = d.notes ? `<div class="notes">${escapeHtml(d.notes)}</div>` : '';
+      const buttonBlock = isApproved
+        ? ''
+        : `<button class="approve-btn" onclick="openSheet('${d.id}')">Approve Deliverable</button>`;
+
+      return `
+        <div class="card">
+          <div class="card-row">
+            <span class="creator-name">${escapeHtml(d.creator_name || 'Unknown creator')}</span>
+            <span class="status-pill ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="meta">Submitted ${formatDate(d.submitted_at)}</div>
+          <a class="submission-link" href="${escapeAttr(d.submission_url)}" target="_blank" rel="noopener">${escapeHtml(d.submission_url)}</a>
+          ${notesBlock}
+          ${buttonBlock}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadCampaigns() {
+    const select = document.getElementById('campaignSelect');
+    try {
+      const res = await fetch(`${API_BASE}/campaigns`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load campaigns');
+      const data = await res.json();
+      const campaigns = data.campaigns || [];
+
+      if (campaigns.length === 0) {
+        select.innerHTML = '<option value="">No campaigns yet</option>';
+        return;
+      }
+
+      select.innerHTML = '<option value="">Select a campaign</option>' +
+        campaigns.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+    } catch (err) {
+      select.innerHTML = '<option value="">Could not load campaigns</option>';
+      showToast('Could not load your campaigns. Please try again.');
+    }
+  }
+
+  async function loadDeliverables(campaignId) {
+    const content = document.getElementById('content');
+    content.innerHTML = '<div class="state-box">Loading deliverables...</div>';
+
+    try {
+      const res = await fetch(`${API_BASE}/deliverables/campaign/${campaignId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.status === 403) {
+        content.innerHTML = '<div class="state-box error">You do not have access to this campaign\'s deliverables.</div>';
+        return;
+      }
+
+      if (!res.ok) throw new Error('Failed to load deliverables');
+
+      const data = await res.json();
+      renderDeliverables(data.deliverables || []);
+    } catch (err) {
+      content.innerHTML = '<div class="state-box error">Something went wrong loading deliverables. Please try again.</div>';
+    }
+  }
+
+  document.getElementById('campaignSelect').addEventListener('change', (e) => {
+    const campaignId = e.target.value;
+    if (campaignId) {
+      loadDeliverables(campaignId);
+    } else {
+      document.getElementById('content').innerHTML = '<div class="state-box">Select a campaign to view submitted deliverables.</div>';
+    }
+  });
+
+  document.getElementById('sheetConfirmBtn').addEventListener('click', async () => {
+    if (!pendingApproveId) return;
+    const btn = document.getElementById('sheetConfirmBtn');
+    const campaignId = document.getElementById('campaignSelect').value;
+    btn.disabled = true;
+    btn.textContent = 'Approving...';
+
+    try {
+      const res = await fetch(`${API_BASE}/deliverables/${pendingApproveId}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) throw new Error('Approval failed');
+
+      closeSheet();
+      showToast('Deliverable approved.');
+      loadDeliverables(campaignId);
+    } catch (err) {
+      showToast('Could not approve. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Approve';
+    }
+  });
+
+  if (!token) {
+    document.getElementById('content').innerHTML = '<div class="state-box error">Please log in to view deliverables.</div>';
+  } else {
+    loadCampaigns();
+  }
+</script>
+
+</body>
+  </html>
