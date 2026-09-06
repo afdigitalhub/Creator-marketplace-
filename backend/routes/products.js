@@ -2,12 +2,33 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+// R2 client. Credentials come from environment variables only,
+// never from code and never from the repository.
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+  }
+});
+
+// Fields safe to return publicly. file_url and storage_key are
+// deliberately excluded so file locations are never exposed.
+const PUBLIC_FIELDS = `
+  p.id, p.seller_id, p.title, p.subtitle, p.description, p.category,
+  p.tags, p.cover_url, p.preview_url, p.price, p.currency, p.status,
+  p.is_featured, p.created_at
+`;
 
 // GET all published products (public browsing, no login required)
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, u.full_name AS seller_name
+      `SELECT ${PUBLIC_FIELDS}, u.full_name AS seller_name
        FROM products p
        JOIN users u ON p.seller_id = u.id
        WHERE p.status = 'published'
@@ -36,11 +57,55 @@ router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => 
   }
 });
 
+// GET a secure, short-lived download link.
+// Requires login AND an active entitlement for this product.
+router.get("/:id/download", requireAuth, async (req, res) => {
+  try {
+    const entitlement = await pool.query(
+      `SELECT id FROM entitlements
+       WHERE user_id = $1 AND product_id = $2 AND status = 'active'`,
+      [req.user.id, req.params.id]
+    );
+
+    if (entitlement.rows.length === 0) {
+      return res.status(403).json({ error: "You do not have access to this product" });
+    }
+
+    const productResult = await pool.query(
+      "SELECT storage_key, title FROM products WHERE id = $1",
+      [req.params.id]
+    );
+
+    if (productResult.rows.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const storageKey = productResult.rows[0].storage_key;
+
+    if (!storageKey) {
+      return res.status(500).json({ error: "This product's file is not available for download yet" });
+    }
+
+    // Link is valid for 5 minutes only.
+    const command = new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: storageKey
+    });
+
+    const url = await getSignedUrl(r2, command, { expiresIn: 300 });
+
+    res.json({ url, expires_in: 300 });
+  } catch (err) {
+    console.error("Download link error:", err);
+    res.status(500).json({ error: "Could not generate download link" });
+  }
+});
+
 // GET single product by id (public, no login required)
 router.get("/:id", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.*, u.full_name AS seller_name
+      `SELECT ${PUBLIC_FIELDS}, u.full_name AS seller_name
        FROM products p
        JOIN users u ON p.seller_id = u.id
        WHERE p.id = $1`,
