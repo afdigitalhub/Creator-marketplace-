@@ -7,17 +7,11 @@ const crypto = require("crypto");
 const PAYSTACK_SECRET = (process.env.PAYSTACK_SECRET_KEY || "").trim();
 const PAYSTACK_BASE = "https://api.paystack.co";
 
-// Paystack works in the smallest currency unit (pesewas for GHS).
 function toMinorUnit(amount) {
   return Math.round(Number(amount) * 100);
 }
 
-// Shared logic for confirming a payment with Paystack and, if genuine,
-// completing the order. Written to be safely repeatable: calling it twice
-// for the same payment does not create duplicate entitlements or earnings.
 async function verifyAndComplete(reference) {
-  // 1. Ask Paystack directly. We never trust what the browser or a
-  //    webhook body claims about payment status.
   const verifyRes = await fetch(`${PAYSTACK_BASE}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` }
   });
@@ -34,8 +28,6 @@ async function verifyAndComplete(reference) {
   try {
     await client.query("BEGIN");
 
-    // 2. Find the payment row. The UNIQUE constraint on provider_reference
-    //    means there can only ever be one.
     const paymentResult = await client.query(
       "SELECT * FROM payments WHERE provider_reference = $1 FOR UPDATE",
       [reference]
@@ -48,8 +40,6 @@ async function verifyAndComplete(reference) {
 
     const payment = paymentResult.rows[0];
 
-    // 3. Already processed? Stop here. This is what makes repeated
-    //    webhooks harmless.
     if (payment.status === "successful") {
       await client.query("ROLLBACK");
       return { ok: true, already_processed: true, order_id: payment.order_id };
@@ -67,7 +57,6 @@ async function verifyAndComplete(reference) {
 
     const order = orderResult.rows[0];
 
-    // 4. Payment not successful at Paystack: record that and stop.
     if (txn.status !== "success") {
       await client.query(
         "UPDATE payments SET status = $1, raw_response = $2 WHERE id = $3",
@@ -81,8 +70,6 @@ async function verifyAndComplete(reference) {
       return { ok: false, reason: "payment_not_successful", status: txn.status };
     }
 
-    // 5. Confirm the amount actually paid matches what we charged.
-    //    This blocks a tampered checkout paying less than the price.
     const expectedMinor = toMinorUnit(order.gross_amount);
     if (Number(txn.amount) !== expectedMinor) {
       await client.query(
@@ -93,7 +80,6 @@ async function verifyAndComplete(reference) {
       return { ok: false, reason: "amount_mismatch", expected: expectedMinor, received: txn.amount };
     }
 
-    // 6. Genuine, verified, correct amount. Complete the order.
     await client.query(
       "UPDATE payments SET status = 'successful', raw_response = $1, verified_at = now() WHERE id = $2",
       [JSON.stringify(txn), payment.id]
@@ -104,8 +90,6 @@ async function verifyAndComplete(reference) {
       [order.id]
     );
 
-    // Entitlement: the buyer's right to download. UNIQUE (user_id, product_id)
-    // means a repeat cannot create a duplicate.
     await client.query(
       `INSERT INTO entitlements (user_id, product_id, order_id, status)
        VALUES ($1, $2, $3, 'active')
@@ -113,8 +97,6 @@ async function verifyAndComplete(reference) {
       [order.buyer_id, order.product_id, order.id]
     );
 
-    // Earning: what the platform owes the seller. Guarded against duplicates
-    // by checking for an existing row for this order.
     const existingEarning = await client.query(
       "SELECT id FROM earnings WHERE source_type = 'product_sale' AND source_id = $1",
       [order.id]
@@ -148,7 +130,44 @@ async function verifyAndComplete(reference) {
   }
 }
 
-// POST /payments/initialise - start a payment for an existing pending order
+// Webhook first, with its own raw body parser so the signature can be
+// verified. This must come before the JSON parser below.
+router.post("/webhook", express.raw({ type: "*/*" }), async (req, res) => {
+  try {
+    const signature = req.headers["x-paystack-signature"];
+    const rawBody = req.body;
+
+    const expected = crypto
+      .createHmac("sha512", PAYSTACK_SECRET)
+      .update(rawBody)
+      .digest("hex");
+
+    if (signature !== expected) {
+      console.error("Webhook signature mismatch, ignoring request");
+      return res.sendStatus(401);
+    }
+
+    const event = JSON.parse(rawBody.toString());
+
+    res.sendStatus(200);
+
+    if (event.event === "charge.success") {
+      try {
+        await verifyAndComplete(event.data.reference);
+      } catch (err) {
+        console.error("Webhook processing error:", err);
+      }
+    }
+
+  } catch (err) {
+    console.error("Webhook error:", err);
+    if (!res.headersSent) res.sendStatus(500);
+  }
+});
+
+// Every route below this line parses JSON normally.
+router.use(express.json());
+
 router.post("/initialise", requireAuth, async (req, res) => {
   const { order_id } = req.body;
 
@@ -184,7 +203,6 @@ router.post("/initialise", requireAuth, async (req, res) => {
     const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [req.user.id]);
     const email = userResult.rows[0].email;
 
-    // Amount comes from the order in our database, never from the request.
     const initRes = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {
       method: "POST",
       headers: {
@@ -228,8 +246,6 @@ router.post("/initialise", requireAuth, async (req, res) => {
   }
 });
 
-// GET /payments/verify/:reference - called when the customer returns.
-// This is a convenience check, not the authority; the webhook is.
 router.get("/verify/:reference", requireAuth, async (req, res) => {
   try {
     const result = await verifyAndComplete(req.params.reference);
@@ -242,44 +258,6 @@ router.get("/verify/:reference", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Verify payment error:", err);
     res.status(500).json({ error: "Could not verify payment" });
-  }
-});
-
-// POST /payments/webhook - Paystack calls this. No auth middleware:
-// authenticity is proven by the signature, not by a login token.
-router.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-  try {
-    const signature = req.headers["x-paystack-signature"];
-    const rawBody = req.body;
-
-    // Verify this genuinely came from Paystack before trusting anything in it.
-    const expected = crypto
-      .createHmac("sha512", PAYSTACK_SECRET)
-      .update(rawBody)
-      .digest("hex");
-
-    if (signature !== expected) {
-      console.error("Webhook signature mismatch, ignoring request");
-      return res.sendStatus(401);
-    }
-
-    const event = JSON.parse(rawBody.toString());
-
-    // Acknowledge immediately so Paystack does not retry unnecessarily.
-    res.sendStatus(200);
-
-    if (event.event === "charge.success") {
-      const reference = event.data.reference;
-      try {
-        await verifyAndComplete(reference);
-      } catch (err) {
-        console.error("Webhook processing error:", err);
-      }
-    }
-
-  } catch (err) {
-    console.error("Webhook error:", err);
-    if (!res.headersSent) res.sendStatus(500);
   }
 });
 
