@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage Check — AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12;
+    --good: #34d399; --bad: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; min-height: 100vh; }
+  h1 { font-size: 18px; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--gradient); color: white; font-size: 15px; font-weight: 700; margin-bottom: 20px; }
+  pre { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 12px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; color: var(--text-light); }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .label { color: var(--text-muted); }
+  .val { font-weight: 700; text-align: right; word-break: break-all; }
+  .good { color: var(--good); }
+  .bad { color: var(--bad); }
+  .err-box { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); color: var(--bad); padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-top: 16px; line-height: 1.5; word-break: break-word; }
+</style>
+</head>
+<body>
+
+<h1>Storage Connection Check</h1>
+<div class="sub">Admin only. No secret values are shown.</div>
+
+<button onclick="runCheck()">Run Check</button>
+
+<div id="result"></div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+
+  function yn(v) {
+    return v ? '<span class="good">Yes</span>' : '<span class="bad">No</span>';
+  }
+
+  async function runCheck() {
+    const box = document.getElementById('result');
+    box.innerHTML = '<div class="sub">Checking...</div>';
+
+    if (!token) {
+      box.innerHTML = '<div class="err-box">Not logged in. Log in as admin first.</div>';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/products/storage/health`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const d = await res.json();
+
+      if (res.status === 403) {
+        box.innerHTML = '<div class="err-box">Admin access required. Log in with the admin account.</div>';
+        return;
+      }
+
+      let html = `
+        <div class="row"><span class="label">Bucket name set</span><span class="val">${yn(d.bucket_name_set)}</span></div>
+        <div class="row"><span class="label">Bucket name</span><span class="val">${d.bucket_name || '—'}</span></div>
+        <div class="row"><span class="label">Access key set</span><span class="val">${yn(d.access_key_set)} (${d.access_key_length} chars)</span></div>
+        <div class="row"><span class="label">Secret set</span><span class="val">${yn(d.secret_set)} (${d.secret_length} chars)</span></div>
+        <div class="row"><span class="label">Endpoint valid format</span><span class="val">${yn(d.endpoint_looks_valid)}</span></div>
+        <div class="row"><span class="label">Endpoint</span><span class="val">${d.endpoint_normalised || '—'}</span></div>
+        <div class="row"><span class="label">Client created</span><span class="val">${yn(d.client_created)}</span></div>
+        <div class="row"><span class="label">Can sign URLs</span><span class="val">${yn(d.can_sign)}</span></div>
+      `;
+
+      if (d.error) {
+        html += `<div class="err-box"><strong>${d.error_name || 'Error'}</strong><br>${d.error}</div>`;
+      }
+
+      box.innerHTML = html;
+
+    } catch (err) {
+      box.innerHTML = `<div class="err-box">Connection error: ${err.message}</div>`;
+    }
+  }
+</script>
+
+</body>
+  </html>
