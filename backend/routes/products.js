@@ -5,24 +5,74 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-// R2 client. Credentials come from environment variables only,
-// never from code and never from the repository.
-const r2 = new S3Client({
-  region: "auto",
-  endpoint: process.env.R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+// Normalise the endpoint so common copy-paste mistakes cannot break it:
+// missing https://, trailing slash, or the bucket name accidentally appended.
+function normaliseEndpoint(raw, bucketName) {
+  if (!raw) return null;
+  let ep = String(raw).trim();
+  if (!/^https?:\/\//i.test(ep)) ep = "https://" + ep;
+  ep = ep.replace(/\/+$/, "");
+  if (bucketName && ep.toLowerCase().endsWith("/" + String(bucketName).trim().toLowerCase())) {
+    ep = ep.slice(0, -(String(bucketName).trim().length + 1));
   }
-});
+  return ep;
+}
 
-// Fields safe to return publicly. file_url and storage_key are
-// deliberately excluded so file locations are never exposed.
+const R2_BUCKET = (process.env.R2_BUCKET_NAME || "").trim();
+const R2_ENDPOINT = normaliseEndpoint(process.env.R2_ENDPOINT, R2_BUCKET);
+const R2_KEY_ID = (process.env.R2_ACCESS_KEY_ID || "").trim();
+const R2_SECRET = (process.env.R2_SECRET_ACCESS_KEY || "").trim();
+
+let r2 = null;
+if (R2_ENDPOINT && R2_KEY_ID && R2_SECRET) {
+  r2 = new S3Client({
+    region: "auto",
+    endpoint: R2_ENDPOINT,
+    credentials: { accessKeyId: R2_KEY_ID, secretAccessKey: R2_SECRET }
+  });
+}
+
 const PUBLIC_FIELDS = `
   p.id, p.seller_id, p.title, p.subtitle, p.description, p.category,
   p.tags, p.cover_url, p.preview_url, p.price, p.currency, p.status,
   p.is_featured, p.created_at
 `;
+
+// Admin-only storage health check. Reports exactly what is wrong,
+// without ever revealing secret values.
+router.get("/storage/health", requireAuth, requireRole("admin"), async (req, res) => {
+  const report = {
+    bucket_name_set: Boolean(R2_BUCKET),
+    bucket_name: R2_BUCKET || null,
+    access_key_set: Boolean(R2_KEY_ID),
+    access_key_length: R2_KEY_ID.length,
+    secret_set: Boolean(R2_SECRET),
+    secret_length: R2_SECRET.length,
+    endpoint_raw_set: Boolean(process.env.R2_ENDPOINT),
+    endpoint_normalised: R2_ENDPOINT,
+    endpoint_looks_valid: Boolean(R2_ENDPOINT && /^https:\/\/.+\.r2\.cloudflarestorage\.com$/i.test(R2_ENDPOINT)),
+    client_created: Boolean(r2)
+  };
+
+  if (!r2) {
+    report.can_sign = false;
+    report.error = "R2 client not created. One or more environment variables are missing.";
+    return res.json(report);
+  }
+
+  try {
+    const command = new GetObjectCommand({ Bucket: R2_BUCKET, Key: "connection-test.pdf" });
+    const url = await getSignedUrl(r2, command, { expiresIn: 60 });
+    report.can_sign = true;
+    report.signed_url_host = new URL(url).host;
+  } catch (err) {
+    report.can_sign = false;
+    report.error = err.message;
+    report.error_name = err.name;
+  }
+
+  res.json(report);
+});
 
 // GET all published products (public browsing, no login required)
 router.get("/", async (req, res) => {
@@ -41,7 +91,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET all products regardless of status (admin only, for Manage Products page)
+// GET all products regardless of status (admin only)
 router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const result = await pool.query(
@@ -57,8 +107,7 @@ router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => 
   }
 });
 
-// GET a secure, short-lived download link.
-// Requires login AND an active entitlement for this product.
+// Secure, short-lived download link. Requires login AND an active entitlement.
 router.get("/:id/download", requireAuth, async (req, res) => {
   try {
     const entitlement = await pool.query(
@@ -69,6 +118,13 @@ router.get("/:id/download", requireAuth, async (req, res) => {
 
     if (entitlement.rows.length === 0) {
       return res.status(403).json({ error: "You do not have access to this product" });
+    }
+
+    if (!r2) {
+      return res.status(500).json({
+        error: "File storage is not configured correctly. Please contact support.",
+        detail: "R2 client unavailable: missing environment configuration"
+      });
     }
 
     const productResult = await pool.query(
@@ -86,22 +142,21 @@ router.get("/:id/download", requireAuth, async (req, res) => {
       return res.status(500).json({ error: "This product's file is not available for download yet" });
     }
 
-    // Link is valid for 5 minutes only.
-    const command = new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: storageKey
-    });
-
+    const command = new GetObjectCommand({ Bucket: R2_BUCKET, Key: storageKey });
     const url = await getSignedUrl(r2, command, { expiresIn: 300 });
 
     res.json({ url, expires_in: 300 });
   } catch (err) {
     console.error("Download link error:", err);
-    res.status(500).json({ error: "Could not generate download link" });
+    res.status(500).json({
+      error: "Could not generate download link",
+      detail: err.message,
+      detail_name: err.name
+    });
   }
 });
 
-// GET single product by id (public, no login required)
+// GET single product by id (public)
 router.get("/:id", async (req, res) => {
   try {
     const result = await pool.query(
@@ -121,7 +176,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST create product (founder/admin only for now)
+// POST create product (admin only)
 router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
   const {
     title, subtitle, description, category, tags,
@@ -152,7 +207,7 @@ router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
   }
 });
 
-// PUT update product (owner/seller only)
+// PUT update product
 router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const existing = await pool.query("SELECT * FROM products WHERE id = $1", [req.params.id]);
@@ -194,7 +249,7 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
   }
 });
 
-// DELETE product (owner/seller only)
+// DELETE product
 router.delete("/:id", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const existing = await pool.query("SELECT * FROM products WHERE id = $1", [req.params.id]);
