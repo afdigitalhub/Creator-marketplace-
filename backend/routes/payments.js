@@ -70,6 +70,18 @@ async function verifyAndComplete(reference) {
       return { ok: false, reason: "payment_not_successful", status: txn.status };
     }
 
+    // Currency must match the order exactly. If Paystack converted the
+    // charge to a different currency, this is not the payment we asked for.
+    if (String(txn.currency).toUpperCase() !== String(order.currency).toUpperCase()) {
+      await client.query(
+        "UPDATE payments SET status = 'failed', raw_response = $1 WHERE id = $2",
+        [JSON.stringify(txn), payment.id]
+      );
+      await client.query("COMMIT");
+      console.error("Currency mismatch:", { expected: order.currency, received: txn.currency, reference });
+      return { ok: false, reason: "currency_mismatch", expected: order.currency, received: txn.currency };
+    }
+
     const expectedMinor = toMinorUnit(order.gross_amount);
     if (Number(txn.amount) !== expectedMinor) {
       await client.query(
@@ -130,8 +142,7 @@ async function verifyAndComplete(reference) {
   }
 }
 
-// Webhook first, with its own raw body parser so the signature can be
-// verified. This must come before the JSON parser below.
+// Webhook first, with raw body parsing for signature verification.
 router.post("/webhook", express.raw({ type: "*/*" }), async (req, res) => {
   try {
     const signature = req.headers["x-paystack-signature"];
@@ -165,7 +176,6 @@ router.post("/webhook", express.raw({ type: "*/*" }), async (req, res) => {
   }
 });
 
-// Every route below this line parses JSON normally.
 router.use(express.json());
 
 router.post("/initialise", requireAuth, async (req, res) => {
@@ -203,6 +213,8 @@ router.post("/initialise", requireAuth, async (req, res) => {
     const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [req.user.id]);
     const email = userResult.rows[0].email;
 
+    const orderCurrency = String(order.currency || "GHS").toUpperCase();
+
     const initRes = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {
       method: "POST",
       headers: {
@@ -212,8 +224,15 @@ router.post("/initialise", requireAuth, async (req, res) => {
       body: JSON.stringify({
         email,
         amount: toMinorUnit(order.gross_amount),
-        currency: order.currency,
-        metadata: { order_id: order.id, product_title: order.product_title }
+        currency: orderCurrency,
+        // Restrict to channels that settle in the order currency and avoid
+        // Paystack offering a converted-currency card charge.
+        channels: ["card", "mobile_money", "bank", "bank_transfer", "ussd"],
+        metadata: {
+          order_id: order.id,
+          product_title: order.product_title,
+          expected_currency: orderCurrency
+        }
       })
     });
 
@@ -232,12 +251,14 @@ router.post("/initialise", requireAuth, async (req, res) => {
     await pool.query(
       `INSERT INTO payments (order_id, provider, provider_reference, amount, currency, status)
        VALUES ($1, 'paystack', $2, $3, $4, 'pending')`,
-      [order.id, reference, order.gross_amount, order.currency]
+      [order.id, reference, order.gross_amount, orderCurrency]
     );
 
     res.json({
       authorization_url: initData.data.authorization_url,
-      reference
+      reference,
+      currency: orderCurrency,
+      amount: order.gross_amount
     });
 
   } catch (err) {
@@ -251,6 +272,12 @@ router.get("/verify/:reference", requireAuth, async (req, res) => {
     const result = await verifyAndComplete(req.params.reference);
 
     if (!result.ok) {
+      if (result.reason === "currency_mismatch") {
+        return res.status(400).json({
+          error: "Payment was charged in the wrong currency and has not been accepted",
+          reason: result.reason
+        });
+      }
       return res.status(400).json({ error: "Payment not confirmed", reason: result.reason });
     }
 
