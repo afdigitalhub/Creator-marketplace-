@@ -18,13 +18,13 @@ const messageRoutes = require("./routes/messages");
 const orderRoutes = require("./routes/orders");
 const libraryRoutes = require("./routes/library");
 const paymentRoutes = require("./routes/payments");
+const earningsRoutes = require("./routes/earnings");
 
 const app = express();
 app.use(cors());
 
 // Payments must be mounted BEFORE the global JSON parser, because the
 // Paystack webhook needs the raw request body to verify its signature.
-// payments.js applies its own JSON parsing to its other routes.
 app.use("/payments", paymentRoutes);
 
 app.use(express.json());
@@ -44,6 +44,7 @@ app.use("/admin", adminRoutes);
 app.use("/messages", messageRoutes);
 app.use("/orders", orderRoutes);
 app.use("/library", libraryRoutes);
+app.use("/earnings", earningsRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
