@@ -15,6 +15,7 @@ const reviewRoutes = require("./routes/reviews");
 const notificationRoutes = require("./routes/notifications");
 const adminRoutes = require("./routes/admin");
 const messageRoutes = require("./routes/messages");
+const orderRoutes = require("./routes/orders");
 
 const app = express();
 app.use(cors());
@@ -33,6 +34,7 @@ app.use("/reviews", reviewRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/admin", adminRoutes);
 app.use("/messages", messageRoutes);
+app.use("/orders", orderRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
