@@ -34,6 +34,7 @@
   .item-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
   .item-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
   .download-btn { align-self: flex-start; padding: 9px 18px; border-radius: 10px; background: var(--gradient); color: white; font-weight: 700; font-size: 13px; border: none; cursor: pointer; text-decoration: none; }
+  .download-btn:disabled { opacity: 0.6; }
 
   .empty-state { text-align: center; padding: 70px 24px; }
   .empty-state .icon { font-size: 40px; margin-bottom: 16px; opacity: 0.5; }
@@ -89,8 +90,38 @@
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  function handleDownload() {
-    showToast('Downloads are not available yet. Secure delivery is being set up.');
+  async function handleDownload(productId, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Preparing...';
+
+    try {
+      const res = await fetch(`${API_BASE}/products/${productId}/download`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+
+      btn.disabled = false;
+      btn.textContent = 'Download';
+
+      if (res.status === 403) {
+        showToast("You don't have access to this product.");
+        return;
+      }
+
+      if (!res.ok) {
+        showToast(data.error || 'Could not prepare your download. Please try again.');
+        return;
+      }
+
+      // Open the short-lived signed link. It expires in a few minutes.
+      window.location.href = data.url;
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Download';
+      showToast('Connection error. Please try again.');
+    }
   }
 
   async function loadLibrary() {
@@ -147,7 +178,7 @@
                 <div class="item-category">${escapeHtml(item.category || '')}</div>
                 <div class="item-title">${escapeHtml(item.title)}</div>
                 <div class="item-meta">Owned since ${formatDate(item.owned_since)}</div>
-                <button class="download-btn" onclick="handleDownload()">Download</button>
+                <button class="download-btn" onclick="handleDownload(${item.product_id}, this)">Download</button>
               </div>
             </div>
           `).join('')}
