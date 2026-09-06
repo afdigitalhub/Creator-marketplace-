@@ -69,8 +69,10 @@
   .buy-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,18,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 60; }
   .buy-bar .price { font-size: 19px; font-weight: 800; color: var(--accent-blue); }
   .buy-bar .price span { display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); }
-  .buy-btn { padding: 13px 28px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease; }
+  .buy-btn { padding: 13px 24px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease; white-space: nowrap; }
   .buy-btn:active { transform: scale(0.97); opacity: 0.9; }
+  .buy-btn:disabled { opacity: 0.6; }
+  .owned-badge { padding: 13px 24px; border-radius: 12px; background: rgba(52,211,153,0.12); color: var(--success); font-weight: 700; font-size: 14px; white-space: nowrap; }
 
   .state-block { text-align: center; padding: 80px 24px 40px; }
   .state-block .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.6; }
@@ -81,12 +83,20 @@
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
   .modal-overlay.active { display: flex; }
-  .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 28px 20px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 560px; text-align: center; }
-  .modal-sheet .icon { font-size: 36px; margin-bottom: 12px; }
-  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-  .modal-sheet p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; }
+  .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 26px 20px calc(26px + env(safe-area-inset-bottom)); width: 100%; max-width: 560px; }
+  .modal-sheet .icon { font-size: 34px; margin-bottom: 12px; text-align: center; }
+  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .modal-sheet p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-align: center; }
   .modal-sheet button { width: 100%; padding: 13px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; }
-  .modal-sheet a.secondary-link { display: block; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; }
+  .modal-sheet a.secondary-link { display: block; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; text-align: center; }
+
+  .breakdown { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13.5px; }
+  .breakdown-row.total { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 12px; font-weight: 800; font-size: 15px; }
+  .breakdown-label { color: var(--text-muted); }
+  .breakdown-row.total .breakdown-label { color: var(--text-light); }
+  .breakdown-value { font-weight: 700; }
+  .pending-note { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.25); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: var(--af-yellow); line-height: 1.5; margin-bottom: 18px; text-align: left; }
 </style>
 </head>
 <body>
@@ -105,20 +115,15 @@
   <div class="skel-line"></div>
 </div>
 
-<div class="modal-overlay" id="checkoutModal">
-  <div class="modal-sheet">
-    <div class="icon">🛠️</div>
-    <h3>Checkout coming soon</h3>
-    <p>We're putting the finishing touches on secure payments. This product will be available to purchase very soon.</p>
-    <button onclick="closeModal('checkoutModal')">Got it</button>
-  </div>
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-sheet" id="orderModalContent"></div>
 </div>
 
 <div class="modal-overlay" id="loginModal">
   <div class="modal-sheet">
     <div class="icon">🔒</div>
-    <h3>Log in to send a message</h3>
-    <p>You'll need an account to message the seller. It only takes a moment.</p>
+    <h3>Log in to continue</h3>
+    <p>You'll need an account to reserve this product. It only takes a moment.</p>
     <button onclick="goToLogin()">Log In</button>
     <a href="#" class="secondary-link" onclick="closeModal('loginModal');return false;">Not now</a>
   </div>
@@ -159,6 +164,10 @@
     return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
   }
 
+  function parseJwt(tok) {
+    try { return JSON.parse(atob(tok.split('.')[1])); } catch (e) { return null; }
+  }
+
   function showState(icon, title, message, showShopLink, showRetry) {
     document.getElementById('mainContent').innerHTML = `
       <div class="state-block">
@@ -178,54 +187,83 @@
     window.location.href = 'login.html';
   }
 
-  async function handleMessageSeller(sellerId) {
+  async function handleReserve() {
     if (!token) {
       openModal('loginModal');
       return;
     }
 
-    const currentUser = parseJwt(token);
-    if (currentUser && currentUser.id === sellerId) {
-      return; // Selling your own product; button is hidden in this case anyway.
-    }
-
-    const btn = document.getElementById('messageSellerBtn');
+    const btn = document.getElementById('reserveBtn');
     btn.disabled = true;
-    btn.textContent = 'Opening...';
+    btn.textContent = 'Working...';
 
     try {
-      const res = await fetch(`${API_BASE}/messages/conversations`, {
+      const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ product_id: productId })
+        body: JSON.stringify({ product_id: Number(productId) })
       });
 
       const data = await res.json();
 
+      btn.disabled = false;
+      btn.textContent = 'Reserve This Product';
+
       if (!res.ok) {
-        btn.disabled = false;
-        btn.textContent = '💬 Message Seller';
-        alert(data.error || 'Could not start conversation. Please try again.');
+        document.getElementById('orderModalContent').innerHTML = `
+          <div class="icon">ℹ️</div>
+          <h3>Couldn't reserve this</h3>
+          <p>${escapeHtml(data.error || 'Something went wrong. Please try again.')}</p>
+          <button onclick="closeModal('orderModal')">Close</button>
+        `;
+        openModal('orderModal');
         return;
       }
 
-      window.location.href = `conversation.html?id=${data.conversation.id}`;
+      const o = data.order;
+      const cur = o.currency;
+
+      document.getElementById('orderModalContent').innerHTML = `
+        <div class="icon">📋</div>
+        <h3>${data.reused ? 'You already reserved this' : 'Reserved'}</h3>
+        <p>${escapeHtml(o.product_title)}</p>
+
+        <div class="breakdown">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Goes to the seller</span>
+            <span class="breakdown-value">${formatMoney(o.seller_amount, cur)}</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Platform fee (${Number(o.commission_rate)}%)</span>
+            <span class="breakdown-value">${formatMoney(o.commission_amount, cur)}</span>
+          </div>
+          <div class="breakdown-row total">
+            <span class="breakdown-label">Total</span>
+            <span class="breakdown-value">${formatMoney(o.gross_amount, cur)}</span>
+          </div>
+        </div>
+
+        <div class="pending-note">
+          No payment has been taken. Payments are not connected yet, so this only records your interest. You will not be charged, and you do not have access to the file.
+        </div>
+
+        <button onclick="closeModal('orderModal')">Got it</button>
+      `;
+      openModal('orderModal');
 
     } catch (err) {
       btn.disabled = false;
-      btn.textContent = '💬 Message Seller';
-      alert('Connection error. Please try again.');
-    }
-  }
-
-  function parseJwt(tok) {
-    try {
-      return JSON.parse(atob(tok.split('.')[1]));
-    } catch (e) {
-      return null;
+      btn.textContent = 'Reserve This Product';
+      document.getElementById('orderModalContent').innerHTML = `
+        <div class="icon">⚠️</div>
+        <h3>Connection error</h3>
+        <p>Please check your connection and try again.</p>
+        <button onclick="closeModal('orderModal')">Close</button>
+      `;
+      openModal('orderModal');
     }
   }
 
@@ -371,10 +409,14 @@
         </div>
       `;
 
+      const actionHtml = isOwnProduct
+        ? `<span class="owned-badge">Your product</span>`
+        : `<button class="buy-btn" id="reserveBtn" onclick="handleReserve()">Reserve This Product</button>`;
+
       document.body.insertAdjacentHTML('beforeend', `
         <div class="buy-bar">
           <div class="price">${formatMoney(p.price, p.currency)}<span>Total price</span></div>
-          <button class="buy-btn" onclick="openModal('checkoutModal')">Buy Now</button>
+          ${actionHtml}
         </div>
       `);
 
@@ -382,6 +424,44 @@
 
     } catch (err) {
       showState('⚠️', 'Connection error', 'Please check your connection and try again.', false, true);
+    }
+  }
+
+  async function handleMessageSeller(sellerId) {
+    if (!token) {
+      openModal('loginModal');
+      return;
+    }
+
+    const btn = document.getElementById('messageSellerBtn');
+    btn.disabled = true;
+    btn.textContent = 'Opening...';
+
+    try {
+      const res = await fetch(`${API_BASE}/messages/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ product_id: productId })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = '💬 Message Seller';
+        alert(data.error || 'Could not start conversation. Please try again.');
+        return;
+      }
+
+      window.location.href = `conversation.html?id=${data.conversation.id}`;
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '💬 Message Seller';
+      alert('Connection error. Please try again.');
     }
   }
 
