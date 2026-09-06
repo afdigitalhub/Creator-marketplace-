@@ -73,6 +73,7 @@
   .buy-btn:active { transform: scale(0.97); opacity: 0.9; }
   .buy-btn:disabled { opacity: 0.6; }
   .owned-badge { padding: 13px 24px; border-radius: 12px; background: rgba(52,211,153,0.12); color: var(--success); font-weight: 700; font-size: 14px; white-space: nowrap; }
+  .owned-link { padding: 13px 24px; border-radius: 12px; background: rgba(52,211,153,0.12); color: var(--success); font-weight: 700; font-size: 14px; white-space: nowrap; text-decoration: none; }
 
   .state-block { text-align: center; padding: 80px 24px 40px; }
   .state-block .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.6; }
@@ -87,7 +88,7 @@
   .modal-sheet .icon { font-size: 34px; margin-bottom: 12px; text-align: center; }
   .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; text-align: center; }
   .modal-sheet p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-align: center; }
-  .modal-sheet button { width: 100%; padding: 13px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; }
+  .modal-sheet button.primary { width: 100%; padding: 13px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; }
   .modal-sheet a.secondary-link { display: block; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; text-align: center; }
 
   .breakdown { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
@@ -96,7 +97,7 @@
   .breakdown-label { color: var(--text-muted); }
   .breakdown-row.total .breakdown-label { color: var(--text-light); }
   .breakdown-value { font-weight: 700; }
-  .pending-note { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.25); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: var(--af-yellow); line-height: 1.5; margin-bottom: 18px; text-align: left; }
+  .test-note { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.25); border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: var(--af-yellow); line-height: 1.5; margin-bottom: 18px; text-align: left; }
 </style>
 </head>
 <body>
@@ -123,8 +124,8 @@
   <div class="modal-sheet">
     <div class="icon">🔒</div>
     <h3>Log in to continue</h3>
-    <p>You'll need an account to reserve this product. It only takes a moment.</p>
-    <button onclick="goToLogin()">Log In</button>
+    <p>You'll need an account to buy this product. It only takes a moment.</p>
+    <button class="primary" onclick="goToLogin()">Log In</button>
     <a href="#" class="secondary-link" onclick="closeModal('loginModal');return false;">Not now</a>
   </div>
 </div>
@@ -149,12 +150,6 @@
   function getTags(product) {
     if (!product.tags) return [];
     return product.tags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
-  }
-
-  function getFileFormat(fileUrl) {
-    if (!fileUrl) return null;
-    const match = fileUrl.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
-    return match ? match[1].toUpperCase() : null;
   }
 
   function formatDate(dateStr) {
@@ -187,18 +182,19 @@
     window.location.href = 'login.html';
   }
 
-  async function handleReserve() {
+  async function handleBuy() {
     if (!token) {
       openModal('loginModal');
       return;
     }
 
-    const btn = document.getElementById('reserveBtn');
+    const btn = document.getElementById('buyBtn');
     btn.disabled = true;
     btn.textContent = 'Working...';
 
     try {
-      const res = await fetch(`${API_BASE}/orders`, {
+      // Create or reuse the pending order
+      const orderRes = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,63 +203,105 @@
         body: JSON.stringify({ product_id: Number(productId) })
       });
 
-      const data = await res.json();
+      const orderData = await orderRes.json();
 
-      btn.disabled = false;
-      btn.textContent = 'Reserve This Product';
-
-      if (!res.ok) {
+      if (!orderRes.ok) {
+        btn.disabled = false;
+        btn.textContent = 'Buy Now';
         document.getElementById('orderModalContent').innerHTML = `
           <div class="icon">ℹ️</div>
-          <h3>Couldn't reserve this</h3>
-          <p>${escapeHtml(data.error || 'Something went wrong. Please try again.')}</p>
-          <button onclick="closeModal('orderModal')">Close</button>
+          <h3>Couldn't continue</h3>
+          <p>${escapeHtml(orderData.error || 'Something went wrong. Please try again.')}</p>
+          <button class="primary" onclick="closeModal('orderModal')">Close</button>
         `;
         openModal('orderModal');
         return;
       }
 
-      const o = data.order;
-      const cur = o.currency;
+      const o = orderData.order;
 
+      // Show the breakdown, then start payment on confirm
       document.getElementById('orderModalContent').innerHTML = `
-        <div class="icon">📋</div>
-        <h3>${data.reused ? 'You already reserved this' : 'Reserved'}</h3>
+        <div class="icon">🧾</div>
+        <h3>Confirm your purchase</h3>
         <p>${escapeHtml(o.product_title)}</p>
 
         <div class="breakdown">
           <div class="breakdown-row">
             <span class="breakdown-label">Goes to the seller</span>
-            <span class="breakdown-value">${formatMoney(o.seller_amount, cur)}</span>
+            <span class="breakdown-value">${formatMoney(o.seller_amount, o.currency)}</span>
           </div>
           <div class="breakdown-row">
             <span class="breakdown-label">Platform fee (${Number(o.commission_rate)}%)</span>
-            <span class="breakdown-value">${formatMoney(o.commission_amount, cur)}</span>
+            <span class="breakdown-value">${formatMoney(o.commission_amount, o.currency)}</span>
           </div>
           <div class="breakdown-row total">
             <span class="breakdown-label">Total</span>
-            <span class="breakdown-value">${formatMoney(o.gross_amount, cur)}</span>
+            <span class="breakdown-value">${formatMoney(o.gross_amount, o.currency)}</span>
           </div>
         </div>
 
-        <div class="pending-note">
-          No payment has been taken. Payments are not connected yet, so this only records your interest. You will not be charged, and you do not have access to the file.
+        <div class="test-note">
+          Payments are in test mode. No real money will be charged. Use Paystack's test card when prompted.
         </div>
 
-        <button onclick="closeModal('orderModal')">Got it</button>
+        <button class="primary" id="payBtn" onclick="startPayment('${o.id}')">Continue to Payment</button>
+        <a href="#" class="secondary-link" onclick="closeModal('orderModal');return false;">Cancel</a>
       `;
       openModal('orderModal');
 
+      btn.disabled = false;
+      btn.textContent = 'Buy Now';
+
     } catch (err) {
       btn.disabled = false;
-      btn.textContent = 'Reserve This Product';
+      btn.textContent = 'Buy Now';
       document.getElementById('orderModalContent').innerHTML = `
         <div class="icon">⚠️</div>
         <h3>Connection error</h3>
         <p>Please check your connection and try again.</p>
-        <button onclick="closeModal('orderModal')">Close</button>
+        <button class="primary" onclick="closeModal('orderModal')">Close</button>
       `;
       openModal('orderModal');
+    }
+  }
+
+  async function startPayment(orderId) {
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'Opening payment...';
+
+    try {
+      const res = await fetch(`${API_BASE}/payments/initialise`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ order_id: orderId })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        payBtn.disabled = false;
+        payBtn.textContent = 'Continue to Payment';
+        document.getElementById('orderModalContent').innerHTML = `
+          <div class="icon">⚠️</div>
+          <h3>Couldn't start payment</h3>
+          <p>${escapeHtml(data.error || 'Please try again.')}</p>
+          <button class="primary" onclick="closeModal('orderModal')">Close</button>
+        `;
+        return;
+      }
+
+      // Remember the reference so we can verify on return
+      localStorage.setItem('af_pending_payment_ref', data.reference);
+      window.location.href = data.authorization_url;
+
+    } catch (err) {
+      payBtn.disabled = false;
+      payBtn.textContent = 'Continue to Payment';
     }
   }
 
@@ -286,7 +324,7 @@
 
       if (candidates.length === 0) return;
 
-      const relatedHtml = `
+      document.getElementById('mainContent').insertAdjacentHTML('beforeend', `
         <div class="related-section">
           <h3>You might also find useful</h3>
           <div class="related-grid">
@@ -304,11 +342,23 @@
             `).join('')}
           </div>
         </div>
-      `;
-      document.getElementById('mainContent').insertAdjacentHTML('beforeend', relatedHtml);
-
+      `);
     } catch (err) {
-      // Related products are a nice-to-have; fail silently.
+      // Related products are optional.
+    }
+  }
+
+  async function checkOwnership() {
+    if (!token) return false;
+    try {
+      const res = await fetch(`${API_BASE}/library`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return (data.items || []).some(i => String(i.product_id) === String(productId));
+    } catch (err) {
+      return false;
     }
   }
 
@@ -347,13 +397,13 @@
 
       document.getElementById('headerTitle').textContent = p.title;
       const tags = getTags(p);
-      const fileFormat = getFileFormat(p.file_url);
       const dateAdded = formatDate(p.created_at);
       const currentUser = token ? parseJwt(token) : null;
       const isOwnProduct = currentUser && currentUser.id === p.seller_id;
+      const alreadyOwned = await checkOwnership();
 
       document.getElementById('mainContent').innerHTML = `
-        <div class="product-cover-wrap" id="coverWrap">
+        <div class="product-cover-wrap">
           ${p.cover_url
             ? `<img src="${escapeHtml(p.cover_url)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;cover-fallback&quot;><div class=&quot;icon&quot;>🖼️</div><div>Cover image unavailable</div></div>'">`
             : `<div class="cover-fallback"><div class="icon">🖼️</div><div>No cover image</div></div>`}
@@ -387,11 +437,10 @@
             <div class="info-label">Category</div>
             <div class="info-value">${escapeHtml(p.category || '—')}</div>
           </div>
-          ${fileFormat ? `
           <div class="info-row">
             <div class="info-label">File format</div>
-            <div class="info-value">${escapeHtml(fileFormat)}</div>
-          </div>` : ''}
+            <div class="info-value">PDF</div>
+          </div>
           ${p.seller_name ? `
           <div class="info-row">
             <div class="info-label">Sold by</div>
@@ -403,15 +452,20 @@
             <div class="info-value">${escapeHtml(dateAdded)}</div>
           </div>` : ''}
           <div class="info-row">
-            <div class="info-label">Availability</div>
-            <div class="info-value">In stock, digital delivery</div>
+            <div class="info-label">Delivery</div>
+            <div class="info-value">Instant download after payment</div>
           </div>
         </div>
       `;
 
-      const actionHtml = isOwnProduct
-        ? `<span class="owned-badge">Your product</span>`
-        : `<button class="buy-btn" id="reserveBtn" onclick="handleReserve()">Reserve This Product</button>`;
+      let actionHtml;
+      if (isOwnProduct) {
+        actionHtml = `<span class="owned-badge">Your product</span>`;
+      } else if (alreadyOwned) {
+        actionHtml = `<a href="library.html" class="owned-link">In your library</a>`;
+      } else {
+        actionHtml = `<button class="buy-btn" id="buyBtn" onclick="handleBuy()">Buy Now</button>`;
+      }
 
       document.body.insertAdjacentHTML('beforeend', `
         <div class="buy-bar">
@@ -457,7 +511,6 @@
       }
 
       window.location.href = `conversation.html?id=${data.conversation.id}`;
-
     } catch (err) {
       btn.disabled = false;
       btn.textContent = '💬 Message Seller';
