@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment — AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
+<style>
+  :root {
+    --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12;
+    --success: #34d399; --error: #f87171; --af-yellow: #f5c518;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .box { max-width: 420px; width: 100%; text-align: center; }
+  .icon { font-size: 52px; margin-bottom: 18px; }
+  h1 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 26px; }
+  .btn { display: block; width: 100%; padding: 14px; border-radius: 13px; background: var(--gradient); color: white; text-decoration: none; font-weight: 700; font-size: 15px; border: none; margin-bottom: 10px; }
+  .btn-secondary { display: block; width: 100%; padding: 14px; border-radius: 13px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-light); text-decoration: none; font-weight: 700; font-size: 15px; }
+  .spinner { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--text-light); border-radius: 50%; margin: 0 auto 18px; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="box" id="box">
+  <div class="spinner"></div>
+  <h1>Confirming your payment</h1>
+  <p>This only takes a moment. Please don't close this page.</p>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+
+  const params = new URLSearchParams(window.location.search);
+  const reference = params.get('reference')
+    || params.get('trxref')
+    || localStorage.getItem('af_pending_payment_ref');
+
+  function render(icon, title, message, primaryText, primaryHref, secondaryText, secondaryHref) {
+    document.getElementById('box').innerHTML = `
+      <div class="icon">${icon}</div>
+      <h1>${title}</h1>
+      <p>${message}</p>
+      ${primaryText ? `<a href="${primaryHref}" class="btn">${primaryText}</a>` : ''}
+      ${secondaryText ? `<a href="${secondaryHref}" class="btn-secondary">${secondaryText}</a>` : ''}
+    `;
+  }
+
+  async function confirm() {
+    if (!token) {
+      localStorage.setItem('af_redirect_after_login', window.location.href);
+      window.location.href = 'login.html';
+      return;
+    }
+
+    if (!reference) {
+      render('❓', 'No payment found',
+        'We could not find a payment to confirm. If you were charged, check your library, it may already be there.',
+        'Go to My Library', 'library.html', 'Back to Shop', 'shop.html');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/payments/verify/${encodeURIComponent(reference)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        localStorage.removeItem('af_pending_payment_ref');
+        render('✅', 'Payment confirmed',
+          'Your purchase is complete and the item is now in your library, ready to download.',
+          'Go to My Library', 'library.html', 'Back to Shop', 'shop.html');
+        return;
+      }
+
+      // Not confirmed. The webhook may still be processing.
+      render('⏳', 'Payment not confirmed yet',
+        'We have not received confirmation from the payment provider yet. If you completed payment, it usually appears within a minute. Check your library shortly.',
+        'Check My Library', 'library.html', 'Back to Shop', 'shop.html');
+
+    } catch (err) {
+      render('⚠️', 'Could not check payment',
+        'Please check your connection. If you completed payment, your purchase is safe and will appear in your library.',
+        'Go to My Library', 'library.html', 'Back to Shop', 'shop.html');
+    }
+  }
+
+  confirm();
+</script>
+
+</body>
+  </html>
