@@ -427,6 +427,7 @@
   <a href="messages.html" class="menu-link">💬 Messages</a>
   <a href="campaigns.html" class="menu-link">📋 Campaigns</a>
   <a href="applications.html" class="menu-link">📨 Applications</a>
+  <a href="business-deliverables.html" class="menu-link" id="deliverablesLink" style="display:none;">📦 Deliverables</a>
   <a href="profile.html" class="menu-link">👤 Profile</a>
 
   <div class="menu-divider"></div>
@@ -542,6 +543,7 @@
     document.getElementById('ctaCard').style.display = 'flex';
     document.getElementById('ctaTitle').textContent = 'Post a Campaign';
     document.getElementById('ctaSub').textContent = 'Reach the right creators for your brand';
+    document.getElementById('deliverablesLink').style.display = 'flex';
   } else if (role === 'admin') {
     document.getElementById('greetingSub').textContent = 'Monitor platform activity and manage the marketplace';
     document.getElementById('feedTitle').textContent = 'All Campaigns';
