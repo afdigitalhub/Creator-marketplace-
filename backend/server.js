@@ -21,6 +21,7 @@ const paymentRoutes = require("./routes/payments");
 const earningsRoutes = require("./routes/earnings");
 const productReviewRoutes = require("./routes/productReviews");
 const withdrawalRoutes = require("./routes/withdrawals");
+const adminStatsRoutes = require("./routes/adminStats");
 
 const app = express();
 app.use(cors());
@@ -44,6 +45,7 @@ app.use("/reviews", reviewRoutes);
 app.use("/product-reviews", productReviewRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/admin", adminRoutes);
+app.use("/admin-stats", adminStatsRoutes);
 app.use("/messages", messageRoutes);
 app.use("/orders", orderRoutes);
 app.use("/library", libraryRoutes);
