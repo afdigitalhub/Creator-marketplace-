@@ -3,52 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — AF Digital Hub</title>
+<title>Admin | AF Digital Hub</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#05050a">
 <style>
   :root {
-    --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
-    --accent-blue: #4f6ef7; --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
-    --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12;
-    --success: #34d399; --error: #f87171; --af-yellow: #f5c518;
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --border: #1c1c2e;
+    --accent-blue: #4f6ef7;
+    --danger: #f87171;
+    --success: #34d399;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding-bottom: 40px; }
 
-  .top-header { display: flex; align-items: center; gap: 14px; padding: 18px 16px; position: sticky; top: 0; background: rgba(5,5,10,0.9); backdrop-filter: blur(12px); z-index: 50; border-bottom: 1px solid var(--border); }
-  .back-btn { font-size: 20px; color: var(--text-light); text-decoration: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 10px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5,5,10,0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
   .header-title { font-size: 16px; font-weight: 700; }
 
-  .tabs { display: flex; gap: 8px; padding: 16px; overflow-x: auto; border-bottom: 1px solid var(--border); }
-  .tab { padding: 9px 16px; border-radius: 20px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); font-size: 13.5px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 16px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    padding: 9px 16px;
+    border-radius: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
   .tab.active { background: var(--gradient); color: white; border-color: transparent; }
 
-  .main-content { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .main-content { padding: 20px 16px; }
 
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
-  .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
-  .stat-label { font-size: 12.5px; color: var(--text-muted); }
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
 
-  .list-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 10px; }
-  .list-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .list-title { font-size: 14.5px; font-weight: 700; margin-bottom: 3px; }
-  .list-sub { font-size: 12.5px; color: var(--text-muted); }
-  .role-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; text-transform: capitalize; }
-  .role-creator { background: rgba(52,211,153,0.12); color: var(--success); }
-  .role-business { background: rgba(79,110,247,0.14); color: var(--accent-blue); }
-  .role-admin { background: rgba(124,58,237,0.16); color: #a78bfa; }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
 
-  .action-btn { margin-top: 12px; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; }
-  .btn-danger { background: rgba(248,113,113,0.08); color: var(--error); border: 1px solid rgba(248,113,113,0.3); }
-  .btn-resolve { background: var(--gradient); color: white; }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-  .empty-state { text-align: center; padding: 60px 24px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
-  .loading-text { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+  .stat-label { font-size: 12px; color: var(--text-muted); }
 
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--card-bg); border: 1px solid var(--border); color: var(--text-light); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 200; }
-  .toast.show { opacity: 1; }
+  .item-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 10px;
+  }
+
+  .item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .item-title { font-size: 14.5px; font-weight: 700; }
+  .item-sub { font-size: 12.5px; color: var(--text-muted); }
+
+  .pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    text-transform: capitalize;
+  }
+
+  .pill.creator { background: rgba(79,110,247,0.12); color: var(--accent-blue); }
+  .pill.business { background: rgba(139,92,246,0.12); color: #a78bfa; }
+  .pill.admin { background: rgba(245,197,24,0.12); color: #f5c518; }
+  .pill.active { background: rgba(52,211,153,0.12); color: var(--success); }
+  .pill.suspended { background: rgba(248,113,113,0.12); color: var(--danger); }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  .action-btn {
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-light);
+  }
+
+  .action-btn.danger { color: var(--danger); border-color: rgba(248,113,113,0.3); }
+  .action-btn.success { color: var(--success); border-color: rgba(52,211,153,0.3); }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -63,161 +185,203 @@
   <div class="tab" data-tab="users" onclick="switchTab('users')">Users</div>
   <div class="tab" data-tab="campaigns" onclick="switchTab('campaigns')">Campaigns</div>
   <div class="tab" data-tab="reports" onclick="switchTab('reports')">Reports</div>
-  <div class="tab" data-tab="withdrawals" onclick="goToWithdrawals()">Withdrawals</div>
+  <a href="admin-withdrawals.html" class="tab">Withdrawals</a>
 </div>
 
-<div class="main-content" id="mainContent">
+<div class="main-content" id="content">
   <div class="loading-text">Loading...</div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const token = localStorage.getItem('af_token');
   const role = localStorage.getItem('af_role');
 
-  if (!token) window.location.href = 'login.html';
+  if (!token || role !== 'admin') {
+    window.location.href = 'dashboard.html';
+  }
 
   let currentTab = 'overview';
-  let cachedUsers = [];
-  let cachedCampaigns = [];
-  let cachedReports = [];
 
   function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  function goToWithdrawals() {
-    window.location.href = 'admin-withdrawals.html';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function switchTab(tab) {
     currentTab = tab;
-    document.querySelectorAll('.tab').forEach(t => {
+    document.querySelectorAll('.tab[data-tab]').forEach(t => {
       t.classList.toggle('active', t.dataset.tab === tab);
     });
-    render();
+    loadTab();
   }
 
-  function roleClass(r) {
-    if (r === 'creator') return 'role-creator';
-    if (r === 'business') return 'role-business';
-    if (r === 'admin') return 'role-admin';
-    return 'role-creator';
+  async function loadTab() {
+    const content = document.getElementById('content');
+    content.innerHTML = '<div class="loading-text">Loading...</div>';
+
+    try {
+      if (currentTab === 'overview') {
+        const [usersRes, campaignsRes, reportsRes] = await Promise.all([
+          fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/campaigns`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/admin/reports`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        const users = (await usersRes.json()).users || [];
+        const campaigns = (await campaignsRes.json()).campaigns || [];
+        const reports = (await reportsRes.json()).reports || [];
+
+        const businesses = users.filter(u => u.role === 'business').length;
+        const openReports = reports.filter(r => r.status === 'pending').length;
+
+        content.innerHTML = `
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-value">${users.length}</div>
+              <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${campaigns.length}</div>
+              <div class="stat-label">Total Campaigns</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${openReports}</div>
+              <div class="stat-label">Open Reports</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${businesses}</div>
+              <div class="stat-label">Businesses</div>
+            </div>
+          </div>
+        `;
+      }
+
+      else if (currentTab === 'users') {
+        const res = await fetch(`${API_BASE}/admin/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const users = (await res.json()).users || [];
+
+        if (users.length === 0) {
+          content.innerHTML = '<div class="empty-state">No users yet.</div>';
+          return;
+        }
+
+        content.innerHTML = users.map(u => `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <div class="item-title">${escapeHtml(u.full_name)}</div>
+                <div class="item-sub">${escapeHtml(u.email)}</div>
+              </div>
+              <span class="pill ${escapeHtml(u.role)}">${escapeHtml(u.role)}</span>
+            </div>
+            ${u.status ? `<span class="pill ${escapeHtml(u.status)}">${escapeHtml(u.status)}</span>` : ''}
+            <div class="btn-row">
+              ${u.status === 'suspended'
+                ? `<button class="action-btn success" onclick="updateUserStatus('${u.id}', 'active')">Reactivate</button>`
+                : `<button class="action-btn danger" onclick="updateUserStatus('${u.id}', 'suspended')">Suspend</button>`}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      else if (currentTab === 'campaigns') {
+        const res = await fetch(`${API_BASE}/campaigns`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const campaigns = (await res.json()).campaigns || [];
+
+        if (campaigns.length === 0) {
+          content.innerHTML = '<div class="empty-state">No campaigns yet.</div>';
+          return;
+        }
+
+        content.innerHTML = campaigns.map(c => `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <div class="item-title">${escapeHtml(c.title)}</div>
+                <div class="item-sub">${escapeHtml(c.business_name || 'Business')}</div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="action-btn danger" onclick="deleteCampaign('${c.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      else if (currentTab === 'reports') {
+        const res = await fetch(`${API_BASE}/admin/reports`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const reports = (await res.json()).reports || [];
+
+        if (reports.length === 0) {
+          content.innerHTML = '<div class="empty-state">No reports filed.</div>';
+          return;
+        }
+
+        content.innerHTML = reports.map(r => `
+          <div class="item-card">
+            <div class="item-top">
+              <div>
+                <div class="item-title">${escapeHtml(r.target_type)} report</div>
+                <div class="item-sub">By ${escapeHtml(r.reporter_name || 'user')}</div>
+              </div>
+              <span class="pill ${r.status === 'resolved' ? 'active' : 'suspended'}">${escapeHtml(r.status)}</span>
+            </div>
+            <div class="item-sub" style="margin-top:8px;">${escapeHtml(r.reason)}</div>
+            ${r.status !== 'resolved' ? `
+              <div class="btn-row">
+                <button class="action-btn success" onclick="resolveReport('${r.id}')">Mark Resolved</button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+
+    } catch (err) {
+      content.innerHTML = '<div class="empty-state">Could not load. Please try again.</div>';
+    }
   }
 
-  function render() {
-    const el = document.getElementById('mainContent');
-
-    if (currentTab === 'overview') {
-      const businesses = cachedUsers.filter(u => u.role === 'business').length;
-      const openReports = cachedReports.filter(r => r.status !== 'resolved').length;
-      el.innerHTML = `
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-value">${cachedUsers.length}</div>
-            <div class="stat-label">Total Users</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${cachedCampaigns.length}</div>
-            <div class="stat-label">Total Campaigns</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${openReports}</div>
-            <div class="stat-label">Open Reports</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">${businesses}</div>
-            <div class="stat-label">Businesses</div>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    if (currentTab === 'users') {
-      if (cachedUsers.length === 0) {
-        el.innerHTML = `<div class="empty-state">No users yet.</div>`;
+  async function updateUserStatus(userId, status) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${userId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      if (!res.ok) {
+        alert('Could not update user.');
         return;
       }
-      el.innerHTML = cachedUsers.map(u => `
-        <div class="list-card">
-          <div class="list-top">
-            <div>
-              <div class="list-title">${escapeHtml(u.full_name)}</div>
-              <div class="list-sub">${escapeHtml(u.email)}</div>
-            </div>
-            <div class="role-pill ${roleClass(u.role)}">${escapeHtml(u.role)}</div>
-          </div>
-        </div>
-      `).join('');
-      return;
-    }
-
-    if (currentTab === 'campaigns') {
-      if (cachedCampaigns.length === 0) {
-        el.innerHTML = `<div class="empty-state">No campaigns yet.</div>`;
-        return;
-      }
-      el.innerHTML = cachedCampaigns.map(c => `
-        <div class="list-card">
-          <div class="list-top">
-            <div>
-              <div class="list-title">${escapeHtml(c.title)}</div>
-              <div class="list-sub">${escapeHtml(c.business_name || 'Business')}</div>
-            </div>
-          </div>
-          <button class="action-btn btn-danger" onclick="deleteCampaign('${c.id}')">Remove Campaign</button>
-        </div>
-      `).join('');
-      return;
-    }
-
-    if (currentTab === 'reports') {
-      if (cachedReports.length === 0) {
-        el.innerHTML = `<div class="empty-state">No reports have been filed.</div>`;
-        return;
-      }
-      el.innerHTML = cachedReports.map(r => `
-        <div class="list-card">
-          <div class="list-top">
-            <div>
-              <div class="list-title">${escapeHtml(r.target_type)} reported</div>
-              <div class="list-sub">By ${escapeHtml(r.reporter_name || 'a user')} · ${escapeHtml(r.status)}</div>
-            </div>
-          </div>
-          <div class="list-sub" style="margin-top:8px;line-height:1.5;">${escapeHtml(r.reason)}</div>
-          ${r.status !== 'resolved' ? `<button class="action-btn btn-resolve" onclick="resolveReport('${r.id}')">Mark Resolved</button>` : ''}
-        </div>
-      `).join('');
-      return;
+      loadTab();
+    } catch (err) {
+      alert('Connection error.');
     }
   }
 
   async function deleteCampaign(id) {
+    if (!confirm('Delete this campaign?')) return;
     try {
       const res = await fetch(`${API_BASE}/admin/campaigns/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
-        showToast('Could not remove campaign.');
+        alert('Could not delete campaign.');
         return;
       }
-      cachedCampaigns = cachedCampaigns.filter(c => String(c.id) !== String(id));
-      showToast('Campaign removed.');
-      render();
+      loadTab();
     } catch (err) {
-      showToast('Connection error.');
+      alert('Connection error.');
     }
   }
 
@@ -228,52 +392,16 @@
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
-        showToast('Could not resolve report.');
+        alert('Could not resolve report.');
         return;
       }
-      const r = cachedReports.find(x => String(x.id) === String(id));
-      if (r) r.status = 'resolved';
-      showToast('Report resolved.');
-      render();
+      loadTab();
     } catch (err) {
-      showToast('Connection error.');
+      alert('Connection error.');
     }
   }
 
-  async function loadAll() {
-    if (role !== 'admin') {
-      document.getElementById('mainContent').innerHTML = `<div class="empty-state">This page is for administrators only.</div>`;
-      return;
-    }
-
-    try {
-      const [usersRes, campaignsRes, reportsRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/campaigns`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${API_BASE}/admin/reports`, { headers: { 'Authorization': `Bearer ${token}` } })
-      ]);
-
-      if (usersRes.ok) {
-        const d = await usersRes.json();
-        cachedUsers = d.users || [];
-      }
-      if (campaignsRes.ok) {
-        const d = await campaignsRes.json();
-        cachedCampaigns = d.campaigns || [];
-      }
-      if (reportsRes.ok) {
-        const d = await reportsRes.json();
-        cachedReports = d.reports || [];
-      }
-
-      render();
-
-    } catch (err) {
-      document.getElementById('mainContent').innerHTML = `<div class="empty-state">Could not load admin data. Please try again.</div>`;
-    }
-  }
-
-  loadAll();
+  loadTab();
 </script>
 
 </body>
