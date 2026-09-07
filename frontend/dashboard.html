@@ -430,12 +430,14 @@
   <a href="campaigns.html" class="menu-link">📋 Campaigns</a>
   <a href="applications.html" class="menu-link">📨 Applications</a>
   <a href="business-deliverables.html" class="menu-link" id="deliverablesLink" style="display:none;">📦 Deliverables</a>
+  <a href="admin.html" class="menu-link" id="adminLink" style="display:none;">🛠️ Admin</a>
   <a href="profile.html" class="menu-link">👤 Profile</a>
 
   <div class="menu-divider"></div>
 
   <a href="about.html" class="menu-link">ℹ️ About Us</a>
   <a href="testimonials.html" class="menu-link">⭐ Testimonials</a>
+  <a href="refunds.html" class="menu-link">↩️ Refund Policy</a>
   <a href="privacy.html" class="menu-link">🔒 Privacy Policy</a>
   <a href="terms.html" class="menu-link">📄 Terms of Service</a>
 
@@ -549,6 +551,7 @@
   } else if (role === 'admin') {
     document.getElementById('greetingSub').textContent = 'Monitor platform activity and manage the marketplace';
     document.getElementById('feedTitle').textContent = 'All Campaigns';
+    document.getElementById('adminLink').style.display = 'flex';
   } else {
     document.getElementById('greetingSub').textContent = 'Find campaigns that match your style';
     document.getElementById('feedTitle').textContent = 'Available Campaigns';
