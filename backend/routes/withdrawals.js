@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
-const MINIMUM_WITHDRAWAL = 50;
+const MINIMUM_WITHDRAWAL = 10;
 
 // Calculate a user's available balance from the ledger.
 // Never stored, always computed, so it cannot drift out of line.
