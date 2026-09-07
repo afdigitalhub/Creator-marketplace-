@@ -3,8 +3,10 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
-const MINIMUM_WITHDRAWAL = 10;
+const MINIMUM_WITHDRAWAL = 50;
 
+// Calculate a user's available balance from the ledger.
+// Never stored, always computed, so it cannot drift out of line.
 async function getAvailableBalance(client, userId) {
   const result = await client.query(
     `SELECT COALESCE(SUM(net_amount), 0) AS available, MAX(currency) AS currency
@@ -18,6 +20,7 @@ async function getAvailableBalance(client, userId) {
   };
 }
 
+// GET /withdrawals/mine - the user's own withdrawal history and balance
 router.get("/mine", requireAuth, async (req, res) => {
   const client = await pool.connect();
   try {
@@ -48,6 +51,7 @@ router.get("/mine", requireAuth, async (req, res) => {
   }
 });
 
+// POST /withdrawals - request a withdrawal
 router.post("/", requireAuth, async (req, res) => {
   const { amount, destination_type, account_name, account_number, provider_name } = req.body;
 
@@ -72,6 +76,8 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     await client.query("BEGIN");
 
+    // Lock this user's available earnings so two simultaneous requests
+    // cannot both pass the balance check and withdraw the same money.
     const lockedEarnings = await client.query(
       `SELECT id, net_amount FROM earnings
        WHERE user_id = $1 AND status = 'available'
@@ -123,6 +129,8 @@ router.post("/", requireAuth, async (req, res) => {
 
     const withdrawal = withdrawalResult.rows[0];
 
+    // Mark the specific earnings covering this amount as withdrawn,
+    // oldest first, and record exactly which ones were used.
     let remaining = requested;
     for (const earning of lockedEarnings.rows) {
       if (remaining <= 0) break;
@@ -155,6 +163,7 @@ router.post("/", requireAuth, async (req, res) => {
 
 // --- ADMIN ---
 
+// GET /withdrawals/admin/all - every withdrawal request
 router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const result = await pool.query(
@@ -176,6 +185,8 @@ router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => 
   }
 });
 
+// PUT /withdrawals/:id/status - admin marks a withdrawal processing,
+// completed, or failed. Failure returns the earnings to available.
 router.put("/:id/status", requireAuth, requireRole("admin"), async (req, res) => {
   const { status, failure_reason, provider_reference } = req.body;
 
@@ -209,6 +220,7 @@ router.put("/:id/status", requireAuth, requireRole("admin"), async (req, res) =>
     }
 
     if (status === "failed") {
+      // Return exactly the earnings this withdrawal consumed.
       await client.query(
         `UPDATE earnings SET status = 'available'
          WHERE id IN (SELECT earning_id FROM withdrawal_earnings WHERE withdrawal_id = $1)`,
