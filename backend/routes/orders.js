@@ -4,8 +4,6 @@ const pool = require("../config/db");
 const { requireAuth } = require("../middleware/auth");
 
 // Platform commission. Applies to every sale with no exceptions.
-// Read from platform_settings so it can be changed without a deploy,
-// falling back to 10 if the setting has not been created yet.
 async function getCommissionRate() {
   try {
     const result = await pool.query(
@@ -21,10 +19,6 @@ async function getCommissionRate() {
   return 10;
 }
 
-// Money is rounded to 2 decimal places at the point of calculation so the
-// three amounts always add up exactly. seller_amount is derived by
-// subtraction, never calculated separately, so rounding can never create
-// or destroy money.
 function calculateAmounts(price, ratePercent) {
   const gross = Math.round(Number(price) * 100) / 100;
   const commission = Math.round(gross * (ratePercent / 100) * 100) / 100;
@@ -33,8 +27,6 @@ function calculateAmounts(price, ratePercent) {
 }
 
 // POST /orders - create a pending order for a product.
-// No payment is taken. This records the intent to buy and the exact
-// financial breakdown at this moment in time.
 router.post("/", requireAuth, async (req, res) => {
   const { product_id } = req.body;
 
@@ -43,8 +35,6 @@ router.post("/", requireAuth, async (req, res) => {
   }
 
   try {
-    // Price, seller and title all come from the database.
-    // Nothing about money is ever taken from the request body.
     const productResult = await pool.query(
       "SELECT * FROM products WHERE id = $1",
       [product_id]
@@ -64,7 +54,6 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "You cannot buy your own product" });
     }
 
-    // If they already own it, do not create a second order.
     const existingEntitlement = await pool.query(
       "SELECT id FROM entitlements WHERE user_id = $1 AND product_id = $2 AND status = 'active'",
       [req.user.id, product_id]
@@ -73,8 +62,6 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "You already own this product" });
     }
 
-    // Reuse an existing pending order for the same product rather than
-    // creating a new one every time the button is tapped.
     const existingOrder = await pool.query(
       `SELECT * FROM orders
        WHERE buyer_id = $1 AND product_id = $2 AND status = 'pending'
@@ -115,17 +102,31 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
-// GET /orders/mine - the buyer's own orders
+// GET /orders/mine - the buyer's own order history.
+// Includes payment status and whether they still have access.
 router.get("/mine", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, p.cover_url
+      `SELECT
+         o.id, o.product_id, o.product_title, o.gross_amount, o.currency,
+         o.status, o.created_at, o.updated_at,
+         p.cover_url, p.category,
+         u.full_name AS seller_name,
+         (SELECT pm.provider_reference FROM payments pm
+          WHERE pm.order_id = o.id AND pm.status = 'successful'
+          ORDER BY pm.created_at DESC LIMIT 1) AS payment_reference,
+         EXISTS (
+           SELECT 1 FROM entitlements e
+           WHERE e.order_id = o.id AND e.status = 'active'
+         ) AS has_access
        FROM orders o
        LEFT JOIN products p ON o.product_id = p.id
+       LEFT JOIN users u ON o.seller_id = u.id
        WHERE o.buyer_id = $1
        ORDER BY o.created_at DESC`,
       [req.user.id]
     );
+
     res.json({ orders: result.rows });
   } catch (err) {
     console.error("List my orders error:", err);
@@ -136,7 +137,17 @@ router.get("/mine", requireAuth, async (req, res) => {
 // GET /orders/:id - a single order, visible only to its buyer or seller
 router.get("/:id", requireAuth, async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM orders WHERE id = $1", [req.params.id]);
+    const result = await pool.query(
+      `SELECT o.*, p.cover_url, u.full_name AS seller_name,
+         (SELECT pm.provider_reference FROM payments pm
+          WHERE pm.order_id = o.id AND pm.status = 'successful'
+          ORDER BY pm.created_at DESC LIMIT 1) AS payment_reference
+       FROM orders o
+       LEFT JOIN products p ON o.product_id = p.id
+       LEFT JOIN users u ON o.seller_id = u.id
+       WHERE o.id = $1`,
+      [req.params.id]
+    );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Order not found" });
