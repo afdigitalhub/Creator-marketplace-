@@ -69,14 +69,19 @@
     width: 64px;
     height: 64px;
     border-radius: 18px;
-    background: var(--gradient);
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 24px;
-    color: white;
+    background: #05050a;
     margin: 0 auto 16px;
+  }
+
+  .logo-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .hero h1 {
@@ -130,6 +135,55 @@
     margin-bottom: 20px;
   }
 
+  .founder-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 22px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .founder-photo {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 16px;
+    border: 2px solid var(--card-border);
+    box-shadow: 0 8px 30px rgba(79, 110, 247, 0.2);
+  }
+
+  .founder-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .founder-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .founder-role {
+    font-size: 13px;
+    color: var(--af-yellow);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+
+  .founder-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  .founder-card p:last-child { margin-bottom: 0; }
+
   .values-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -158,12 +212,25 @@
 
 <div class="main-content">
   <div class="hero">
-    <div class="logo-mark">AF</div>
+    <div class="logo-mark"><img src="icons/logo-mark.png" alt="AF Digital Hub"></div>
     <h1>AF Digital<span class="hub">Hub</span></h1>
     <p>Connecting creators and businesses to build campaigns that actually work.</p>
   </div>
 
   <div class="founder-tag">👋 Founded by Adonle Fameye</div>
+
+  <div class="founder-card">
+    <div class="founder-photo">
+      <img src="founder-photo.jpg" alt="Adonle Fameye, Founder of AF Digital Hub">
+    </div>
+    <div class="founder-name">Adonle Fameye</div>
+    <div class="founder-role">Founder, AF Digital Hub</div>
+
+    <p>Adonle Fameye is the founder of AF Digital Hub, a digital marketplace built to give creators, businesses, and everyday people a real place to learn, sell, and grow online.</p>
+    <p>Based in Ghana, Adonle built AF Digital Hub using his phone and laptop, without shortcuts, driven by a clear belief that opportunity shouldn't depend on where you start from. Every eBook in the Shop was written by him personally, and every part of the platform was built through patience, persistence, and hands-on work.</p>
+    <p>AF Digital Hub exists because Adonle wanted to build something real: a place where people can access practical knowledge, sell digital products, find genuine business opportunities, and build something of their own, regardless of their background or resources.</p>
+    <p>His goal is simple: to make AF Digital Hub a trusted platform that people across Ghana and beyond can rely on to learn, earn, and build a better future.</p>
+  </div>
 
   <div class="story-card">
     <h2>Our Story</h2>
@@ -200,4 +267,4 @@
 </div>
 
 </body>
-</html>
+  </html>
