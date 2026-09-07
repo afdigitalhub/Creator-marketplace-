@@ -20,6 +20,7 @@ const libraryRoutes = require("./routes/library");
 const paymentRoutes = require("./routes/payments");
 const earningsRoutes = require("./routes/earnings");
 const productReviewRoutes = require("./routes/productReviews");
+const withdrawalRoutes = require("./routes/withdrawals");
 
 const app = express();
 app.use(cors());
@@ -47,9 +48,9 @@ app.use("/messages", messageRoutes);
 app.use("/orders", orderRoutes);
 app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
+app.use("/withdrawals", withdrawalRoutes);
 
 app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
 
 const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => console.log(`Creator Marketplace API running on port ${PORT}`));
-
