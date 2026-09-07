@@ -11,7 +11,7 @@
     --bg: #05050a; --card-bg: #0f0f1a; --border: #1c1c2e;
     --accent-blue: #4f6ef7; --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
     --text-light: #f8f8fc; --text-muted: #6b6b80; --input-bg: #0a0a12;
-    --af-yellow: #f5c518;
+    --af-yellow: #f5c518; --success: #34d399;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding-bottom: 40px; }
@@ -26,15 +26,23 @@
   .intro p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
 
   .item-grid { display: flex; flex-direction: column; gap: 12px; }
-  .item-card { display: flex; gap: 14px; padding: 14px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border); }
+  .item-card { padding: 14px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--border); }
+  .item-main { display: flex; gap: 14px; }
   .item-cover { width: 64px; height: 84px; border-radius: 10px; background: var(--input-bg); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
   .item-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .item-category { font-size: 10.5px; font-weight: 700; color: var(--af-yellow); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
   .item-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
   .item-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
-  .download-btn { align-self: flex-start; padding: 9px 18px; border-radius: 10px; background: var(--gradient); color: white; font-weight: 700; font-size: 13px; border: none; cursor: pointer; text-decoration: none; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .download-btn { padding: 9px 18px; border-radius: 10px; background: var(--gradient); color: white; font-weight: 700; font-size: 13px; border: none; cursor: pointer; }
   .download-btn:disabled { opacity: 0.6; }
+  .review-btn { padding: 9px 16px; border-radius: 10px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-light); font-weight: 700; font-size: 13px; cursor: pointer; }
+
+  .your-review { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .your-review-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .your-stars { color: var(--af-yellow); font-size: 14px; letter-spacing: 1px; margin-bottom: 5px; }
+  .your-comment { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
 
   .empty-state { text-align: center; padding: 70px 24px; }
   .empty-state .icon { font-size: 40px; margin-bottom: 16px; opacity: 0.5; }
@@ -47,6 +55,24 @@
 
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--card-bg); border: 1px solid var(--border); color: var(--text-light); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 200; max-width: 90%; text-align: center; line-height: 1.4; }
   .toast.show { opacity: 1; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 150; }
+  .modal-overlay.active { display: flex; }
+  .modal-sheet { background: var(--card-bg); border: 1px solid var(--border); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 26px 20px calc(26px + env(safe-area-inset-bottom)); width: 100%; max-width: 560px; }
+  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+  .modal-sheet .modal-sub { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px; }
+
+  .star-picker { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+  .star-btn { background: none; border: none; font-size: 32px; color: var(--border); cursor: pointer; padding: 0; line-height: 1; }
+  .star-btn.filled { color: var(--af-yellow); }
+
+  .modal-sheet textarea { width: 100%; padding: 12px 14px; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; color: var(--text-light); font-size: 14px; font-family: inherit; resize: vertical; min-height: 90px; outline: none; margin-bottom: 8px; }
+  .modal-sheet textarea:focus { border-color: var(--accent-blue); }
+  .char-count { font-size: 11.5px; color: var(--text-muted); text-align: right; margin-bottom: 16px; }
+  .modal-sheet button.primary { width: 100%; padding: 13px; border-radius: 12px; background: var(--gradient); color: white; font-weight: 700; font-size: 14.5px; border: none; }
+  .modal-sheet button.primary:disabled { opacity: 0.6; }
+  .modal-sheet a.secondary-link { display: block; margin-top: 12px; color: var(--text-muted); font-size: 13px; text-decoration: none; text-align: center; }
+  .modal-error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #f87171; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; margin-bottom: 14px; display: none; }
 </style>
 </head>
 <body>
@@ -60,6 +86,10 @@
   <div class="loading-text">Loading your library...</div>
 </div>
 
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal-sheet" id="reviewModalContent"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -70,6 +100,10 @@
     localStorage.setItem('af_redirect_after_login', window.location.href);
     window.location.href = 'login.html';
   }
+
+  let selectedRating = 0;
+  let reviewingProductId = null;
+  let editingReviewId = null;
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -90,6 +124,11 @@
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  function starsDisplay(rating) {
+    const r = Math.round(Number(rating) || 0);
+    return '★'.repeat(r) + '☆'.repeat(5 - r);
+  }
+
   async function handleDownload(productId, btn) {
     btn.disabled = true;
     btn.textContent = 'Preparing...';
@@ -100,7 +139,6 @@
       });
 
       const data = await res.json();
-
       btn.disabled = false;
       btn.textContent = 'Download';
 
@@ -108,19 +146,131 @@
         showToast("You don't have access to this product.");
         return;
       }
-
       if (!res.ok) {
         showToast(data.error || 'Could not prepare your download. Please try again.');
         return;
       }
 
-      // Open the short-lived signed link. It expires in a few minutes.
       window.location.href = data.url;
 
     } catch (err) {
       btn.disabled = false;
       btn.textContent = 'Download';
       showToast('Connection error. Please try again.');
+    }
+  }
+
+  function setRating(n) {
+    selectedRating = n;
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById('star' + i);
+      if (el) el.classList.toggle('filled', i <= n);
+    }
+  }
+
+  function openReviewModal(productId, title, existing) {
+    reviewingProductId = productId;
+    editingReviewId = existing ? existing.id : null;
+    selectedRating = existing ? Number(existing.rating) : 0;
+
+    document.getElementById('reviewModalContent').innerHTML = `
+      <h3>${existing ? 'Edit your review' : 'Write a review'}</h3>
+      <div class="modal-sub">${escapeHtml(title)}</div>
+
+      <div class="modal-error" id="reviewError"></div>
+
+      <div class="star-picker">
+        ${[1,2,3,4,5].map(i => `<button class="star-btn" id="star${i}" onclick="setRating(${i})">★</button>`).join('')}
+      </div>
+
+      <textarea id="reviewComment" maxlength="2000" placeholder="What did you think of it? (optional)">${existing && existing.comment ? escapeHtml(existing.comment) : ''}</textarea>
+      <div class="char-count" id="charCount">0 / 2000</div>
+
+      <button class="primary" id="submitReviewBtn" onclick="submitReview()">${existing ? 'Save Changes' : 'Post Review'}</button>
+      <a href="#" class="secondary-link" onclick="closeReviewModal();return false;">Cancel</a>
+    `;
+
+    setRating(selectedRating);
+
+    const textarea = document.getElementById('reviewComment');
+    const counter = document.getElementById('charCount');
+    counter.textContent = `${textarea.value.length} / 2000`;
+    textarea.addEventListener('input', () => {
+      counter.textContent = `${textarea.value.length} / 2000`;
+    });
+
+    document.getElementById('reviewModal').classList.add('active');
+  }
+
+  function closeReviewModal() {
+    document.getElementById('reviewModal').classList.remove('active');
+    reviewingProductId = null;
+    editingReviewId = null;
+    selectedRating = 0;
+  }
+
+  function showReviewError(msg) {
+    const box = document.getElementById('reviewError');
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+
+  async function submitReview() {
+    if (selectedRating < 1) {
+      showReviewError('Please choose a rating from 1 to 5 stars.');
+      return;
+    }
+
+    const btn = document.getElementById('submitReviewBtn');
+    const comment = document.getElementById('reviewComment').value.trim();
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      const url = editingReviewId
+        ? `${API_BASE}/product-reviews/${editingReviewId}`
+        : `${API_BASE}/product-reviews`;
+
+      const method = editingReviewId ? 'PUT' : 'POST';
+      const body = editingReviewId
+        ? { rating: selectedRating, comment }
+        : { product_id: reviewingProductId, rating: selectedRating, comment };
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        btn.disabled = false;
+        btn.textContent = editingReviewId ? 'Save Changes' : 'Post Review';
+        showReviewError(data.error || 'Could not save your review.');
+        return;
+      }
+
+      closeReviewModal();
+      showToast('Thank you for your review.');
+      loadLibrary();
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = editingReviewId ? 'Save Changes' : 'Post Review';
+      showReviewError('Connection error. Please try again.');
+    }
+  }
+
+  async function getReviewState(productId) {
+    try {
+      const res = await fetch(`${API_BASE}/product-reviews/eligibility/${productId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      return null;
     }
   }
 
@@ -163,25 +313,53 @@
         return;
       }
 
+      // Fetch review state for each owned item
+      const states = await Promise.all(items.map(i => getReviewState(i.product_id)));
+
       document.getElementById('mainContent').innerHTML = `
         <div class="intro">
           <h1>My Library</h1>
           <p>${items.length} item${items.length === 1 ? '' : 's'} you own.</p>
         </div>
         <div class="item-grid">
-          ${items.map(item => `
-            <div class="item-card">
-              <div class="item-cover">
-                ${item.cover_url ? `<img src="${escapeHtml(item.cover_url)}" alt="" onerror="this.remove()">` : ''}
+          ${items.map((item, idx) => {
+            const state = states[idx];
+            const existing = state && state.existing_review ? state.existing_review : null;
+            const canReview = state && state.can_review;
+
+            let reviewBtn = '';
+            if (canReview) {
+              reviewBtn = `<button class="review-btn" onclick="openReviewModal(${item.product_id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}', null)">Write a review</button>`;
+            } else if (existing) {
+              reviewBtn = `<button class="review-btn" onclick='openReviewModal(${item.product_id}, ${JSON.stringify(item.title)}, ${JSON.stringify(existing)})'>Edit review</button>`;
+            }
+
+            return `
+              <div class="item-card">
+                <div class="item-main">
+                  <div class="item-cover">
+                    ${item.cover_url ? `<img src="${escapeHtml(item.cover_url)}" alt="" onerror="this.remove()">` : ''}
+                  </div>
+                  <div class="item-info">
+                    <div class="item-category">${escapeHtml(item.category || '')}</div>
+                    <div class="item-title">${escapeHtml(item.title)}</div>
+                    <div class="item-meta">Owned since ${formatDate(item.owned_since)}</div>
+                    <div class="btn-row">
+                      <button class="download-btn" onclick="handleDownload(${item.product_id}, this)">Download</button>
+                      ${reviewBtn}
+                    </div>
+                  </div>
+                </div>
+                ${existing ? `
+                  <div class="your-review">
+                    <div class="your-review-label">Your review</div>
+                    <div class="your-stars">${starsDisplay(existing.rating)}</div>
+                    ${existing.comment ? `<div class="your-comment">${escapeHtml(existing.comment)}</div>` : ''}
+                  </div>
+                ` : ''}
               </div>
-              <div class="item-info">
-                <div class="item-category">${escapeHtml(item.category || '')}</div>
-                <div class="item-title">${escapeHtml(item.title)}</div>
-                <div class="item-meta">Owned since ${formatDate(item.owned_since)}</div>
-                <button class="download-btn" onclick="handleDownload(${item.product_id}, this)">Download</button>
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
 
