@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product — AF Digital Hub</title>
-<meta name="robots" content="index,follow,max-image-preview:large">
-<meta name="description" content="Explore digital products and eBooks on the AF Digital Hub Shop.">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#05050a">
 <style>
@@ -413,52 +411,6 @@
     }
   }
 
-  function setProductSeo(p) {
-    const site = 'https://afdigitalhub.net';
-    const id = encodeURIComponent(String(p.id));
-    const url = `${site}/product-details.html?id=${id}`;
-    const title = `${p.title} | AF Digital Hub`;
-    const rawDesc = p.description || p.subtitle || `Explore ${p.title} on the AF Digital Hub Shop.`;
-    const description = String(rawDesc).replace(/\s+/g, ' ').trim().slice(0, 300);
-    const setMeta = (selector, attr, value) => {
-      let el = document.querySelector(selector);
-      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, selector.includes('[property=') ? selector.match(/property="([^"]+)/)[1] : selector.match(/name="([^"]+)/)[1]); document.head.appendChild(el); }
-      el.setAttribute(attr === 'content' ? 'content' : attr, value);
-    };
-    document.title = title;
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) { canonical = document.createElement('link'); canonical.rel='canonical'; document.head.appendChild(canonical); }
-    canonical.href = url;
-    const ensureMeta = (key, value) => {
-      const byName = document.querySelector(`meta[name="${key}"]`) || document.querySelector(`meta[property="${key}"]`);
-      const el = byName || document.head.appendChild(Object.assign(document.createElement('meta'), key.startsWith('og:') || key.startsWith('twitter:') ? {property:key} : {name:key}));
-      el.setAttribute(key.startsWith('og:') || key.startsWith('twitter:') ? 'property' : 'name', key);
-      el.content = value;
-    };
-    ensureMeta('description', description);
-    ensureMeta('robots', 'index,follow,max-image-preview:large');
-    ensureMeta('og:type', 'product');
-    ensureMeta('og:site_name', 'AF Digital Hub');
-    ensureMeta('og:title', title);
-    ensureMeta('og:description', description);
-    ensureMeta('og:url', url);
-    if (p.cover_url) ensureMeta('og:image', p.cover_url);
-    ensureMeta('twitter:card', 'summary_large_image');
-    ensureMeta('twitter:title', title);
-    ensureMeta('twitter:description', description);
-    if (p.cover_url) ensureMeta('twitter:image', p.cover_url);
-    const old = document.getElementById('productSeoJsonLd');
-    if (old) old.remove();
-    const data = {
-      '@context':'https://schema.org', '@type':'Product', '@id':url+'#product', name:p.title, url:url, description:description,
-      image:p.cover_url ? [p.cover_url] : undefined, category:p.category || undefined,
-      brand:{'@type':'Brand',name:'AF Digital Hub'},
-      offers:{'@type':'Offer',url:url,priceCurrency:String(p.currency || 'GHS').toUpperCase(),price:Number(p.price),availability:p.status==='published'?'https://schema.org/InStock':'https://schema.org/OutOfStock'}
-    };
-    Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
-    const script=document.createElement('script'); script.type='application/ld+json'; script.id='productSeoJsonLd'; script.textContent=JSON.stringify(data); document.head.appendChild(script);
-  }
-
   async function loadProduct() {
     if (!productId) {
       showState('❓', 'Product unavailable', 'No product was specified.', true, false);
@@ -486,7 +438,6 @@
 
       const data = await res.json();
       const p = data.product;
-      setProductSeo(p);
 
       if (!p || p.status !== 'published') {
         showState('📦', 'Product unavailable', 'This product may have been removed or is no longer listed.', true, false);
