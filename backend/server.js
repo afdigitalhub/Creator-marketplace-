@@ -52,7 +52,12 @@ app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
 app.use("/withdrawals", withdrawalRoutes);
 
-app.get("/", (req, res) => res.json({ status: "Creator Marketplace API running" }));
+app.get("/", (req, res) => {
+  res.json({ status: "Creator Marketplace API running" });
+});
 
 const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => console.log(`Creator Marketplace API running on port ${PORT}`));
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Creator Marketplace API running on port ${PORT}`);
+});
