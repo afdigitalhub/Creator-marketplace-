@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaigns | AF Digital Hub</title>
+<meta name="description" content="Discover creator opportunities and business campaigns on AF Digital Hub. Connect creators and businesses for meaningful digital collaborations.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://afdigitalhub.net/campaigns.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AF Digital Hub">
+<meta property="og:title" content="Creator Opportunities & Business Campaigns | AF Digital Hub">
+<meta property="og:description" content="Discover creator opportunities and business campaigns on AF Digital Hub. Connect creators and businesses for meaningful digital collaborations.">
+<meta property="og:url" content="https://afdigitalhub.net/campaigns.html">
+<meta property="og:image" content="https://afdigitalhub.net/icons/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Creator Opportunities & Business Campaigns | AF Digital Hub">
+<meta name="twitter:description" content="Discover creator opportunities and business campaigns on AF Digital Hub. Connect creators and businesses for meaningful digital collaborations.">
+<meta name="twitter:image" content="https://afdigitalhub.net/icons/icon-512.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --accent-purple: #8b5cf6;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 90px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .hamburger { width: 22px; height: 16px; position: relative; cursor: pointer; }
+  .hamburger span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: var(--text-light);
+    border-radius: 2px;
+  }
+  .hamburger span:nth-child(1) { top: 0; }
+  .hamburger span:nth-child(2) { top: 7px; }
+  .hamburger span:nth-child(3) { top: 14px; }
+
+  .logo-mark-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+  }
+
+  .logo-text-sm { font-size: 16px; font-weight: 700; }
+  .logo-text-sm .hub { color: var(--af-yellow); }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 90;
+    display: none;
+  }
+
+  .side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100%;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    transition: left 0.25s ease;
+    padding: 24px 18px;
+    overflow-y: auto;
+  }
+
+  .side-menu.open { left: 0; }
+  .overlay.open { display: block; }
+
+  .side-menu .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+  .side-user {
+    margin-top: 18px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .side-user-name { font-size: 16px; font-weight: 700; }
+  .side-user-role {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-transform: capitalize;
+    margin-top: 2px;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 10px;
+  }
+
+  .menu-link:active { background: var(--input-bg); }
+
+  .menu-divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .menu-link.logout { color: #f87171; }
+
+  .main-content { padding: 20px 16px; }
+
+  .page-title { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 18px; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 15px;
+    margin-bottom: 14px;
+  }
+
+  .search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-light);
+    font-size: 14.5px;
+    width: 100%;
+    font-family: inherit;
+  }
+
+  .search-bar input::placeholder { color: var(--text-dim); }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 22px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    flex-shrink: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .filter-chip.active {
+    background: var(--gradient);
+    color: white;
+    border-color: transparent;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .featured-card {
+    background: linear-gradient(135deg, rgba(79,110,247,0.18), rgba(124,58,237,0.18));
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 26px;
+    text-decoration: none;
+    color: var(--text-light);
+    display: block;
+  }
+
+  .featured-tag {
+    display: inline-block;
+    background: var(--af-yellow);
+    color: #1a1400;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .featured-title { font-size: 19px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+  .featured-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+  .featured-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .featured-budget { font-size: 22px; font-weight: 800; }
+  .featured-budget-label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+
+  .featured-btn {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .campaign-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: var(--text-light);
+    display: block;
+  }
+
+  .campaign-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
+  .campaign-title { font-size: 15.5px; font-weight: 700; margin-bottom: 3px; }
+  .campaign-meta { font-size: 12.5px; color: var(--text-muted); }
+
+  .campaign-budget {
+    background: rgba(79,110,247,0.12);
+    color: var(--accent-blue);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .campaign-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tags-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+  .tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 7px;
+  }
+
+  .card-actions { margin-top: 12px; }
+
+  .apply-btn {
+    display: inline-block;
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 26, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 20px;
+    z-index: 50;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .nav-item.active { color: var(--accent-blue); }
+  .nav-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="side-menu" id="sideMenu">
+  <div class="logo-row">
+    <div class="logo-mark-sm">AF</div>
+    <div class="logo-text-sm">Digital<span class="hub">Hub</span></div>
+  </div>
+  <div class="side-user">
+    <div class="side-user-name" id="menuUserName">User</div>
+    <div class="side-user-role" id="menuUserRole">role</div>
+  </div>
+
+  <a href="dashboard.html" class="menu-link">🏠 Dashboard</a>
+  <a href="campaigns.html" class="menu-link">📋 Campaigns</a>
+  <a href="applications.html" class="menu-link">📨 Applications</a>
+  <a href="profile.html" class="menu-link">👤 Profile</a>
+
+  <div class="menu-divider"></div>
+
+  <a href="about.html" class="menu-link">ℹ️ About Us</a>
+  <a href="testimonials.html" class="menu-link">⭐ Testimonials</a>
+  <a href="privacy.html" class="menu-link">🔒 Privacy Policy</a>
+  <a href="terms.html" class="menu-link">📄 Terms of Service</a>
+
+  <div class="menu-divider"></div>
+
+  <a href="#" class="menu-link logout" onclick="logout()">🚪 Log Out</a>
+</div>
+
+<div class="top-header">
+  <div class="header-left">
+    <div class="hamburger" onclick="openMenu()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo-mark-sm">AF</div>
+    <div class="logo-text-sm">Digital<span class="hub">Hub</span></div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="page-title">Browse Campaigns</div>
+  <div class="page-sub" id="pageSub">Find campaigns that match your style</div>
+
+  <div class="search-bar">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Search by title or keyword...">
+  </div>
+
+  <div class="filter-row" id="filterRow">
+    <div class="filter-chip active" data-niche="">All</div>
+    <div class="filter-chip" data-niche="Fashion">Fashion</div>
+    <div class="filter-chip" data-niche="Beauty">Beauty</div>
+    <div class="filter-chip" data-niche="Tech">Tech</div>
+    <div class="filter-chip" data-niche="Fitness">Fitness</div>
+    <div class="filter-chip" data-niche="Food">Food</div>
+    <div class="filter-chip" data-niche="Lifestyle">Lifestyle</div>
+  </div>
+
+  <div id="featuredSlot"></div>
+
+  <div class="section-title" id="feedTitle">Available Campaigns</div>
+  <div id="campaignFeed">
+    <div class="loading-text">Loading campaigns...</div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <span class="nav-icon">🏠</span>Home
+  </a>
+  <a href="campaigns.html" class="nav-item active">
+    <span class="nav-icon">📋</span>Campaigns
+  </a>
+  <a href="applications.html" class="nav-item">
+    <span class="nav-icon">📨</span>Applications
+  </a>
+  <a href="profile.html" class="nav-item">
+    <span class="nav-icon">👤</span>Profile
+  </a>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+  const name = localStorage.getItem('af_name');
+
+  if (!token) {
+    window.location.href = 'login.html';
+  }
+
+  document.getElementById('menuUserName').textContent = name || 'User';
+  document.getElementById('menuUserRole').textContent = role || '';
+
+  if (role === 'business') {
+    document.getElementById('pageSub').textContent = 'Manage and review your campaigns';
+    document.getElementById('feedTitle').textContent = 'Your Campaigns';
+  }
+
+  const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵' };
+  function formatMoney(amount, currency) {
+    if (!amount) return 'N/A';
+    const symbol = CURRENCY_SYMBOLS[currency] || '$';
+    return `${symbol}${amount}`;
+  }
+
+  function openMenu() {
+    document.getElementById('sideMenu').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let allCampaigns = [];
+  let activeNiche = '';
+  let searchTerm = '';
+
+  async function loadCampaigns() {
+    try {
+      const response = await fetch(`${API_BASE}/campaigns`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">Could not load campaigns.</div>`;
+        return;
+      }
+
+      allCampaigns = data.campaigns || [];
+      renderFeatured();
+      renderCampaigns();
+
+    } catch (err) {
+      document.getElementById('campaignFeed').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  function renderFeatured() {
+    const slot = document.getElementById('featuredSlot');
+    if (allCampaigns.length === 0) {
+      slot.innerHTML = '';
+      return;
+    }
+    const featured = [...allCampaigns].sort((a, b) => (b.budget || 0) - (a.budget || 0))[0];
+    if (!featured || !featured.budget) {
+      slot.innerHTML = '';
+      return;
+    }
+    slot.innerHTML = `
+      <a href="campaign-details.html?id=${featured.id}" class="featured-card">
+        <div class="featured-tag">FEATURED</div>
+        <div class="featured-title">${escapeHtml(featured.title)}</div>
+        <div class="featured-meta">${escapeHtml(featured.business_name || 'Business')} · ${featured.creators_needed ? featured.creators_needed + ' creators needed' : ''}</div>
+        <div class="featured-bottom">
+          <div>
+            <div class="featured-budget">${formatMoney(featured.budget, featured.currency)}</div>
+            <div class="featured-budget-label">Budget</div>
+          </div>
+          <div class="featured-btn">View Details</div>
+        </div>
+      </a>
+    `;
+  }
+
+  function renderCampaigns() {
+    const feed = document.getElementById('campaignFeed');
+    let filtered = allCampaigns;
+
+    if (activeNiche) {
+      filtered = filtered.filter(c => (c.required_niche || '').toLowerCase() === activeNiche.toLowerCase());
+    }
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(c =>
+        (c.title || '').toLowerCase().includes(term) ||
+        (c.description || '').toLowerCase().includes(term)
+      );
+    }
+
+    if (allCampaigns.length === 0) {
+      feed.innerHTML = `<div class="empty-state">Nothing here yet.</div>`;
+      return;
+    }
+
+    if (filtered.length === 0) {
+      feed.innerHTML = `<div class="empty-state">No campaigns found.</div>`;
+      return;
+    }
+
+    feed.innerHTML = filtered.map(c => `
+      <a href="campaign-details.html?id=${c.id}" class="campaign-card">
+        <div class="campaign-top">
+          <div>
+            <div class="campaign-title">${escapeHtml(c.title)}</div>
+            <div class="campaign-meta">${escapeHtml(c.business_name || 'Business')}</div>
+          </div>
+          <div class="campaign-budget">${formatMoney(c.budget, c.currency)}</div>
+        </div>
+        <div class="campaign-desc">${escapeHtml(c.description || '')}</div>
+        <div class="tags-row">
+          ${c.required_platform ? `<span class="tag">${escapeHtml(c.required_platform)}</span>` : ''}
+          ${c.required_niche ? `<span class="tag">${escapeHtml(c.required_niche)}</span>` : ''}
+          ${c.creators_needed ? `<span class="tag">${c.creators_needed} creators needed</span>` : ''}
+        </div>
+        ${role !== 'business' ? `<div class="card-actions"><span class="apply-btn">Apply Now</span></div>` : ''}
+      </a>
+    `).join('');
+  }
+
+  document.getElementById('filterRow').addEventListener('click', (e) => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeNiche = chip.dataset.niche || '';
+    renderCampaigns();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    renderCampaigns();
+  });
+
+  loadCampaigns();
+</script>
+
+</body>
+  </html>

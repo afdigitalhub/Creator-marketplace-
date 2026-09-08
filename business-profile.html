@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Profile — AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050a">
+<style>
+  :root {
+    --bg: #05050a; --card: #0f0f1a; --border: #1f1f2e; --text: #f2f2f7;
+    --muted: #9a9ab0; --accent1: #4f6ef7; --accent2: #7c3aed; --accent3: #6d28d9; --yellow: #f5c518;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 40px; }
+  .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; border-bottom: 1px solid var(--border); }
+  .back-btn { color: var(--text); text-decoration: none; font-size: 20px; }
+  .top-title { font-size: 16px; font-weight: 700; }
+
+  .profile-hero { padding: 28px 20px 20px; text-align: center; }
+  .avatar {
+    width: 84px; height: 84px; border-radius: 20px; margin: 0 auto 14px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: white; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-name { font-size: 20px; font-weight: 700; }
+  .profile-category { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .profile-desc { margin-top: 14px; font-size: 14px; color: var(--text); line-height: 1.5; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .profile-desc.empty { color: var(--muted); font-style: italic; }
+
+  .section { padding: 0 20px; margin-top: 24px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+
+  .contact-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; }
+  .contact-icon { font-size: 16px; }
+  .empty-note { color: var(--muted); font-size: 13px; }
+
+  .edit-toggle { width: 100%; margin-top: 28px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; cursor: pointer; }
+  .edit-link { display: block; width: 100%; margin-top: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text); font-size: 14.5px; font-weight: 600; text-align: center; text-decoration: none; }
+  .view-public-link { display: block; width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 14.5px; font-weight: 700; text-align: center; text-decoration: none; }
+
+  .edit-panel { display: none; padding: 0 20px; margin-top: 20px; }
+  .edit-panel.open { display: block; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; margin-top: 18px; }
+  label:first-of-type { margin-top: 0; }
+  input, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 15px; font-family: inherit; }
+  textarea { resize: vertical; min-height: 90px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .save-btn { width: 100%; margin-top: 24px; padding: 14px; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3)); color: white; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .save-btn:disabled { opacity: 0.6; }
+  #status { margin-top: 14px; font-size: 14px; text-align: center; }
+  .status-ok { color: #4ade80; }
+  .status-err { color: #f87171; }
+</style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="top-title">Business Profile</div>
+    <div style="width:20px;"></div>
+  </div>
+
+  <div class="profile-hero">
+    <div class="avatar" id="avatar">?</div>
+    <div class="profile-name" id="displayName">Business</div>
+    <div class="profile-category" id="displayCategory"></div>
+    <div class="profile-desc" id="displayDesc">No description yet.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Contact</div>
+    <div id="contactInfo"><span class="empty-note">No contact info added yet.</span></div>
+  </div>
+
+  <div class="section">
+    <a href="#" class="view-public-link" id="viewPublicLink">View My Public Profile</a>
+    <button class="edit-toggle" onclick="toggleEdit()">Edit Business Details</button>
+    <a href="profile-edit.html" class="edit-link">Edit Professional Profile</a>
+  </div>
+
+  <div class="edit-panel" id="editPanel">
+    <div class="card">
+      <label for="logo_url">Logo URL</label>
+      <input type="text" id="logo_url" placeholder="https://...">
+      <div class="hint">Paste a link to your business logo.</div>
+
+      <label for="business_name">Business Name</label>
+      <input type="text" id="business_name" placeholder="e.g. AF Digital Hub">
+
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Tell creators what your business does."></textarea>
+
+      <label for="category">Category</label>
+      <input type="text" id="category" placeholder="e.g. Fashion, Tech, Food">
+
+      <label for="contact_email">Contact Email</label>
+      <input type="text" id="contact_email" placeholder="you@business.com">
+
+      <label for="contact_phone">Contact Phone</label>
+      <input type="text" id="contact_phone" placeholder="+233...">
+
+      <button id="saveBtn" class="save-btn" onclick="saveProfile()">Save Changes</button>
+      <div id="status"></div>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem("af_token");
+
+  function parseJwt(tok) {
+    try { return JSON.parse(atob(tok.split('.')[1])); } catch (e) { return null; }
+  }
+
+  // Point the public profile link at this user's own profile.
+  const currentUser = token ? parseJwt(token) : null;
+  if (currentUser && currentUser.id) {
+    document.getElementById("viewPublicLink").href = `public-profile.html?id=${currentUser.id}`;
+  } else {
+    document.getElementById("viewPublicLink").style.display = "none";
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderContact(container, email, phone) {
+    let html = "";
+    if (email) html += `<div class="contact-card"><span class="contact-icon">✉️</span>${escapeHtml(email)}</div>`;
+    if (phone) html += `<div class="contact-card"><span class="contact-icon">📞</span>${escapeHtml(phone)}</div>`;
+    container.innerHTML = html || `<span class="empty-note">No contact info added yet.</span>`;
+  }
+
+  function updateDisplay(data) {
+    document.getElementById("displayName").textContent = data.business_name || "Business";
+    document.getElementById("displayCategory").textContent = data.category || "";
+
+    const descEl = document.getElementById("displayDesc");
+    if (data.description) {
+      descEl.textContent = data.description;
+      descEl.classList.remove("empty");
+    } else {
+      descEl.textContent = "No description yet.";
+      descEl.classList.add("empty");
+    }
+
+    const avatar = document.getElementById("avatar");
+    if (data.logo_url) {
+      avatar.innerHTML = `<img src="${escapeHtml(data.logo_url)}" alt="Business logo">`;
+    } else {
+      avatar.textContent = (data.business_name || "B").charAt(0).toUpperCase();
+    }
+
+    renderContact(document.getElementById("contactInfo"), data.contact_email, data.contact_phone);
+  }
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API_BASE}/profiles/business`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      updateDisplay(data);
+
+      document.getElementById("logo_url").value = data.logo_url || "";
+      document.getElementById("business_name").value = data.business_name || "";
+      document.getElementById("description").value = data.description || "";
+      document.getElementById("category").value = data.category || "";
+      document.getElementById("contact_email").value = data.contact_email || "";
+      document.getElementById("contact_phone").value = data.contact_phone || "";
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function toggleEdit() {
+    document.getElementById("editPanel").classList.toggle("open");
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById("saveBtn");
+    const status = document.getElementById("status");
+    btn.disabled = true;
+    status.textContent = "Saving...";
+    status.className = "";
+
+    const body = {
+      logo_url: document.getElementById("logo_url").value.trim(),
+      business_name: document.getElementById("business_name").value.trim(),
+      description: document.getElementById("description").value.trim(),
+      category: document.getElementById("category").value.trim(),
+      contact_email: document.getElementById("contact_email").value.trim(),
+      contact_phone: document.getElementById("contact_phone").value.trim()
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/profiles/business`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || `Server returned ${res.status}`);
+      }
+
+      const updated = await res.json();
+      updateDisplay(updated);
+      status.textContent = "Profile saved.";
+      status.className = "status-ok";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Error: " + err.message;
+      status.className = "status-err";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  loadProfile();
+</script>
+
+</body>
+  </html>

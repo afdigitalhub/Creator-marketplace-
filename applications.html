@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applications | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --accent-purple: #8b5cf6;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+    --success: #34d399;
+    --error: #f87171;
+    --pending: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 90px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .hamburger { width: 22px; height: 16px; position: relative; cursor: pointer; }
+
+  .hamburger span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: var(--text-light);
+    border-radius: 2px;
+  }
+
+  .hamburger span:nth-child(1) { top: 0; }
+  .hamburger span:nth-child(2) { top: 7px; }
+  .hamburger span:nth-child(3) { top: 14px; }
+
+  .logo-mark-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+  }
+
+  .logo-text-sm { font-size: 16px; font-weight: 700; }
+  .logo-text-sm .hub { color: var(--af-yellow); }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 90;
+    display: none;
+  }
+
+  .side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100%;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    transition: left 0.25s ease;
+    padding: 24px 18px;
+    overflow-y: auto;
+  }
+
+  .side-menu.open { left: 0; }
+  .overlay.open { display: block; }
+
+  .side-menu .logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+
+  .side-user {
+    margin-top: 18px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .side-user-name { font-size: 16px; font-weight: 700; }
+
+  .side-user-role {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-transform: capitalize;
+    margin-top: 2px;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 10px;
+  }
+
+  .menu-link:active { background: var(--input-bg); }
+
+  .menu-divider { height: 1px; background: var(--border); margin: 14px 0; }
+  .menu-link.logout { color: #f87171; }
+
+  .main-content { padding: 20px 16px; }
+
+  .page-title { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+
+  .campaign-select-wrap {
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .campaign-select-wrap label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  select {
+    width: 100%;
+    padding: 13px 15px;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 13px;
+    color: var(--text-light);
+    font-size: 14.5px;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .app-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .app-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
+  .app-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .app-meta { font-size: 12.5px; color: var(--text-muted); }
+
+  .status-pill {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 20px;
+    white-space: nowrap;
+    text-transform: capitalize;
+  }
+
+  .status-pill.pending { background: rgba(251, 191, 36, 0.12); color: var(--pending); }
+  .status-pill.accepted { background: rgba(52, 211, 153, 0.12); color: var(--success); }
+  .status-pill.rejected { background: rgba(248, 113, 113, 0.12); color: var(--error); }
+
+  .app-pitch {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .app-price {
+    font-size: 13px;
+    color: var(--accent-blue);
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .action-btn.accept { background: var(--success); color: #05050a; }
+  .action-btn.reject { background: var(--input-bg); color: var(--error); border: 1px solid var(--border); }
+  .action-btn:disabled { opacity: 0.5; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 15, 26, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 20px;
+    z-index: 50;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .nav-item.active { color: var(--accent-blue); }
+  .nav-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="side-menu" id="sideMenu">
+  <div class="logo-row">
+    <div class="logo-mark-sm">AF</div>
+    <div class="logo-text-sm">Digital<span class="hub">Hub</span></div>
+  </div>
+  <div class="side-user">
+    <div class="side-user-name" id="menuUserName">User</div>
+    <div class="side-user-role" id="menuUserRole">role</div>
+  </div>
+
+  <a href="dashboard.html" class="menu-link">🏠 Dashboard</a>
+  <a href="campaigns.html" class="menu-link">📋 Campaigns</a>
+  <a href="applications.html" class="menu-link">📨 Applications</a>
+  <a href="profile.html" class="menu-link">👤 Profile</a>
+
+  <div class="menu-divider"></div>
+
+  <a href="about.html" class="menu-link">ℹ️ About Us</a>
+  <a href="testimonials.html" class="menu-link">⭐ Testimonials</a>
+  <a href="privacy.html" class="menu-link">🔒 Privacy Policy</a>
+  <a href="terms.html" class="menu-link">📄 Terms of Service</a>
+
+  <div class="menu-divider"></div>
+
+  <a href="#" class="menu-link logout" onclick="logout()">🚪 Log Out</a>
+</div>
+
+<div class="top-header">
+  <div class="header-left">
+    <div class="hamburger" onclick="openMenu()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo-mark-sm">AF</div>
+    <div class="logo-text-sm">Digital<span class="hub">Hub</span></div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="page-title" id="pageTitle">Applications</div>
+  <div class="page-sub" id="pageSub">Track the status of your applications</div>
+
+  <div class="campaign-select-wrap" id="campaignSelectWrap">
+    <label>Select a campaign</label>
+    <select id="campaignSelect"></select>
+  </div>
+
+  <div id="appList">
+    <div class="loading-text">Loading applications...</div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <span class="nav-icon">🏠</span>Home
+  </a>
+  <a href="campaigns.html" class="nav-item">
+    <span class="nav-icon">📋</span>Campaigns
+  </a>
+  <a href="applications.html" class="nav-item active">
+    <span class="nav-icon">📨</span>Applications
+  </a>
+  <a href="profile.html" class="nav-item">
+    <span class="nav-icon">👤</span>Profile
+  </a>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const role = localStorage.getItem('af_role');
+  const name = localStorage.getItem('af_name');
+
+  if (!token) window.location.href = 'login.html';
+
+  document.getElementById('menuUserName').textContent = name || 'User';
+  document.getElementById('menuUserRole').textContent = role || '';
+
+  function openMenu() {
+    document.getElementById('sideMenu').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function init() {
+    if (role === 'creator') {
+      document.getElementById('pageSub').textContent = 'Track the status of your applications';
+      loadMyApplications();
+    } else if (role === 'business' || role === 'admin') {
+      document.getElementById('pageTitle').textContent = 'Manage Applications';
+      document.getElementById('pageSub').textContent = 'Review applications to your campaigns';
+      document.getElementById('campaignSelectWrap').style.display = 'block';
+      await loadMyCampaigns();
+    }
+  }
+
+  // --- Creator view ---
+  async function loadMyApplications() {
+    try {
+      const res = await fetch(`${API_BASE}/applications/mine`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('appList').innerHTML = `<div class="empty-state">Could not load applications.</div>`;
+        return;
+      }
+
+      const apps = data.applications || [];
+
+      if (apps.length === 0) {
+        document.getElementById('appList').innerHTML = `<div class="empty-state">You haven't applied to any campaigns yet.</div>`;
+        return;
+      }
+
+      document.getElementById('appList').innerHTML = apps.map(a => `
+        <div class="app-card">
+          <div class="app-top">
+            <div>
+              <div class="app-title">${escapeHtml(a.campaign_title || 'Campaign')}</div>
+              <div class="app-meta">${a.budget ? '$' + a.budget + ' budget' : ''}</div>
+            </div>
+            <div class="status-pill ${a.status}">${a.status}</div>
+          </div>
+          ${a.pitch ? `<div class="app-pitch">${escapeHtml(a.pitch)}</div>` : ''}
+          ${a.proposed_price ? `<div class="app-price">Your offer: $${a.proposed_price}</div>` : ''}
+        </div>
+      `).join('');
+
+    } catch (err) {
+      document.getElementById('appList').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  // --- Business view ---
+  let myCampaigns = [];
+
+  async function loadMyCampaigns() {
+    try {
+      const res = await fetch(`${API_BASE}/campaigns`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('appList').innerHTML = `<div class="empty-state">Could not load your campaigns.</div>`;
+        return;
+      }
+
+      myCampaigns = data.campaigns || [];
+
+      if (myCampaigns.length === 0) {
+        document.getElementById('campaignSelectWrap').style.display = 'none';
+        document.getElementById('appList').innerHTML = `<div class="empty-state">You haven't posted any campaigns yet.</div>`;
+        return;
+      }
+
+      document.getElementById('campaignSelect').innerHTML = myCampaigns.map(c =>
+        `<option value="${c.id}">${escapeHtml(c.title)}</option>`
+      ).join('');
+
+      loadApplicationsForCampaign(myCampaigns[0].id);
+
+    } catch (err) {
+      document.getElementById('appList').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  document.getElementById('campaignSelect').addEventListener('change', function() {
+    loadApplicationsForCampaign(this.value);
+  });
+
+  async function loadApplicationsForCampaign(campaignId) {
+    document.getElementById('appList').innerHTML = `<div class="loading-text">Loading applications...</div>`;
+
+    try {
+      const res = await fetch(`${API_BASE}/applications/campaign/${campaignId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('appList').innerHTML = `<div class="empty-state">Could not load applications.</div>`;
+        return;
+      }
+
+      const apps = data.applications || [];
+
+      if (apps.length === 0) {
+        document.getElementById('appList').innerHTML = `<div class="empty-state">No applications for this campaign yet.</div>`;
+        return;
+      }
+
+      document.getElementById('appList').innerHTML = apps.map(a => `
+        <div class="app-card">
+          <div class="app-top">
+            <div>
+              <div class="app-title">${escapeHtml(a.creator_name || 'Creator')}</div>
+              <div class="app-meta">${escapeHtml(a.creator_email || '')}</div>
+            </div>
+            <div class="status-pill ${a.status}">${a.status}</div>
+          </div>
+          ${a.pitch ? `<div class="app-pitch">${escapeHtml(a.pitch)}</div>` : ''}
+          ${a.proposed_price ? `<div class="app-price">Proposed price: $${a.proposed_price}</div>` : ''}
+          ${a.status === 'pending' ? `
+            <div class="action-row">
+              <button class="action-btn accept" onclick="updateStatus('${a.id}', 'accepted', this)">Accept</button>
+              <button class="action-btn reject" onclick="updateStatus('${a.id}', 'rejected', this)">Reject</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+    } catch (err) {
+      document.getElementById('appList').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  async function updateStatus(appId, status, btn) {
+    const row = btn.closest('.action-row');
+    row.querySelectorAll('button').forEach(b => b.disabled = true);
+    btn.textContent = status === 'accepted' ? 'Accepting...' : 'Rejecting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/applications/${appId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (!res.ok) {
+        row.querySelectorAll('button').forEach(b => b.disabled = false);
+        btn.textContent = status === 'accepted' ? 'Accept' : 'Reject';
+        return;
+      }
+
+      loadApplicationsForCampaign(document.getElementById('campaignSelect').value);
+
+    } catch (err) {
+      row.querySelectorAll('button').forEach(b => b.disabled = false);
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

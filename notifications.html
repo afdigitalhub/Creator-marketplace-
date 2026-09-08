@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications | AF Digital Hub</title>
+<style>
+  :root {
+    --bg: #05050a;
+    --card-bg: #0f0f1a;
+    --card-border: rgba(139, 92, 246, 0.15);
+    --accent-blue: #4f6ef7;
+    --accent-purple: #8b5cf6;
+    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --text-light: #f8f8fc;
+    --text-muted: #6b6b80;
+    --text-dim: #4a4a5e;
+    --af-yellow: #f5c518;
+    --input-bg: #0a0a12;
+    --border: #1c1c2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left { display: flex; align-items: center; gap: 14px; }
+
+  .back-btn {
+    font-size: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+
+  .mark-all-btn {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .main-content { padding: 16px; }
+
+  .notif-card {
+    display: flex;
+    gap: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .notif-card.unread {
+    border-color: rgba(79, 110, 247, 0.35);
+    background: linear-gradient(135deg, rgba(79,110,247,0.08), rgba(124,58,237,0.05));
+  }
+
+  .notif-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .notif-body { flex: 1; }
+
+  .notif-message {
+    font-size: 14px;
+    line-height: 1.45;
+    margin-bottom: 4px;
+  }
+
+  .notif-time {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .unread-dot {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <div class="header-left">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="header-title">Notifications</div>
+  </div>
+  <button class="mark-all-btn" id="markAllBtn" onclick="markAllRead()" style="display:none;">Mark all read</button>
+</div>
+
+<div class="main-content" id="notifList">
+  <div class="loading-text">Loading notifications...</div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+
+  if (!token) window.location.href = 'login.html';
+
+  const ICONS = {
+    new_application: '📨',
+    application_accepted: '✅',
+    application_rejected: '❌',
+    new_deliverable: '📦',
+    deliverable_approved: '🎉',
+    default: '🔔'
+  };
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function timeAgo(dateStr) {
+    const date = new Date(dateStr);
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
+  }
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch(`${API_BASE}/notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('notifList').innerHTML = `<div class="empty-state">Could not load notifications.</div>`;
+        return;
+      }
+
+      const notifs = data.notifications || [];
+
+      if (notifs.length === 0) {
+        document.getElementById('notifList').innerHTML = `<div class="empty-state">You're all caught up — no notifications yet.</div>`;
+        return;
+      }
+
+      const hasUnread = notifs.some(n => !n.read);
+      if (hasUnread) {
+        document.getElementById('markAllBtn').style.display = 'block';
+      }
+
+      document.getElementById('notifList').innerHTML = notifs.map(n => `
+        <div class="notif-card ${n.read ? '' : 'unread'}">
+          <div class="notif-icon">${ICONS[n.type] || ICONS.default}</div>
+          <div class="notif-body">
+            <div class="notif-message">${escapeHtml(n.message)}</div>
+            <div class="notif-time">${timeAgo(n.created_at)}</div>
+          </div>
+          ${n.read ? '' : '<div class="unread-dot"></div>'}
+        </div>
+      `).join('');
+
+    } catch (err) {
+      document.getElementById('notifList').innerHTML = `<div class="empty-state">Connection error. Please try again.</div>`;
+    }
+  }
+
+  async function markAllRead() {
+    const btn = document.getElementById('markAllBtn');
+    btn.disabled = true;
+    btn.textContent = 'Marking...';
+
+    try {
+      await fetch(`${API_BASE}/notifications/read-all`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      loadNotifications();
+      btn.style.display = 'none';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Mark all read';
+    }
+  }
+
+  loadNotifications();
+</script>
+
+</body>
+</html>
