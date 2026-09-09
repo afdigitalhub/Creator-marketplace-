@@ -10,7 +10,9 @@ router.get("/creator", requireAuth, requireRole("creator"), async (req, res) => 
       `SELECT * FROM creator_profiles WHERE user_id = $1`,
       [req.user.id]
     );
-    res.json(result.rows[0] || {});
+    res.json(result.rows[0] || {
+      user_id: req.user.id, bio: "", niches: [], platforms: [], portfolio_links: [], photo_url: null
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to load creator profile" });
@@ -43,7 +45,9 @@ router.get("/business", requireAuth, requireRole("business"), async (req, res) =
       `SELECT * FROM business_profiles WHERE user_id = $1`,
       [req.user.id]
     );
-    res.json(result.rows[0] || {});
+    res.json(result.rows[0] || {
+      user_id: req.user.id, business_name: "", description: "", category: "", logo_url: null, contact_email: "", contact_phone: ""
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to load business profile" });
