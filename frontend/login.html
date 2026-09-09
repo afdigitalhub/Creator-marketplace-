@@ -12,11 +12,11 @@
     --bg-glow-1: #1e1b4b;
     --bg-glow-2: #312e81;
     --card-bg: #0f0f1a;
-    --card-border: rgba(139, 92, 246, 0.15);
+    --card-border: rgba(245, 197, 24, 0.18);
     --accent-blue: #4f6ef7;
     --accent-purple: #8b5cf6;
     --accent-violet: #6d28d9;
-    --gradient: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 60%, #6d28d9 100%);
+    --gradient: linear-gradient(135deg, #f5c518 0%, #4f6ef7 55%, #1e3a8a 100%);
     --text-light: #f8f8fc;
     --text-muted: #6b6b80;
     --text-dim: #4a4a5e;
@@ -93,25 +93,40 @@
     width: 42px;
     height: 42px;
     border-radius: 12px;
-    background: var(--gradient);
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 17px;
-    color: white;
-    letter-spacing: -0.5px;
-    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+    background: #05050a;
+    box-shadow: 0 4px 20px rgba(245, 197, 24, 0.3);
     position: relative;
+    flex-shrink: 0;
   }
 
-  .logo-mark::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 50%);
+  .logo-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
+
+  .password-field-wrap { position: relative; }
+  .password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .password-toggle svg { width: 20px; height: 20px; }
+  .password-toggle.visible { color: var(--af-yellow); }
 
   .logo-text {
     font-size: 19px;
@@ -173,6 +188,8 @@
     transition: border-color 0.15s ease;
     font-family: inherit;
   }
+
+  .password-field-wrap input { padding-right: 44px; }
 
   input::placeholder { color: var(--text-dim); }
 
@@ -286,7 +303,7 @@
 <div class="content-wrap">
 
   <a href="index.html" class="logo-row">
-    <div class="logo-mark">AF</div>
+    <div class="logo-mark"><img src="icons/logo-mark.png" alt="AF Digital Hub"></div>
     <div class="logo-text">Digital<span class="hub">Hub</span></div>
   </a>
 
@@ -316,7 +333,15 @@
 
       <div class="field">
         <label>Password</label>
-        <input type="password" id="password" placeholder="••••••••" required>
+        <div class="password-field-wrap">
+          <input type="password" id="password" placeholder="••••••••" required>
+          <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword()" aria-label="Show password">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn-primary" id="submit-btn">Log In</button>
@@ -341,6 +366,15 @@
     creator: "As a creator, you can build your professional profile and apply to campaigns posted by businesses.",
     business: "As a business, you can present your business and post campaigns to find the right creators."
   };
+
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const btn = document.getElementById('passwordToggle');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.classList.toggle('visible', isHidden);
+    btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+  }
 
   function selectRole(role) {
     selectedRole = role;
