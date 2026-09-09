@@ -137,4 +137,47 @@ router.get("/", requireAuth, requireRole("admin"), async (req, res) => {
   }
 });
 
+// GET /admin-stats/trends - daily revenue and signups for the last 14 days.
+// Powers AF Analytics' trend view. Days with no activity are filled in as
+// zero so the frontend doesn't have to guess about gaps.
+router.get("/trends", requireAuth, requireRole("admin"), async (req, res) => {
+  try {
+    const [revenueResult, signupResult] = await Promise.all([
+      pool.query(`
+        SELECT
+          d::date AS day,
+          COALESCE(SUM(o.gross_amount), 0) AS revenue,
+          COUNT(o.id) AS orders
+        FROM generate_series(
+          CURRENT_DATE - INTERVAL '13 days', CURRENT_DATE, INTERVAL '1 day'
+        ) AS d
+        LEFT JOIN orders o
+          ON o.status = 'paid' AND date_trunc('day', o.created_at) = d
+        GROUP BY d
+        ORDER BY d
+      `),
+      pool.query(`
+        SELECT
+          d::date AS day,
+          COUNT(u.id) AS new_users
+        FROM generate_series(
+          CURRENT_DATE - INTERVAL '13 days', CURRENT_DATE, INTERVAL '1 day'
+        ) AS d
+        LEFT JOIN users u
+          ON date_trunc('day', u.created_at) = d
+        GROUP BY d
+        ORDER BY d
+      `)
+    ]);
+
+    res.json({
+      revenue_trend: revenueResult.rows,
+      signup_trend: signupResult.rows
+    });
+  } catch (err) {
+    console.error("Admin stats trends error:", err);
+    res.status(500).json({ error: "Could not load platform trends" });
+  }
+});
+
 module.exports = router;
