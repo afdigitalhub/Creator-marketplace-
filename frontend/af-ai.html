@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AF Intelligent AI | AF Digital Hub</title>
+  <meta name="description" content="AF Intelligent AI — your intelligent assistant for AF Digital Hub, learning, opportunities, business, creators and the wider world.">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(88, 62, 255, .18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(255, 212, 0, .08), transparent 30%),
+        #070707;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .nav {
+      height: 70px;
+      padding: 0 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(7,7,7,.88);
+      backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg,#ffd400,#705cff);
+      color: #080808;
+      font-weight: 900;
+    }
+
+    .back {
+      color: #cfcfcf;
+      font-size: 14px;
+    }
+
+    .back:hover {
+      color: #ffd400;
+    }
+
+    .hero {
+      max-width: 1000px;
+      margin: auto;
+      padding: 70px 20px 35px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,212,0,.08);
+      border: 1px solid rgba(255,212,0,.22);
+      color: #ffd400;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: clamp(38px, 7vw, 72px);
+      line-height: .98;
+      letter-spacing: -3px;
+      margin-bottom: 20px;
+    }
+
+    .gradient {
+      background: linear-gradient(90deg,#fff,#b5aaff,#ffd400);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 700px;
+      margin: auto;
+      color: #aaa;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .ai-wrap {
+      max-width: 920px;
+      margin: 30px auto 80px;
+      padding: 0 20px;
+    }
+
+    .chat-card {
+      background: rgba(18,18,18,.94);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0,0,0,.45);
+    }
+
+    .chat-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #aaa;
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #48e38a;
+      box-shadow: 0 0 12px #48e38a;
+    }
+
+    .messages {
+      min-height: 390px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 25px;
+    }
+
+    .message {
+      max-width: 82%;
+      padding: 15px 17px;
+      border-radius: 17px;
+      margin-bottom: 15px;
+      line-height: 1.6;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .ai {
+      background: #202020;
+      border: 1px solid rgba(255,255,255,.06);
+      color: #e8e8e8;
+    }
+
+    .user {
+      margin-left: auto;
+      background: linear-gradient(135deg,#5849ff,#743cff);
+      color: #fff;
+    }
+
+    .typing {
+      color: #999;
+      font-size: 13px;
+      padding: 0 25px 15px;
+      display: none;
+    }
+
+    .suggestions {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 0 20px 15px;
+    }
+
+    .suggestion {
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #151515;
+      color: #ccc;
+      border-radius: 999px;
+      padding: 9px 13px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .suggestion:hover {
+      border-color: #ffd400;
+      color: #ffd400;
+    }
+
+    .input-area {
+      padding: 15px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      min-height: 52px;
+      max-height: 150px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0d0d0d;
+      color: #fff;
+      border-radius: 15px;
+      padding: 15px;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    textarea:focus {
+      border-color: #6655ff;
+    }
+
+    button.send {
+      width: 55px;
+      border: 0;
+      border-radius: 15px;
+      background: linear-gradient(135deg,#ffd400,#ffb700);
+      color: #080808;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button.send:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .tools {
+      max-width: 920px;
+      margin: 0 auto 70px;
+      padding: 0 20px;
+    }
+
+    .tools-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .tools-title h2 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .tools-title p {
+      color: #888;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 15px;
+    }
+
+    .tool {
+      padding: 22px;
+      background: #111;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      transition: .2s;
+    }
+
+    .tool:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,212,0,.3);
+    }
+
+    .tool-icon {
+      font-size: 25px;
+      margin-bottom: 13px;
+    }
+
+    .tool h3 {
+      margin-bottom: 8px;
+    }
+
+    .tool p {
+      color: #999;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .notice {
+      max-width: 920px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+
+    .notice-box {
+      background: rgba(255,212,0,.05);
+      border: 1px solid rgba(255,212,0,.15);
+      border-radius: 18px;
+      padding: 18px;
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 35px 20px;
+      color: #666;
+      border-top: 1px solid rgba(255,255,255,.06);
+      font-size: 13px;
+    }
+
+    @media(max-width:700px) {
+      .nav {
+        padding: 0 18px;
+      }
+
+      .hero {
+        padding-top: 50px;
+      }
+
+      .message {
+        max-width: 90%;
+      }
+
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .input-area {
+        padding: 10px;
+      }
+
+      button.send {
+        width: 50px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">AF</span>
+      <span>AF Digital Hub</span>
+    </a>
+
+    <a href="index.html" class="back">← Back to AF Digital Hub</a>
+  </nav>
+
+  <section class="hero">
+    <div class="badge">✦ AF INTELLIGENT AI</div>
+
+    <h1>
+      Intelligence for<br>
+      <span class="gradient">your digital world.</span>
+    </h1>
+
+    <p>
+      Ask questions, understand AF Digital Hub, explore opportunities,
+      learn new skills, work on your ideas and get intelligent guidance
+      across the platform and beyond.
+    </p>
+  </section>
+
+  <section class="ai-wrap">
+
+    <div class="chat-card">
+
+      <div class="chat-head">
+        <strong>AF Intelligent AI</strong>
+
+        <div class="status">
+          <span class="dot"></span>
+          Ready
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+
+        <div class="message ai">
+          👋 Welcome to AF Intelligent AI.
+
+          I can help you understand AF Digital Hub, discover opportunities, learn digital skills, explore the Shop, work on business ideas and answer questions about the wider world.
+
+          What would you like to know?
+        </div>
+
+      </div>
+
+      <div class="typing" id="typing">
+        AF Intelligent AI is thinking...
+      </div>
+
+      <div class="suggestions">
+
+        <button class="suggestion"
+          onclick="askSuggestion('What can I do on AF Digital Hub?')">
+          What can I do here?
+        </button>
+
+        <button class="suggestion"
+          onclick="askSuggestion('What opportunities can I find through AF Digital Hub?')">
+          Find opportunities
+        </button>
+
+        <button class="suggestion"
+          onclick="askSuggestion('How can I improve my digital skills?')">
+          Improve my skills
+        </button>
+
+        <button class="suggestion"
+          onclick="askSuggestion('Tell me about the AF Digital Hub Shop.')">
+          Explore the Shop
+        </button>
+
+        <button class="suggestion"
+          onclick="askSuggestion('What important technology developments are happening in the world right now?')">
+          World technology
+        </button>
+
+      </div>
+
+      <form class="input-area" id="chatForm">
+
+        <textarea
+          id="messageInput"
+          placeholder="Ask AF Intelligent AI anything..."
+          rows="1"
+        ></textarea>
+
+        <button class="send" id="sendBtn" type="submit">
+          ↑
+        </button>
+
+      </form>
+
+    </div>
+
+  </section>
+
+  <section class="tools">
+
+    <div class="tools-title">
+      <h2>One intelligence layer. Many possibilities.</h2>
+      <p>AF Intelligent AI is designed to work across the AF Digital Hub ecosystem.</p>
+    </div>
+
+    <div class="tool-grid">
+
+      <a href="af-search.html" class="tool">
+        <div class="tool-icon">🔎</div>
+        <h3>AF Intelligent Search</h3>
+        <p>
+          Search the wider web for current information, opportunities,
+          technology developments and useful resources.
+        </p>
+      </a>
+
+      <a href="calculator.html" class="tool">
+        <div class="tool-icon">🧮</div>
+        <h3>AF Intelligent Calculator</h3>
+        <p>
+          Calculate percentages, profits, commissions, savings, ROI,
+          discounts and other useful numbers.
+        </p>
+      </a>
+
+      <div class="tool">
+        <div class="tool-icon">🌍</div>
+        <h3>Global Intelligence</h3>
+        <p>
+          AF Digital Hub is built for a global audience. Ask about
+          current topics, markets, technology and digital opportunities.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="notice">
+
+    <div class="notice-box">
+      <strong>AF Intelligent AI</strong> is an assistant, not a replacement
+      for professional or official advice. For current information,
+      important decisions and opportunities, always verify details with
+      the relevant official source.
+      <br><br>
+      Sign in to AF Digital Hub when available so the assistant can provide
+      more relevant platform-specific guidance.
+    </div>
+
+  </section>
+
+  <footer>
+    © 2026 AF Digital Hub · Founded by Adonle Fameye
+  </footer>
+
+
+  <script>
+
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const typing = document.getElementById("typing");
+
+    function getToken() {
+      return (
+        localStorage.getItem("token") ||
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("accessToken") ||
+        ""
+      );
+    }
+
+    function addMessage(text, type) {
+
+      const div = document.createElement("div");
+
+      div.className = `message ${type}`;
+
+      div.textContent = text;
+
+      messages.appendChild(div);
+
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function askSuggestion(text) {
+
+      input.value = text;
+
+      form.dispatchEvent(
+        new Event("submit", {
+          bubbles: true,
+          cancelable: true
+        })
+      );
+    }
+
+    async function askAI(message) {
+
+      const token = getToken();
+
+      const headers = {
+        "Content-Type": "application/json"
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch("/ai/chat", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          message,
+          web: true
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "AF Intelligent AI could not respond right now."
+        );
+      }
+
+      return (
+        data.reply ||
+        data.output ||
+        data.message ||
+        "I couldn't generate a response right now."
+      );
+    }
+
+    form.addEventListener("submit", async function(e) {
+
+      e.preventDefault();
+
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      addMessage(message, "user");
+
+      input.value = "";
+
+      sendBtn.disabled = true;
+
+      typing.style.display = "block";
+
+      try {
+
+        const reply = await askAI(message);
+
+        addMessage(reply, "ai");
+
+      } catch (error) {
+
+        addMessage(
+          "Sorry, AF Intelligent AI is temporarily unavailable. Please try again shortly.",
+          "ai"
+        );
+
+        console.error(error);
+
+      } finally {
+
+        typing.style.display = "none";
+
+        sendBtn.disabled = false;
+
+        input.focus();
+
+      }
+
+    });
+
+
+    input.addEventListener("keydown", function(e) {
+
+      if (e.key === "Enter" && !e.shiftKey) {
+
+        e.preventDefault();
+
+        form.dispatchEvent(
+          new Event("submit", {
+            bubbles: true,
+            cancelable: true
+          })
+        );
+
+      }
+
+    });
+
+  </script>
+
+</body>
+  </html>
