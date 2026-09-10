@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 
@@ -23,15 +24,22 @@ const productReviewRoutes = require("./routes/productReviews");
 const withdrawalRoutes = require("./routes/withdrawals");
 const adminStatsRoutes = require("./routes/adminStats");
 
+/* AF INTELLIGENT AI */
+const aiRoutes = require("./routes/ai");
+
 const app = express();
+
 app.use(cors());
 
-// Payments must be mounted BEFORE the global JSON parser, because the
-// Paystack webhook needs the raw request body to verify its signature.
+/*
+  Paystack payments must be mounted BEFORE the global JSON parser.
+  The webhook needs the raw request body to verify its signature.
+*/
 app.use("/payments", paymentRoutes);
 
 app.use(express.json());
 
+/* Existing AF Digital Hub routes */
 app.use("/auth", authRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/profiles", profileRoutes);
@@ -52,12 +60,21 @@ app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
 app.use("/withdrawals", withdrawalRoutes);
 
+/* AF Intelligent AI */
+app.use("/ai", aiRoutes);
+
+/* API health check */
 app.get("/", (req, res) => {
-  res.json({ status: "Creator Marketplace API running" });
+  res.json({
+    status: "Creator Marketplace API running",
+    ai: "AF Intelligent AI enabled"
+  });
 });
 
 const PORT = process.env.PORT || 4001;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Creator Marketplace API running on port ${PORT}`);
+  console.log(
+    `Creator Marketplace API running on port ${PORT}`
+  );
 });
