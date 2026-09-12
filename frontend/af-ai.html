@@ -522,6 +522,8 @@
 
   <script>
 
+    const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+
     const messages = document.getElementById("messages");
     const form = document.getElementById("chatForm");
     const input = document.getElementById("messageInput");
@@ -530,6 +532,7 @@
 
     function getToken() {
       return (
+        localStorage.getItem("af_token") ||
         localStorage.getItem("token") ||
         localStorage.getItem("authToken") ||
         localStorage.getItem("accessToken") ||
@@ -574,7 +577,7 @@
         headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch("/ai/chat", {
+      const response = await fetch(`${API_BASE}/ai/chat`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -665,4 +668,4 @@
   </script>
 
 </body>
-  </html>
+</html>
