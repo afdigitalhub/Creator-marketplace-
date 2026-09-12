@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 /*
   AF DIGITAL HUB — AF INTELLIGENT AI
@@ -17,6 +17,8 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
   - Visitors
 
   The API key NEVER goes to the frontend.
+
+  Uses Google's Gemini API (generativelanguage.googleapis.com).
 */
 
 function getOptionalUser(req) {
@@ -163,46 +165,41 @@ ${JSON.stringify(context, null, 2)}
 
 
 async function runAI({ user, message, web = false }) {
-  if (!OPENAI_API_KEY) {
+  if (!GEMINI_API_KEY) {
     const error = new Error(
-      "AF Intelligent AI is not configured. Add OPENAI_API_KEY to the server environment."
+      "AF Intelligent AI is not configured. Add GEMINI_API_KEY to the server environment."
     );
 
     error.status = 503;
     throw error;
   }
 
-  const tools = web
-    ? [{ type: "web_search" }]
-    : undefined;
-
   const body = {
-    model: OPENAI_MODEL,
-    store: false,
-    input: [
-      {
-        role: "system",
-        content: buildSystemPrompt(user)
-      },
+    systemInstruction: {
+      parts: [{ text: buildSystemPrompt(user) }]
+    },
+    contents: [
       {
         role: "user",
-        content: message
+        parts: [{ text: message }]
       }
     ],
-    max_output_tokens: 1200
+    generationConfig: {
+      maxOutputTokens: 1200
+    }
   };
 
-  if (tools) {
-    body.tools = tools;
+  if (web) {
+    body.tools = [{ google_search: {} }];
   }
 
   const response = await fetch(
-    "https://api.openai.com/v1/responses",
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`
+        "x-goog-api-key": GEMINI_API_KEY
       },
       body: JSON.stringify(body)
     }
@@ -211,7 +208,7 @@ async function runAI({ user, message, web = false }) {
   const data = await response.json();
 
   if (!response.ok) {
-    console.error("OpenAI API error:", data);
+    console.error("Gemini API error:", data);
 
     const error = new Error(
       data?.error?.message ||
@@ -224,21 +221,13 @@ async function runAI({ user, message, web = false }) {
 
   let output = "";
 
-  if (typeof data.output_text === "string") {
-    output = data.output_text;
-  }
+  const candidate = data?.candidates?.[0];
+  const parts = candidate?.content?.parts;
 
-  if (!output && Array.isArray(data.output)) {
-    for (const item of data.output) {
-      if (!Array.isArray(item.content)) continue;
-
-      for (const content of item.content) {
-        if (
-          content.type === "output_text" &&
-          typeof content.text === "string"
-        ) {
-          output += content.text;
-        }
+  if (Array.isArray(parts)) {
+    for (const part of parts) {
+      if (typeof part.text === "string") {
+        output += part.text;
       }
     }
   }
