@@ -4,6 +4,8 @@ const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
+const PAYSTACK_SECRET = (process.env.PAYSTACK_SECRET_KEY || "").trim();
+const PAYSTACK_BASE = "https://api.paystack.co";
 const PLATFORM_COMMISSION_RATE = 0.10; // same 10% used across the platform
 
 const CATEGORY_LABELS = {
@@ -12,6 +14,10 @@ const CATEGORY_LABELS = {
   review: "Quick Review",
   price_check: "Price Check"
 };
+
+function toMinorUnit(amount) {
+  return Math.round(Number(amount) * 100);
+}
 
 function serializeGig(row) {
   return {
@@ -39,14 +45,7 @@ function serializeGig(row) {
 
 /*
   POST /gigs
-  Create a new gig. Starts as "pending_payment" until payment is confirmed.
-  ────────────────────────────────────────────────────────────────────
-  PAYMENT NOTE: This route creates the gig row and returns its id, but
-  does NOT yet call Paystack directly. Once we see how payments.js
-  initializes a Paystack transaction for existing orders, we plug that
-  same call in here (right where marked below) so a gig follows the
-  exact same, already-trusted payment path as everything else on the
-  platform, rather than a newly invented one.
+  Create a new gig, sitting as "pending_payment" until the poster pays.
 */
 router.post("/", requireAuth, async (req, res) => {
   try {
@@ -77,26 +76,163 @@ router.post("/", requireAuth, async (req, res) => {
       [posterId, category, title.trim(), description.trim(), city ? city.trim() : null, numericPrice, currency || "GHS"]
     );
 
-    const gig = result.rows[0];
-
-    // ── PAYMENT INTEGRATION POINT ─────────────────────────────────
-    // Once payments.js is reviewed, this is where we call the same
-    // Paystack initialize function already used for product orders,
-    // passing gig.price and gig.id as the reference metadata, then
-    // return the authorization_url the same way orders.js already does.
-    // Until then, the gig stays in "pending_payment" and won't show
-    // in the open feed.
-    // ───────────────────────────────────────────────────────────────
-
-    return res.status(201).json({
-      success: true,
-      gig: serializeGig(gig),
-      message: "Gig created. Payment step will be connected next."
-    });
+    return res.status(201).json({ success: true, gig: serializeGig(result.rows[0]) });
 
   } catch (error) {
     console.error("Create gig error:", error);
     return res.status(500).json({ error: "Could not create gig." });
+  }
+});
+
+
+/*
+  POST /gigs/:id/pay
+  Starts a real Paystack transaction for this gig, the same way
+  payments.js does for product orders: same base URL, same minor-unit
+  conversion, same channel restriction, same reference storage.
+*/
+router.post("/:id/pay", requireAuth, async (req, res) => {
+  if (!PAYSTACK_SECRET) {
+    return res.status(500).json({ error: "Payments are not configured yet" });
+  }
+
+  try {
+    const userId = req.user.id || req.user.userId;
+
+    const gigResult = await pool.query("SELECT * FROM gigs WHERE id = $1", [req.params.id]);
+    if (!gigResult.rows.length) {
+      return res.status(404).json({ error: "Gig not found." });
+    }
+
+    const gig = gigResult.rows[0];
+
+    if (gig.poster_id !== userId) {
+      return res.status(403).json({ error: "Only the poster can pay for this gig." });
+    }
+    if (gig.status !== "pending_payment") {
+      return res.status(400).json({ error: "This gig has already been paid for or is no longer payable." });
+    }
+
+    const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [userId]);
+    const email = userResult.rows[0].email;
+
+    const gigCurrency = String(gig.currency || "GHS").toUpperCase();
+
+    const initRes = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        amount: toMinorUnit(gig.price),
+        currency: gigCurrency,
+        channels: ["card", "mobile_money", "bank", "bank_transfer", "ussd"],
+        callback_url: "https://afdigitalhub.net/gig-payment-complete.html",
+        metadata: {
+          gig_id: gig.id,
+          gig_title: gig.title,
+          expected_currency: gigCurrency
+        }
+      })
+    });
+
+    const initData = await initRes.json();
+
+    if (!initRes.ok || !initData.status) {
+      console.error("Paystack init failed (gig):", initData);
+      return res.status(502).json({
+        error: "Could not start payment",
+        detail: initData.message || "Payment provider rejected the request"
+      });
+    }
+
+    const reference = initData.data.reference;
+
+    await pool.query(
+      "UPDATE gigs SET payment_reference = $1 WHERE id = $2",
+      [reference, gig.id]
+    );
+
+    return res.json({
+      authorization_url: initData.data.authorization_url,
+      reference,
+      currency: gigCurrency,
+      amount: gig.price
+    });
+
+  } catch (error) {
+    console.error("Gig payment init error:", error);
+    return res.status(500).json({ error: "Could not start payment." });
+  }
+});
+
+
+/*
+  GET /gigs/verify/:reference
+  Confirms the Paystack transaction actually succeeded, for the actual
+  amount and currency the gig was created with, before the gig goes
+  live in the feed. Mirrors the checks in payments.js exactly:
+  currency match, amount match, idempotency if already processed.
+*/
+router.get("/verify/:reference", requireAuth, async (req, res) => {
+  if (!PAYSTACK_SECRET) {
+    return res.status(500).json({ error: "Payments are not configured yet" });
+  }
+
+  try {
+    const reference = req.params.reference;
+
+    const gigResult = await pool.query("SELECT * FROM gigs WHERE payment_reference = $1", [reference]);
+    if (!gigResult.rows.length) {
+      return res.status(404).json({ error: "No gig found for this payment reference." });
+    }
+
+    const gig = gigResult.rows[0];
+
+    if (gig.status !== "pending_payment") {
+      return res.json({ success: true, already_processed: true, gig: serializeGig(gig) });
+    }
+
+    const verifyRes = await fetch(`${PAYSTACK_BASE}/transaction/verify/${encodeURIComponent(reference)}`, {
+      headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` }
+    });
+    const verifyData = await verifyRes.json();
+
+    if (!verifyRes.ok || !verifyData.status) {
+      return res.status(400).json({ error: "Payment could not be confirmed." });
+    }
+
+    const txn = verifyData.data;
+
+    if (txn.status !== "success") {
+      return res.status(400).json({ error: "Payment was not successful.", status: txn.status });
+    }
+
+    if (String(txn.currency).toUpperCase() !== String(gig.currency).toUpperCase()) {
+      console.error("Gig currency mismatch:", { expected: gig.currency, received: txn.currency, reference });
+      return res.status(400).json({ error: "Payment was charged in the wrong currency." });
+    }
+
+    const expectedMinor = toMinorUnit(gig.price);
+    if (Number(txn.amount) !== expectedMinor) {
+      return res.status(400).json({ error: "Payment amount did not match the gig price." });
+    }
+
+    const updateResult = await pool.query(
+      "UPDATE gigs SET status = 'open' WHERE id = $1 AND status = 'pending_payment' RETURNING *",
+      [gig.id]
+    );
+
+    return res.json({
+      success: true,
+      gig: serializeGig(updateResult.rows[0] || gig)
+    });
+
+  } catch (error) {
+    console.error("Gig payment verify error:", error);
+    return res.status(500).json({ error: "Could not verify payment." });
   }
 });
 
@@ -132,10 +268,7 @@ router.get("/", async (req, res) => {
       params
     );
 
-    return res.json({
-      success: true,
-      gigs: result.rows.map(serializeGig)
-    });
+    return res.json({ success: true, gigs: result.rows.map(serializeGig) });
 
   } catch (error) {
     console.error("List gigs error:", error);
@@ -146,7 +279,6 @@ router.get("/", async (req, res) => {
 
 /*
   GET /gigs/mine
-  Gigs the current user posted, and gigs they're working on.
 */
 router.get("/mine", requireAuth, async (req, res) => {
   try {
@@ -212,7 +344,6 @@ router.get("/:id", async (req, res) => {
 
 /*
   POST /gigs/:id/claim
-  First qualified user to claim an open gig gets assigned to it.
 */
 router.post("/:id/claim", requireAuth, async (req, res) => {
   try {
@@ -255,7 +386,6 @@ router.post("/:id/claim", requireAuth, async (req, res) => {
 
 /*
   POST /gigs/:id/submit
-  Worker submits their completed work.
 */
 router.post("/:id/submit", requireAuth, async (req, res) => {
   try {
@@ -299,47 +429,60 @@ router.post("/:id/submit", requireAuth, async (req, res) => {
 
 /*
   POST /gigs/:id/approve
-  Poster approves submitted work. This is where escrowed payment
-  would be released: 90% to the worker's earnings, 10% platform
-  commission — matching the same split already used elsewhere.
-  ────────────────────────────────────────────────────────────────
-  Left as a clear, honest TODO rather than a guess: once we see the
-  real "earnings" table columns, this inserts a row crediting the
-  worker exactly like campaign payouts already do.
+  Releases the payment: 90% to the worker's earnings, 10% platform
+  commission — inserted into the real "earnings" table, using the
+  same source_type/source_id pattern already used for product_sale
+  earnings, so it shows up correctly in the worker's Earnings page
+  and in your admin stats.
 */
 router.post("/:id/approve", requireAuth, async (req, res) => {
+  const client = await pool.connect();
   try {
     const userId = req.user.id || req.user.userId;
 
-    const gigResult = await pool.query("SELECT * FROM gigs WHERE id = $1", [req.params.id]);
+    await client.query("BEGIN");
+
+    const gigResult = await client.query("SELECT * FROM gigs WHERE id = $1 FOR UPDATE", [req.params.id]);
     if (!gigResult.rows.length) {
+      await client.query("ROLLBACK");
       return res.status(404).json({ error: "Gig not found." });
     }
 
     const gig = gigResult.rows[0];
 
     if (gig.poster_id !== userId) {
+      await client.query("ROLLBACK");
       return res.status(403).json({ error: "Only the poster can approve this gig." });
     }
     if (gig.status !== "submitted") {
+      await client.query("ROLLBACK");
       return res.status(409).json({ error: "This gig isn't awaiting approval." });
     }
 
     const commission = Number(gig.price) * PLATFORM_COMMISSION_RATE;
     const workerShare = Number(gig.price) - commission;
 
-    const updateResult = await pool.query(
+    const updateResult = await client.query(
       `UPDATE gigs SET status = 'approved', approved_at = now() WHERE id = $1 RETURNING *`,
       [req.params.id]
     );
 
-    // ── EARNINGS INTEGRATION POINT ─────────────────────────────────
-    // await pool.query(
-    //   `INSERT INTO earnings (<real columns once confirmed>)
-    //    VALUES (...)`,
-    //   [gig.worker_id, workerShare, ...]
-    // );
-    // ─────────────────────────────────────────────────────────────
+    const existingEarning = await client.query(
+      "SELECT id FROM earnings WHERE source_type = 'gig_payout' AND source_id = $1",
+      [gig.id]
+    );
+
+    if (existingEarning.rows.length === 0) {
+      await client.query(
+        `INSERT INTO earnings
+          (user_id, source_type, source_id, gross_amount, platform_fee,
+           net_amount, currency, status, available_at)
+         VALUES ($1, 'gig_payout', $2, $3, $4, $5, $6, 'pending', now())`,
+        [gig.worker_id, gig.id, gig.price, commission, workerShare, gig.currency]
+      );
+    }
+
+    await client.query("COMMIT");
 
     return res.json({
       success: true,
@@ -349,8 +492,11 @@ router.post("/:id/approve", requireAuth, async (req, res) => {
     });
 
   } catch (error) {
+    await client.query("ROLLBACK");
     console.error("Approve gig error:", error);
     return res.status(500).json({ error: "Could not approve gig." });
+  } finally {
+    client.release();
   }
 });
 
