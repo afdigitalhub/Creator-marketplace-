@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator | AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050b">
+<style>
+  :root {
+    --bg: #05050b; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gold: #ffd21a; --blue: #4e7cff; --violet: #7b45ff;
+    --text-light: #f8f8fc; --text-muted: #8992a7; --input-bg: #0a0a12;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: radial-gradient(circle at 85% 0%, rgba(123,69,255,.14), transparent 30%), var(--bg);
+    color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh; padding-bottom: 40px;
+  }
+  a { color: inherit; }
+
+  .top-header {
+    display: flex; align-items: center; gap: 14px; padding: 18px 16px;
+    position: sticky; top: 0; background: rgba(5,5,11,.88); backdrop-filter: blur(14px);
+    z-index: 50; border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    font-size: 20px; color: var(--text-light); text-decoration: none;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--card-bg); border-radius: 10px;
+  }
+  .header-title { font-size: 16px; font-weight: 800; }
+
+  .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+
+  .page-title { font-size: 21px; font-weight: 800; margin-bottom: 6px; letter-spacing: -.02em; }
+  .page-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+
+  .tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 4px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto; border: 1px solid var(--border); background: var(--card-bg);
+    color: var(--text-muted); border-radius: 999px; padding: 9px 15px;
+    font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .tab.active { background: var(--gold); color: #07070a; border-color: transparent; }
+
+  .card {
+    background: linear-gradient(160deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+    border: 1px solid var(--border); border-radius: 20px; padding: 22px;
+    box-shadow: 0 18px 34px -18px rgba(0,0,0,.7);
+  }
+  .card h2 { font-size: 17px; font-weight: 800; margin-bottom: 5px; }
+  .card .sub { color: var(--text-muted); font-size: 12.5px; margin-bottom: 20px; line-height: 1.5; }
+
+  .field { margin-bottom: 14px; }
+  label {
+    display: block; font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 7px;
+  }
+  input {
+    width: 100%; padding: 13px 15px; background: var(--input-bg);
+    border: 1px solid var(--border); border-radius: 13px; color: var(--text-light);
+    font-size: 15px; outline: none; font-family: inherit;
+  }
+  input:focus { border-color: var(--gold); }
+
+  .calc-btn {
+    width: 100%; padding: 15px; border: none; border-radius: 14px;
+    background: var(--gold); color: #07070a; font-size: 14.5px; font-weight: 800;
+    cursor: pointer; margin-top: 4px;
+  }
+
+  .result-box {
+    margin-top: 18px; padding: 16px; border-radius: 15px;
+    background: rgba(255,210,26,.08); border: 1px solid rgba(255,210,26,.25);
+    display: none;
+  }
+  .result-label { font-size: 10.5px; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+  .result-value { font-size: 23px; font-weight: 850; }
+  .result-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .info-box {
+    background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-top: 22px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">AF Intelligent Calculator</div>
+</div>
+
+<div class="main-content">
+
+  <div class="page-title">Numbers made simple</div>
+  <div class="page-sub">Work out percentages, profit, commissions, discounts and savings instantly.</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="percentage">Percentage</div>
+    <div class="tab" data-tab="profit">Profit Margin</div>
+    <div class="tab" data-tab="discount">Discount</div>
+    <div class="tab" data-tab="commission">Commission</div>
+    <div class="tab" data-tab="savings">Savings Growth</div>
+  </div>
+
+  <div class="card">
+
+    <div class="panel active" id="panel-percentage">
+      <h2>Percentage of a Number</h2>
+      <div class="sub">Find out what a percentage of a number actually is.</div>
+
+      <div class="field">
+        <label>Percentage (%)</label>
+        <input type="number" id="pct-percent" placeholder="e.g. 15">
+      </div>
+      <div class="field">
+        <label>Of this number</label>
+        <input type="number" id="pct-number" placeholder="e.g. 200">
+      </div>
+
+      <button class="calc-btn" onclick="calcPercentage()">Calculate</button>
+
+      <div class="result-box" id="pct-result">
+        <div class="result-label">Result</div>
+        <div class="result-value" id="pct-value">—</div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-profit">
+      <h2>Profit Margin</h2>
+      <div class="sub">See your profit and margin percentage on a sale.</div>
+
+      <div class="field">
+        <label>Selling Price</label>
+        <input type="number" id="pm-price" placeholder="e.g. 45">
+      </div>
+      <div class="field">
+        <label>Cost Price</label>
+        <input type="number" id="pm-cost" placeholder="e.g. 20">
+      </div>
+
+      <button class="calc-btn" onclick="calcProfit()">Calculate</button>
+
+      <div class="result-box" id="pm-result">
+        <div class="result-label">Profit &amp; Margin</div>
+        <div class="result-value" id="pm-value">—</div>
+        <div class="result-note" id="pm-note"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-discount">
+      <h2>Discount Calculator</h2>
+      <div class="sub">Find the final price after a discount.</div>
+
+      <div class="field">
+        <label>Original Price</label>
+        <input type="number" id="disc-price" placeholder="e.g. 100">
+      </div>
+      <div class="field">
+        <label>Discount (%)</label>
+        <input type="number" id="disc-percent" placeholder="e.g. 20">
+      </div>
+
+      <button class="calc-btn" onclick="calcDiscount()">Calculate</button>
+
+      <div class="result-box" id="disc-result">
+        <div class="result-label">Final Price</div>
+        <div class="result-value" id="disc-value">—</div>
+        <div class="result-note" id="disc-note"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-commission">
+      <h2>Commission Calculator</h2>
+      <div class="sub">Work out earnings from a sale at a given commission rate.</div>
+
+      <div class="field">
+        <label>Sale Amount</label>
+        <input type="number" id="comm-amount" placeholder="e.g. 500">
+      </div>
+      <div class="field">
+        <label>Commission Rate (%)</label>
+        <input type="number" id="comm-rate" placeholder="e.g. 10">
+      </div>
+
+      <button class="calc-btn" onclick="calcCommission()">Calculate</button>
+
+      <div class="result-box" id="comm-result">
+        <div class="result-label">Commission Earned</div>
+        <div class="result-value" id="comm-value">—</div>
+        <div class="result-note" id="comm-note"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-savings">
+      <h2>Savings Growth</h2>
+      <div class="sub">See what regular saving adds up to over time.</div>
+
+      <div class="field">
+        <label>Starting Amount</label>
+        <input type="number" id="sav-start" placeholder="e.g. 0">
+      </div>
+      <div class="field">
+        <label>Amount Saved Monthly</label>
+        <input type="number" id="sav-monthly" placeholder="e.g. 50">
+      </div>
+      <div class="field">
+        <label>Number of Months</label>
+        <input type="number" id="sav-months" placeholder="e.g. 12">
+      </div>
+      <div class="field">
+        <label>Annual Interest Rate (%, optional)</label>
+        <input type="number" id="sav-rate" placeholder="e.g. 5 (leave blank if none)">
+      </div>
+
+      <button class="calc-btn" onclick="calcSavings()">Calculate</button>
+
+      <div class="result-box" id="sav-result">
+        <div class="result-label">Estimated Total</div>
+        <div class="result-value" id="sav-value">—</div>
+        <div class="result-note" id="sav-note"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-box">
+    These are simple, straightforward calculations meant to help you plan. For tax, loan or legal decisions, always confirm with a qualified professional or official source.
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById("panel-" + tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  function fmt(n) {
+    if (!isFinite(n)) return "—";
+    return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+
+  function calcPercentage() {
+    const pct = parseFloat(document.getElementById("pct-percent").value);
+    const num = parseFloat(document.getElementById("pct-number").value);
+    if (isNaN(pct) || isNaN(num)) return;
+    const result = (pct / 100) * num;
+    document.getElementById("pct-value").textContent = fmt(result);
+    document.getElementById("pct-result").style.display = "block";
+  }
+
+  function calcProfit() {
+    const price = parseFloat(document.getElementById("pm-price").value);
+    const cost = parseFloat(document.getElementById("pm-cost").value);
+    if (isNaN(price) || isNaN(cost)) return;
+    const profit = price - cost;
+    const margin = price !== 0 ? (profit / price) * 100 : 0;
+    document.getElementById("pm-value").textContent = fmt(profit) + " profit";
+    document.getElementById("pm-note").textContent = fmt(margin) + "% margin on the selling price";
+    document.getElementById("pm-result").style.display = "block";
+  }
+
+  function calcDiscount() {
+    const price = parseFloat(document.getElementById("disc-price").value);
+    const pct = parseFloat(document.getElementById("disc-percent").value);
+    if (isNaN(price) || isNaN(pct)) return;
+    const saved = (pct / 100) * price;
+    const final = price - saved;
+    document.getElementById("disc-value").textContent = fmt(final);
+    document.getElementById("disc-note").textContent = "You save " + fmt(saved);
+    document.getElementById("disc-result").style.display = "block";
+  }
+
+  function calcCommission() {
+    const amount = parseFloat(document.getElementById("comm-amount").value);
+    const rate = parseFloat(document.getElementById("comm-rate").value);
+    if (isNaN(amount) || isNaN(rate)) return;
+    const commission = (rate / 100) * amount;
+    const remainder = amount - commission;
+    document.getElementById("comm-value").textContent = fmt(commission);
+    document.getElementById("comm-note").textContent = "Remaining after commission: " + fmt(remainder);
+    document.getElementById("comm-result").style.display = "block";
+  }
+
+  function calcSavings() {
+    const start = parseFloat(document.getElementById("sav-start").value) || 0;
+    const monthly = parseFloat(document.getElementById("sav-monthly").value) || 0;
+    const months = parseInt(document.getElementById("sav-months").value) || 0;
+    const annualRate = parseFloat(document.getElementById("sav-rate").value) || 0;
+    const monthlyRate = annualRate / 100 / 12;
+    let total = start;
+    for (let i = 0; i < months; i++) {
+      total += monthly;
+      total += total * monthlyRate;
+    }
+    const totalDeposited = start + (monthly * months);
+    const interestEarned = total - totalDeposited;
+    document.getElementById("sav-value").textContent = fmt(total);
+    document.getElementById("sav-note").textContent =
+      annualRate > 0
+        ? "Total deposited: " + fmt(totalDeposited) + " · Interest earned: " + fmt(interestEarned)
+        : "Total deposited: " + fmt(totalDeposited) + " (no interest applied)";
+    document.getElementById("sav-result").style.display = "block";
+  }
+</script>
+
+</body>
+</html>
