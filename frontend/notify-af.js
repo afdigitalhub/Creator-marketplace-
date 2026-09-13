@@ -41,7 +41,11 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (token) {
-        notifyBtn.textContent = "Notifications On";
+        notifyBtn.textContent = "✓ Notifications On";
+        notifyBtn.style.color = "#34d399";
+        notifyBtn.style.borderColor = "#34d399";
+        notifyBtn.style.opacity = "1";
+        notifyBtn.style.cursor = "default";
         notifyBtn.disabled = true;
       } else {
         alert("Could not get a notification token. Please try again.");
