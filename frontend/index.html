@@ -1080,7 +1080,7 @@ CREATOR · BUSINESS · MARKETPLACE
 
 <div class="search-box">
 
-<span>⌕</span>
+<span id="globalSearchIcon" style="cursor:pointer">⌕</span>
 
 <input
 id="globalSearch"
@@ -1110,7 +1110,7 @@ Sign Up
 <nav class="mobile-nav" id="mobileNav">
 
 <div class="mobile-search">
-<span style="color:#71798d">⌕</span>
+<span id="mobileSearchIcon" style="color:#71798d;cursor:pointer">⌕</span>
 <input id="mobileSearch" type="search" placeholder="Search AF Digital Hub...">
 </div>
 
@@ -1861,12 +1861,28 @@ goSearch(this);
 });
 
 document
+.getElementById("globalSearchIcon")
+.addEventListener("click",function(){
+
+goSearch(document.getElementById("globalSearch"));
+
+});
+
+document
 .getElementById("mobileSearch")
 .addEventListener("keydown",function(event){
 
 if(event.key!=="Enter")return;
 
 goSearch(this);
+
+});
+
+document
+.getElementById("mobileSearchIcon")
+.addEventListener("click",function(){
+
+goSearch(document.getElementById("mobileSearch"));
 
 });
 
@@ -1885,6 +1901,30 @@ document
 .addEventListener("click",function(){
 
 goSearch(document.getElementById("heroSearch"));
+
+});
+
+document
+.getElementById("globalSearch")
+.addEventListener("search",function(){
+
+goSearch(this);
+
+});
+
+document
+.getElementById("mobileSearch")
+.addEventListener("search",function(){
+
+goSearch(this);
+
+});
+
+document
+.getElementById("heroSearch")
+.addEventListener("search",function(){
+
+goSearch(this);
 
 });
 
