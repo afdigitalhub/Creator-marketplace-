@@ -24,6 +24,7 @@ const productReviewRoutes = require("./routes/productReviews");
 const withdrawalRoutes = require("./routes/withdrawals");
 const adminStatsRoutes = require("./routes/adminStats");
 const gigsRoutes = require("./routes/gigs");
+const newsRoutes = require("./routes/news");
 
 /* AF INTELLIGENT AI */
 const aiRoutes = require("./routes/ai");
@@ -61,6 +62,7 @@ app.use("/orders", orderRoutes);
 app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
 app.use("/withdrawals", withdrawalRoutes);
+app.use("/news", newsRoutes);
 
 /* AF Intelligent AI */
 app.use("/ai", aiRoutes);
@@ -80,4 +82,3 @@ app.listen(PORT, "0.0.0.0", () => {
     `Creator Marketplace API running on port ${PORT}`
   );
 });
-
