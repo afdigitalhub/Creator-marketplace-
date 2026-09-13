@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gig Details | AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050b">
+<style>
+  :root {
+    --bg: #05050b; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gold: #ffd21a; --blue: #4e7cff; --violet: #7b45ff;
+    --text-light: #f8f8fc; --text-muted: #8992a7; --input-bg: #0a0a12;
+    --success: #34d399; --error: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: radial-gradient(circle at 85% 0%, rgba(123,69,255,.14), transparent 30%), var(--bg);
+    color: var(--text-light); font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh; padding-bottom: 120px;
+  }
+  .top-header {
+    display: flex; align-items: center; gap: 14px; padding: 18px 16px;
+    position: sticky; top: 0; background: rgba(5,5,11,.88); backdrop-filter: blur(14px);
+    z-index: 50; border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    font-size: 20px; color: var(--text-light); text-decoration: none;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--card-bg); border-radius: 10px;
+  }
+  .header-title { font-size: 16px; font-weight: 800; }
+  .main-content { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+
+  .hero-card {
+    background: radial-gradient(circle at 85% 10%, rgba(255,210,26,.16), transparent 40%),
+                linear-gradient(135deg, rgba(78,124,255,.16), rgba(123,69,255,.16));
+    border: 1px solid rgba(255,210,26,.14); border-radius: 20px; padding: 20px; margin-bottom: 20px;
+  }
+  .gig-cat {
+    display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .4px; padding: 4px 10px; border-radius: 7px; color: #07070a; margin-bottom: 10px;
+  }
+  .cat-errand { background: var(--gold); }
+  .cat-voice { background: var(--blue); color: #fff; }
+  .cat-review { background: var(--violet); color: #fff; }
+  .cat-price_check { background: var(--gold); }
+
+  .gig-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; line-height: 1.3; }
+  .gig-price { font-size: 26px; font-weight: 850; color: var(--gold); }
+
+  .section {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .section-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+  .section-text { font-size: 14px; line-height: 1.6; color: var(--text-light); }
+
+  .status-badge {
+    display: inline-block; font-size: 11px; font-weight: 800; padding: 5px 11px;
+    border-radius: 8px; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .status-open { background: rgba(52,211,153,.15); color: var(--success); }
+  .status-assigned { background: rgba(78,124,255,.15); color: var(--blue); }
+  .status-submitted { background: rgba(255,210,26,.15); color: var(--gold); }
+  .status-approved { background: rgba(52,211,153,.15); color: var(--success); }
+
+  textarea, input {
+    width: 100%; padding: 13px 15px; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: 13px; color: var(--text-light);
+    font-size: 14.5px; outline: none; font-family: inherit; resize: none; margin-bottom: 12px;
+  }
+  textarea:focus, input:focus { border-color: var(--gold); }
+
+  .sticky-action {
+    position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,18,.96);
+    backdrop-filter: blur(14px); border-top: 1px solid var(--border); padding: 14px 16px 22px; z-index: 50;
+  }
+  .action-btn {
+    width: 100%; padding: 15px; border: none; border-radius: 14px;
+    background: var(--gold); color: #07070a; font-size: 15px; font-weight: 800; cursor: pointer;
+  }
+  .action-btn:disabled { opacity: .5; }
+  .action-btn.secondary { background: var(--card-bg); color: var(--text-light); border: 1px solid var(--border); }
+
+  .msg-box {
+    padding: 11px 13px; border-radius: 11px; font-size: 13px; margin-bottom: 14px;
+    display: none; line-height: 1.4;
+  }
+  .msg-box.error { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: var(--error); }
+  .msg-box.success { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: var(--success); }
+
+  .loading-text { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="gigs.html" class="back-btn">←</a>
+  <div class="header-title">Gig Details</div>
+</div>
+
+<div class="main-content" id="mainContent">
+  <div class="loading-text">Loading gig...</div>
+</div>
+
+<div class="sticky-action" id="stickyAction" style="display:none;"></div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+  const currentUserId = localStorage.getItem('af_user_id'); // may not exist yet on all pages
+  if (!token) window.location.href = 'login.html';
+
+  const params = new URLSearchParams(window.location.search);
+  const gigId = params.get('id');
+
+  const CATEGORY_LABELS = { errand: "Local Errand", voice: "Voice & Language", review: "Quick Review", price_check: "Price Check" };
+  const CURRENCY_SYMBOLS = { GHS: '₵', USD: '$', GBP: '£', EUR: '€' };
+  function money(amount, currency) {
+    const symbol = CURRENCY_SYMBOLS[currency] || '₵';
+    return `${symbol}${Number(amount).toFixed(0)}`;
+  }
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let currentGig = null;
+
+  async function loadGig() {
+    try {
+      const res = await fetch(`${API_BASE}/gigs/${gigId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('mainContent').innerHTML = `<div class="loading-text">Gig not found.</div>`;
+        return;
+      }
+
+      currentGig = data.gig;
+      renderGig(currentGig);
+
+    } catch (err) {
+      document.getElementById('mainContent').innerHTML = `<div class="loading-text">Connection error. Please try again.</div>`;
+    }
+  }
+
+  function renderGig(g) {
+    const statusLabels = { open: 'Open', assigned: 'Assigned', submitted: 'Awaiting Approval', approved: 'Completed', pending_payment: 'Pending Payment' };
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="hero-card">
+        <span class="gig-cat cat-${g.category}">${escapeHtml(g.category_label)}</span>
+        <div class="gig-title">${escapeHtml(g.title)}</div>
+        <div class="gig-price">${money(g.price, g.currency)}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Status</div>
+        <span class="status-badge status-${g.status}">${statusLabels[g.status] || g.status}</span>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Description</div>
+        <div class="section-text">${escapeHtml(g.description)}</div>
+      </div>
+
+      ${g.city ? `
+      <div class="section">
+        <div class="section-title">Location</div>
+        <div class="section-text">📍 ${escapeHtml(g.city)}</div>
+      </div>` : ''}
+
+      <div class="section">
+        <div class="section-title">Posted By</div>
+        <div class="section-text">${escapeHtml(g.poster_name || 'A user')}</div>
+      </div>
+
+      ${g.worker_name ? `
+      <div class="section">
+        <div class="section-title">Claimed By</div>
+        <div class="section-text">${escapeHtml(g.worker_name)}</div>
+      </div>` : ''}
+
+      ${g.submission_text || g.submission_file_url ? `
+      <div class="section">
+        <div class="section-title">Submission</div>
+        <div class="section-text">${g.submission_text ? escapeHtml(g.submission_text) : ''}</div>
+        ${g.submission_file_url ? `<div class="section-text" style="margin-top:8px;"><a href="${escapeHtml(g.submission_file_url)}" style="color:var(--blue)" target="_blank">View submitted file →</a></div>` : ''}
+      </div>` : ''}
+
+      <div class="msg-box" id="msgBox"></div>
+    `;
+
+    renderAction(g);
+  }
+
+  function showMsg(text, isError) {
+    const box = document.getElementById('msgBox');
+    if (!box) return;
+    box.textContent = text;
+    box.className = 'msg-box ' + (isError ? 'error' : 'success');
+    box.style.display = 'block';
+  }
+
+  function renderAction(g) {
+    const sticky = document.getElementById('stickyAction');
+
+    if (g.status === 'open') {
+      sticky.style.display = 'block';
+      sticky.innerHTML = `<button class="action-btn" id="claimBtn">Claim This Gig</button>`;
+      document.getElementById('claimBtn').addEventListener('click', claimGig);
+      return;
+    }
+
+    if (g.status === 'assigned') {
+      sticky.style.display = 'block';
+      sticky.innerHTML = `
+        <textarea id="submissionText" rows="3" placeholder="Describe what you did, or paste a link/result..."></textarea>
+        <input type="url" id="submissionFile" placeholder="Optional: link to a file, photo, or recording">
+        <button class="action-btn" id="submitBtn">Submit Completed Work</button>
+      `;
+      document.getElementById('submitBtn').addEventListener('click', submitGig);
+      return;
+    }
+
+    if (g.status === 'submitted') {
+      sticky.style.display = 'block';
+      sticky.innerHTML = `<button class="action-btn" id="approveBtn">Approve & Release Payment</button>`;
+      document.getElementById('approveBtn').addEventListener('click', approveGig);
+      return;
+    }
+
+    sticky.style.display = 'none';
+  }
+
+  async function claimGig() {
+    const btn = document.getElementById('claimBtn');
+    btn.disabled = true;
+    btn.textContent = 'Claiming...';
+
+    try {
+      const res = await fetch(`${API_BASE}/gigs/${gigId}/claim`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(data.error || 'Could not claim this gig.', true);
+        btn.disabled = false;
+        btn.textContent = 'Claim This Gig';
+        return;
+      }
+
+      currentGig = data.gig;
+      renderGig(currentGig);
+      showMsg('Gig claimed! Get it done and submit your work here.', false);
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', true);
+      btn.disabled = false;
+      btn.textContent = 'Claim This Gig';
+    }
+  }
+
+  async function submitGig() {
+    const submissionText = document.getElementById('submissionText').value.trim();
+    const submissionFile = document.getElementById('submissionFile').value.trim();
+
+    if (!submissionText && !submissionFile) {
+      showMsg('Please describe your work or add a file link.', true);
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/gigs/${gigId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ submission_text: submissionText, submission_file_url: submissionFile })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(data.error || 'Could not submit work.', true);
+        btn.disabled = false;
+        btn.textContent = 'Submit Completed Work';
+        return;
+      }
+
+      currentGig = data.gig;
+      renderGig(currentGig);
+      showMsg('Submitted! The poster will review and approve it.', false);
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', true);
+      btn.disabled = false;
+      btn.textContent = 'Submit Completed Work';
+    }
+  }
+
+  async function approveGig() {
+    const btn = document.getElementById('approveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Approving...';
+
+    try {
+      const res = await fetch(`${API_BASE}/gigs/${gigId}/approve`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(data.error || 'Could not approve this gig.', true);
+        btn.disabled = false;
+        btn.textContent = 'Approve & Release Payment';
+        return;
+      }
+
+      currentGig = data.gig;
+      renderGig(currentGig);
+      showMsg('Approved! Payment has been released to the worker.', false);
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', true);
+      btn.disabled = false;
+      btn.textContent = 'Approve & Release Payment';
+    }
+  }
+
+  loadGig();
+</script>
+
+</body>
+</html>
