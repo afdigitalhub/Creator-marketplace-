@@ -25,6 +25,7 @@ const withdrawalRoutes = require("./routes/withdrawals");
 const adminStatsRoutes = require("./routes/adminStats");
 const gigsRoutes = require("./routes/gigs");
 const newsRoutes = require("./routes/news");
+const videosRoutes = require("./routes/videos");
 
 /* AF INTELLIGENT AI */
 const aiRoutes = require("./routes/ai");
@@ -63,6 +64,7 @@ app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
 app.use("/withdrawals", withdrawalRoutes);
 app.use("/news", newsRoutes);
+app.use("/videos", videosRoutes);
 
 /* AF Intelligent AI */
 app.use("/ai", aiRoutes);
