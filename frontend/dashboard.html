@@ -213,6 +213,22 @@
   .empty-state { text-align: center; padding: 30px 16px; color: var(--text-muted); font-size: 13px; }
   .loading-text { text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px; }
 
+  .pulse-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 24px; }
+  .pulse-scroll::-webkit-scrollbar { display: none; }
+  .pulse-tile {
+    flex: none; width: 160px; text-decoration: none; color: var(--text-light);
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 14px 26px -18px rgba(0,0,0,.65);
+  }
+  .pulse-tile .cover { height: 100px; background: #080a11; }
+  .pulse-tile .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pulse-tile .p-body { padding: 10px; }
+  .pulse-tile .p-title {
+    font-size: 11.5px; font-weight: 800; line-height: 1.35; min-height: 45px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .pulse-tile .p-source { font-size: 9.5px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; }
+
   .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(10, 10, 18, .95); backdrop-filter: blur(14px);
@@ -338,6 +354,13 @@
   </div>
   <div class="product-scroll" id="productScroll">
     <div class="loading-text">Loading products...</div>
+  </div>
+
+  <div class="section-title-row">
+    <div class="section-title">AF Pulse — World Headlines</div>
+  </div>
+  <div class="pulse-scroll" id="pulseScroll">
+    <div class="loading-text">Loading headlines...</div>
   </div>
 
   <div class="cta-card" id="ctaCard" style="display:none;">
@@ -553,6 +576,32 @@
 
   loadProducts();
   loadCampaigns();
+
+  async function loadPulse() {
+    try {
+      const res = await fetch(`${API_BASE}/news/top`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const articles = data.articles || [];
+      if (!articles.length) {
+        document.getElementById('pulseScroll').innerHTML = `<div class="empty-state">No headlines available right now.</div>`;
+        return;
+      }
+      document.getElementById('pulseScroll').innerHTML = articles.map(a => `
+        <a class="pulse-tile" href="${escapeHtml(a.url || '#')}" target="_blank" rel="noopener">
+          <div class="cover">${a.image ? `<img src="${escapeHtml(a.image)}" alt="${escapeHtml(a.title)}" loading="lazy">` : ''}</div>
+          <div class="p-body">
+            <div class="p-title">${escapeHtml(a.title)}</div>
+            <div class="p-source">${escapeHtml(a.source || 'News')}</div>
+          </div>
+        </a>`
+      ).join('');
+    } catch (err) {
+      document.getElementById('pulseScroll').innerHTML = `<div class="empty-state">Could not load headlines right now.</div>`;
+    }
+  }
+
+  loadPulse();
 </script>
 
 </body>
