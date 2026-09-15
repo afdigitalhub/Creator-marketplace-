@@ -26,3 +26,21 @@ messaging.onBackgroundMessage((payload) => {
   };
   self.registration.showNotification(title, options);
 });
+
+// A real fetch handler — required by Chrome for the "Install App" prompt to
+// appear. This is a simple pass-through: try the network first, and if that
+// fails (no connection), fall back to anything already cached for that page.
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
+});
+
+// Activate this service worker immediately for anyone already on the site,
+// instead of waiting for them to close and reopen their browser.
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
