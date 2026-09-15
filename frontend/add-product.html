@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Product | AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050b">
+<style>
+  :root {
+    --bg: #05050b; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gold: #ffd21a; --blue: #4e7cff; --violet: #7b45ff;
+    --text-light: #f8f8fc; --text-muted: #8992a7; --input-bg: #0a0a12;
+    --success: #34d399; --error: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg); color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh; padding-bottom: 40px;
+  }
+
+  .top-header {
+    display: flex; align-items: center; gap: 14px; padding: 18px 16px;
+    position: sticky; top: 0; background: rgba(5,5,11,.9); backdrop-filter: blur(12px);
+    z-index: 50; border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    font-size: 18px; color: var(--text-light); text-decoration: none;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 9px;
+  }
+  .header-title { font-size: 15px; font-weight: 700; }
+
+  .wrap { max-width: 420px; margin: 0 auto; padding: 20px 18px; }
+
+  .progress { display: flex; gap: 6px; margin-bottom: 24px; }
+  .dot { flex: 1; height: 4px; border-radius: 4px; background: var(--border); }
+  .dot.done { background: var(--gold); }
+
+  .step-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 6px; }
+  .step-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 8px; }
+  .step-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 7px; }
+  input, textarea, select {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 14px; color: var(--text-light); font-size: 14px; font-family: inherit;
+  }
+  textarea { resize: none; height: 90px; }
+  .hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+  .price-row { display: flex; gap: 10px; }
+  .price-row select { max-width: 90px; }
+
+  .split-note {
+    background: rgba(255,210,26,.08); border: 1px solid rgba(255,210,26,.25); border-radius: 12px;
+    padding: 14px; font-size: 12.5px; color: #d9c98a; margin-top: 6px; line-height: 1.6;
+  }
+  .split-note strong { color: var(--gold); }
+
+  .review-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-label { color: var(--text-muted); }
+  .review-value { font-weight: 700; text-align: right; max-width: 60%; }
+
+  .nav-row { display: flex; gap: 10px; margin-top: 28px; }
+  .btn { flex: 1; padding: 15px; border-radius: 14px; font-size: 14px; font-weight: 800; border: none; text-align: center; cursor: pointer; }
+  .btn-back { background: var(--card-bg); color: var(--text-light); border: 1px solid var(--border); }
+  .btn-next { background: var(--gold); color: #07070a; }
+  .btn-next:disabled { opacity: .5; }
+
+  .error-box { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: var(--error); border-radius: 10px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 14px; display: none; }
+
+  .success-wrap { text-align: center; padding: 60px 20px; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-title { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+  .success-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">Add Product</div>
+</div>
+
+<div class="wrap" id="wizardWrap">
+
+  <div class="progress" id="progressDots"></div>
+
+  <div id="errorBox" class="error-box"></div>
+
+  <div id="stepContent"></div>
+
+  <div class="nav-row">
+    <button class="btn btn-back" id="backBtn" onclick="prevStep()">← Back</button>
+    <button class="btn btn-next" id="nextBtn" onclick="nextStep()">Continue →</button>
+  </div>
+
+</div>
+
+<div class="wrap" id="successWrap" style="display:none;">
+  <div class="success-wrap">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Submitted for review</div>
+    <div class="success-sub">Your product has been sent to AF Digital Hub for approval. Once approved, it will appear in the Shop for everyone to buy.</div>
+    <a href="dashboard.html" class="btn btn-next" style="display:inline-block;text-decoration:none;padding:14px 28px;">Back to Home</a>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+
+  if (!token) {
+    window.location.href = 'login.html';
+  }
+
+  const data = {
+    title: '', category: 'Templates', description: '',
+    cover_url: '', file_url: '',
+    currency: 'GHS', price: ''
+  };
+
+  let step = 1;
+  const totalSteps = 4;
+
+  function renderDots() {
+    let html = '';
+    for (let i = 1; i <= totalSteps; i++) {
+      html += `<div class="dot ${i <= step ? 'done' : ''}"></div>`;
+    }
+    document.getElementById('progressDots').innerHTML = html;
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+  function clearError() {
+    document.getElementById('errorBox').style.display = 'none';
+  }
+
+  function renderStep() {
+    clearError();
+    renderDots();
+    document.getElementById('backBtn').style.visibility = step === 1 ? 'hidden' : 'visible';
+    document.getElementById('nextBtn').textContent = step === totalSteps ? 'Submit for Review' : 'Continue →';
+
+    const content = document.getElementById('stepContent');
+
+    if (step === 1) {
+      content.innerHTML = `
+        <div class="step-label">Step 1 of ${totalSteps}</div>
+        <div class="step-title">What are you selling?</div>
+        <div class="step-sub">Give your product a clear title and pick the category that fits best.</div>
+
+        <div class="field">
+          <label>Product title</label>
+          <input type="text" id="in_title" placeholder="e.g. Instagram Post Templates (20-pack)" value="${escapeAttr(data.title)}">
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <select id="in_category">
+            ${['Templates','eBooks','Courses','Graphics','Other'].map(c =>
+              `<option ${data.category === c ? 'selected' : ''}>${c}</option>`
+            ).join('')}
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea id="in_description" placeholder="Describe what buyers will get...">${escapeHtml(data.description)}</textarea>
+        </div>
+      `;
+    }
+
+    if (step === 2) {
+      content.innerHTML = `
+        <div class="step-label">Step 2 of ${totalSteps}</div>
+        <div class="step-title">Add your files</div>
+        <div class="step-sub">Paste a direct link to your cover image and your product file. You can host these on Google Drive, Dropbox, or anywhere that gives a direct link.</div>
+
+        <div class="field">
+          <label>Cover image link</label>
+          <input type="url" id="in_cover" placeholder="https://..." value="${escapeAttr(data.cover_url)}">
+          <div class="hint">This is the picture buyers see in the Shop.</div>
+        </div>
+
+        <div class="field">
+          <label>Product file link</label>
+          <input type="url" id="in_file" placeholder="https://..." value="${escapeAttr(data.file_url)}">
+          <div class="hint">This is the actual file buyers receive after paying.</div>
+        </div>
+      `;
+    }
+
+    if (step === 3) {
+      content.innerHTML = `
+        <div class="step-label">Step 3 of ${totalSteps}</div>
+        <div class="step-title">Set your price</div>
+        <div class="step-sub">Choose what buyers will pay for this product.</div>
+
+        <div class="field">
+          <label>Price</label>
+          <div class="price-row">
+            <select id="in_currency">
+              ${['GHS','USD','GBP','EUR'].map(c =>
+                `<option ${data.currency === c ? 'selected' : ''}>${c}</option>`
+              ).join('')}
+            </select>
+            <input type="number" id="in_price" placeholder="25" value="${escapeAttr(data.price)}">
+          </div>
+        </div>
+
+        <div class="split-note">
+          You keep <strong>85%</strong> of every sale. AF Digital Hub takes a <strong>15%</strong> platform fee, paid automatically — no extra steps for you.
+        </div>
+      `;
+    }
+
+    if (step === 4) {
+      content.innerHTML = `
+        <div class="step-label">Step 4 of ${totalSteps}</div>
+        <div class="step-title">Review and submit</div>
+        <div class="step-sub">Your product will be sent for a quick review before it appears in the Shop.</div>
+
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:6px 16px;">
+          <div class="review-row"><span class="review-label">Title</span><span class="review-value">${escapeHtml(data.title)}</span></div>
+          <div class="review-row"><span class="review-label">Category</span><span class="review-value">${escapeHtml(data.category)}</span></div>
+          <div class="review-row"><span class="review-label">Price</span><span class="review-value">${escapeHtml(data.currency)} ${escapeHtml(data.price)}</span></div>
+        </div>
+      `;
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+  }
+
+  function saveStepInputs() {
+    if (step === 1) {
+      data.title = document.getElementById('in_title').value.trim();
+      data.category = document.getElementById('in_category').value;
+      data.description = document.getElementById('in_description').value.trim();
+    }
+    if (step === 2) {
+      data.cover_url = document.getElementById('in_cover').value.trim();
+      data.file_url = document.getElementById('in_file').value.trim();
+    }
+    if (step === 3) {
+      data.currency = document.getElementById('in_currency').value;
+      data.price = document.getElementById('in_price').value.trim();
+    }
+  }
+
+  function validateStep() {
+    if (step === 1) {
+      if (!data.title) return 'Please enter a product title.';
+      if (!data.description) return 'Please add a short description.';
+    }
+    if (step === 2) {
+      if (!data.cover_url) return 'Please add a cover image link.';
+      if (!data.file_url) return 'Please add your product file link.';
+    }
+    if (step === 3) {
+      if (!data.price || Number(data.price) <= 0) return 'Please enter a valid price.';
+    }
+    return null;
+  }
+
+  async function nextStep() {
+    saveStepInputs();
+    const err = validateStep();
+    if (err) { showError(err); return; }
+    clearError();
+
+    if (step < totalSteps) {
+      step++;
+      renderStep();
+      return;
+    }
+
+    // Final step — submit
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch(`${API_BASE}/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          cover_url: data.cover_url,
+          file_url: data.file_url,
+          price: Number(data.price),
+          currency: data.currency
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        showError(result.error || 'Could not submit your product. Please try again.');
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Submit for Review';
+        return;
+      }
+
+      document.getElementById('wizardWrap').style.display = 'none';
+      document.getElementById('successWrap').style.display = 'block';
+
+    } catch (err) {
+      showError('Connection error. Please check your internet and try again.');
+      nextBtn.disabled = false;
+      nextBtn.textContent = 'Submit for Review';
+    }
+  }
+
+  function prevStep() {
+    if (step === 1) return;
+    step--;
+    renderStep();
+  }
+
+  renderStep();
+</script>
+
+</body>
+</html>
