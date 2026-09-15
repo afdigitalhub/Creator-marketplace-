@@ -179,6 +179,39 @@ router.post("/pin-login", async (req, res) => {
   }
 });
 
+// POST /auth/ping — called periodically by the app while someone is using it,
+// so we know roughly when they were last active. No response body needed.
+router.post("/ping", requireAuth, async (req, res) => {
+  try {
+    await pool.query("UPDATE users SET last_seen = NOW() WHERE id = $1", [req.user.id]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not update activity" });
+  }
+});
+
+// GET /auth/online-status/:userId — anyone logged in can check if another
+// user was active in the last 2 minutes. Only returns true/false, never
+// the actual timestamp, to keep it simple and avoid exposing exact activity times.
+router.get("/online-status/:userId", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT last_seen FROM users WHERE id = $1",
+      [req.params.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const lastSeen = result.rows[0].last_seen;
+    const online = lastSeen && (Date.now() - new Date(lastSeen).getTime()) < 2 * 60 * 1000;
+    res.json({ online: Boolean(online) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not check status" });
+  }
+});
+
 // GET /auth/me - confirms the token's role, used by frontend route guards
 router.get("/me", requireAuth, (req, res) => {
   res.json({ id: req.user.id, email: req.user.email, role: req.user.role });
