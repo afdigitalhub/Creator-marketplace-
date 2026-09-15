@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set PIN | AF Digital Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05050b">
+<style>
+  :root {
+    --bg: #05050b; --card-bg: #0f0f1a; --border: #1c1c2e;
+    --gold: #ffd21a; --text-light: #f8f8fc; --text-muted: #8992a7;
+    --input-bg: #0a0a12; --success: #34d399; --error: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh; padding-bottom: 40px;
+  }
+  .top-header {
+    display: flex; align-items: center; gap: 14px; padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .back-btn {
+    font-size: 18px; color: var(--text-light); text-decoration: none;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 9px;
+  }
+  .header-title { font-size: 15px; font-weight: 700; }
+  .wrap { max-width: 400px; margin: 40px auto 0; padding: 0 20px; }
+  .title { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .sub { font-size: 13px; color: var(--text-muted); margin-bottom: 26px; line-height: 1.6; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 7px; }
+  input {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px 14px; color: var(--text-light); font-size: 14px;
+  }
+  .submit-btn {
+    width: 100%; background: var(--gold); color: #07070a; border: none;
+    border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 800; margin-top: 8px;
+  }
+  .msg { font-size: 12.5px; margin-top: 14px; padding: 11px 13px; border-radius: 10px; display: none; }
+  .msg.success { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: var(--success); }
+  .msg.error { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: var(--error); }
+</style>
+</head>
+<body>
+
+<div class="top-header">
+  <a href="dashboard.html" class="back-btn">←</a>
+  <div class="header-title">Set Quick-Access PIN</div>
+</div>
+
+<div class="wrap">
+  <div class="title">Create your PIN</div>
+  <div class="sub">Once set, you can log in using just your email and this PIN — no need to type your full password every time. Enter your current password once here to confirm it's really you.</div>
+
+  <div class="field">
+    <label>Your current password</label>
+    <input type="password" id="in_password" placeholder="••••••••" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>Choose a PIN (4–6 digits)</label>
+    <input type="password" id="in_pin" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+  </div>
+
+  <div class="field">
+    <label>Confirm PIN</label>
+    <input type="password" id="in_pin_confirm" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="setPin()">Save PIN</button>
+
+  <div class="msg" id="msgBox"></div>
+</div>
+
+<script>
+  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+  const token = localStorage.getItem('af_token');
+
+  if (!token) {
+    window.location.href = 'login.html';
+  }
+
+  function showMsg(text, type) {
+    const box = document.getElementById('msgBox');
+    box.textContent = text;
+    box.className = 'msg ' + type;
+    box.style.display = 'block';
+  }
+
+  async function setPin() {
+    const password = document.getElementById('in_password').value;
+    const pin = document.getElementById('in_pin').value;
+    const pinConfirm = document.getElementById('in_pin_confirm').value;
+
+    if (!password) return showMsg('Please enter your current password.', 'error');
+    if (!/^\d{4,6}$/.test(pin)) return showMsg('PIN must be 4 to 6 digits.', 'error');
+    if (pin !== pinConfirm) return showMsg('PINs do not match.', 'error');
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/set-pin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ password, pin })
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        showMsg(result.error || 'Could not save PIN.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save PIN';
+        return;
+      }
+
+      showMsg('PIN saved! You can now use it to log in.', 'success');
+      btn.textContent = 'Saved ✓';
+
+    } catch (err) {
+      showMsg('Connection error. Please try again.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Save PIN';
+    }
+  }
+</script>
+
+</body>
+</html>
