@@ -1183,6 +1183,10 @@ placeholder="Search AF Digital Hub...">
 
 <div class="nav-buttons">
 
+<button class="btn btn-dark" id="installBtn" type="button" style="display:none;">
+📲 Install App
+</button>
+
 <a class="btn btn-dark" href="login.html">
 Log In
 </a>
@@ -1215,6 +1219,7 @@ Sign Up
 <a href="about.html">About</a>
 
 <div class="mobile-nav-buttons">
+<button class="btn btn-dark" id="installBtnMobile" type="button" style="display:none;width:100%;margin-bottom:10px;">📲 Install App</button>
 <a class="btn btn-dark" href="login.html">Log In</a>
 <a class="btn btn-gold" href="login.html?mode=signup">Sign Up</a>
 </div>
@@ -2212,6 +2217,53 @@ Could not load videos right now.
 }
 
 loadLive();
+
+
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(event){
+
+event.preventDefault();
+deferredInstallPrompt = event;
+
+document.getElementById('installBtn').style.display = 'inline-flex';
+document.getElementById('installBtnMobile').style.display = 'block';
+
+});
+
+async function triggerInstall(){
+
+if(!deferredInstallPrompt)return;
+
+deferredInstallPrompt.prompt();
+
+const choice = await deferredInstallPrompt.userChoice;
+
+if(choice.outcome === 'accepted'){
+
+document.getElementById('installBtn').style.display = 'none';
+document.getElementById('installBtnMobile').style.display = 'none';
+
+}
+
+deferredInstallPrompt = null;
+
+}
+
+document
+.getElementById('installBtn')
+.addEventListener('click', triggerInstall);
+
+document
+.getElementById('installBtnMobile')
+.addEventListener('click', triggerInstall);
+
+window.addEventListener('appinstalled', function(){
+
+document.getElementById('installBtn').style.display = 'none';
+document.getElementById('installBtnMobile').style.display = 'none';
+
+});
 
 
 function goSearch(inputEl){
