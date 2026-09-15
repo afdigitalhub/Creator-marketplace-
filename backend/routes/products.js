@@ -91,7 +91,24 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET all products regardless of status (admin only)
+// GET the logged-in user's own products, any status (their personal "My Store" list)
+router.get("/mine", requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT p.*
+       FROM products p
+       WHERE p.seller_id = $1
+       ORDER BY p.created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ products: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not fetch your products" });
+  }
+});
+
+// GET all products regardless of status (admin only) — used for the approval queue
 router.get("/admin/all", requireAuth, requireRole("admin"), async (req, res) => {
   try {
     const result = await pool.query(
@@ -176,8 +193,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST create product (admin only)
-router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
+// POST create product — any logged-in user can now list a product.
+// Non-admin sellers always land in "pending_review" regardless of what they send,
+// so nothing goes live in the Shop until an admin approves it.
+router.post("/", requireAuth, async (req, res) => {
   const {
     title, subtitle, description, category, tags,
     cover_url, preview_url, file_url, price, currency, status
@@ -186,6 +205,9 @@ router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
   if (!title || !description || !category || !price) {
     return res.status(400).json({ error: "title, description, category, and price are required" });
   }
+
+  const isAdmin = req.user.role === "admin";
+  const finalStatus = isAdmin ? (status || "draft") : "pending_review";
 
   try {
     const result = await pool.query(
@@ -197,7 +219,7 @@ router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
       [
         req.user.id, title, subtitle || null, description, category, tags || null,
         cover_url || null, preview_url || null, file_url || null,
-        price, currency || "GHS", status || "draft"
+        price, currency || "GHS", finalStatus
       ]
     );
     res.status(201).json({ product: result.rows[0] });
@@ -207,14 +229,20 @@ router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
   }
 });
 
-// PUT update product
-router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
+// PUT update product — the owner can edit their own, or an admin can edit any.
+// Non-admin sellers cannot set status themselves (e.g. cannot self-publish) —
+// only an admin approving/rejecting can change status.
+router.put("/:id", requireAuth, async (req, res) => {
   try {
     const existing = await pool.query("SELECT * FROM products WHERE id = $1", [req.params.id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    if (existing.rows[0].seller_id !== req.user.id) {
+
+    const isAdmin = req.user.role === "admin";
+    const isOwner = existing.rows[0].seller_id === req.user.id;
+
+    if (!isAdmin && !isOwner) {
       return res.status(403).json({ error: "Not authorized to edit this product" });
     }
 
@@ -222,6 +250,10 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
       title, subtitle, description, category, tags,
       cover_url, preview_url, file_url, price, currency, status, is_featured
     } = req.body;
+
+    // Only an admin is allowed to change status or feature a product.
+    const safeStatus = isAdmin ? status : undefined;
+    const safeFeatured = isAdmin ? is_featured : undefined;
 
     const result = await pool.query(
       `UPDATE products SET
@@ -239,7 +271,7 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
         is_featured = COALESCE($12, is_featured)
        WHERE id = $13
        RETURNING *`,
-      [title, subtitle, description, category, tags, cover_url, preview_url, file_url, price, currency, status, is_featured, req.params.id]
+      [title, subtitle, description, category, tags, cover_url, preview_url, file_url, price, currency, safeStatus, safeFeatured, req.params.id]
     );
 
     res.json({ product: result.rows[0] });
@@ -249,14 +281,18 @@ router.put("/:id", requireAuth, requireRole("admin"), async (req, res) => {
   }
 });
 
-// DELETE product
-router.delete("/:id", requireAuth, requireRole("admin"), async (req, res) => {
+// DELETE product — the owner can delete their own, or an admin can delete any.
+router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const existing = await pool.query("SELECT * FROM products WHERE id = $1", [req.params.id]);
     if (existing.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    if (existing.rows[0].seller_id !== req.user.id) {
+
+    const isAdmin = req.user.role === "admin";
+    const isOwner = existing.rows[0].seller_id === req.user.id;
+
+    if (!isAdmin && !isOwner) {
       return res.status(403).json({ error: "Not authorized to delete this product" });
     }
 
