@@ -73,9 +73,37 @@
   </div>
 </div>
 
-<div class="main-content" id="mainContent">
+<div id="pinScreen" style="max-width:320px;margin:80px auto 0;padding:0 20px;text-align:center;">
+  <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Enter PIN</div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Quick check before showing platform figures</div>
+  <input id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"
+    style="width:100%;text-align:center;font-size:24px;letter-spacing:8px;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);">
+  <div id="pinError" style="color:var(--danger);font-size:12px;margin-top:10px;display:none;">Incorrect PIN, try again</div>
+  <button onclick="checkPin()" style="width:100%;margin-top:16px;padding:13px;border-radius:12px;border:none;background:var(--gold);color:#07070a;font-weight:800;font-size:14px;">Unlock</button>
+</div>
+
+<div class="main-content" id="mainContent" style="display:none;">
   <div class="loading-text">Loading platform figures...</div>
 </div>
+
+<script>
+  const ADMIN_PIN = "4728";
+
+  function checkPin() {
+    const val = document.getElementById('pinInput').value;
+    if (val === ADMIN_PIN) {
+      document.getElementById('pinScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      load();
+    } else {
+      document.getElementById('pinError').style.display = 'block';
+    }
+  }
+
+  document.getElementById('pinInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPin();
+  });
+</script>
 
 <script>
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
@@ -334,7 +362,7 @@
     }
   }
 
-  load();
+  // load() now runs only after the correct PIN is entered — see checkPin() above
 </script>
 
 </body>
