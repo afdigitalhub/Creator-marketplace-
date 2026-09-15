@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
+const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -100,8 +101,86 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// POST /auth/set-pin — lets a logged-in user set or change a short PIN.
+// Requires the account password again as confirmation, since this creates
+// a second, simpler way into the account and should not be changeable
+// by anyone who merely has an already-open session on a shared device.
+router.post("/set-pin", requireAuth, async (req, res) => {
+  const { password, pin } = req.body;
+
+  if (!password || !pin) {
+    return res.status(400).json({ error: "password and pin are required" });
+  }
+  if (!/^\d{4,6}$/.test(pin)) {
+    return res.status(400).json({ error: "PIN must be 4 to 6 digits" });
+  }
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const user = result.rows[0];
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    const pin_hash = await bcrypt.hash(pin, 10);
+    await pool.query("UPDATE users SET pin_hash = $1 WHERE id = $2", [pin_hash, req.user.id]);
+
+    res.json({ message: "PIN set successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not set PIN" });
+  }
+});
+
+// POST /auth/pin-login — logs a user in using their email + PIN instead
+// of their full password. Only works if that account has already set a
+// PIN via /auth/set-pin.
+router.post("/pin-login", async (req, res) => {
+  const { email, pin } = req.body;
+  if (!email || !pin) {
+    return res.status(400).json({ error: "email and pin are required" });
+  }
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    const user = result.rows[0];
+
+    if (user.status === "suspended") {
+      return res.status(403).json({ error: "This account has been suspended" });
+    }
+    if (!user.pin_hash) {
+      return res.status(400).json({ error: "No PIN has been set up for this account yet" });
+    }
+
+    const match = await bcrypt.compare(pin, user.pin_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Incorrect PIN" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+    res.json({
+      user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role },
+      token,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "PIN login failed" });
+  }
+});
+
 // GET /auth/me - confirms the token's role, used by frontend route guards
-router.get("/me", require("../middleware/auth").requireAuth, (req, res) => {
+router.get("/me", requireAuth, (req, res) => {
   res.json({ id: req.user.id, email: req.user.email, role: req.user.role });
 });
 
