@@ -2221,6 +2221,14 @@ loadLive();
 
 let deferredInstallPrompt = null;
 
+// Register the service worker as soon as the page loads, unconditionally —
+// Chrome requires an active service worker before it will offer the
+// "Install App" prompt. Previously this only registered when someone
+// tapped Notify Me, which meant most first-time visitors never triggered it.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(function(){});
+}
+
 window.addEventListener('beforeinstallprompt', function(event){
 
 event.preventDefault();
