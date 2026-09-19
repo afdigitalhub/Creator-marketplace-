@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Learn | AF Digital Hub</title>
+  <meta name="theme-color" content="#050814">
+
+  <style>
+    :root {
+      --bg:#050814;
+      --panel:#0d1426;
+      --panel2:#111a30;
+      --border:rgba(255,255,255,.09);
+      --text:#f5f7ff;
+      --muted:#9ba7bd;
+      --gold:#ffd400;
+      --blue:#3d7cff;
+      --purple:#7b4dff;
+      --green:#28d17c;
+      --red:#ff5d73;
+    }
+
+    * {
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body {
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%,rgba(61,124,255,.12),transparent 28%),
+        radial-gradient(circle at 90% 0%,rgba(123,77,255,.12),transparent 28%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    button {
+      font:inherit;
+      cursor:pointer;
+    }
+
+    .page {
+      width:min(1200px,calc(100% - 24px));
+      margin:auto;
+      padding-bottom:50px;
+    }
+
+    header {
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:11px;
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .logo {
+      width:43px;
+      height:43px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:var(--gold);
+      color:#070b16;
+      font-weight:950;
+    }
+
+    .brand strong {
+      display:block;
+      font-size:15px;
+    }
+
+    .brand small {
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+      margin-top:2px;
+    }
+
+    .back {
+      padding:10px 14px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:rgba(255,255,255,.04);
+      color:white;
+    }
+
+    .layout {
+      display:grid;
+      grid-template-columns:300px minmax(0,1fr);
+      gap:20px;
+      margin-top:22px;
+      align-items:start;
+    }
+
+    .sidebar,
+    .lesson-area {
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      overflow:hidden;
+    }
+
+    .sidebar {
+      position:sticky;
+      top:15px;
+    }
+
+    .course-head {
+      padding:20px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .course-head h1 {
+      font-size:18px;
+      line-height:1.3;
+    }
+
+    .course-head p {
+      color:var(--muted);
+      font-size:11px;
+      margin-top:7px;
+      line-height:1.5;
+    }
+
+    .progress-wrap {
+      margin-top:15px;
+    }
+
+    .progress-label {
+      display:flex;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:10px;
+      margin-bottom:7px;
+    }
+
+    .progress {
+      height:7px;
+      background:#1a2338;
+      border-radius:99px;
+      overflow:hidden;
+    }
+
+    .progress-bar {
+      width:0;
+      height:100%;
+      background:linear-gradient(90deg,var(--blue),var(--purple));
+      transition:.3s;
+    }
+
+    .modules {
+      max-height:calc(100vh - 250px);
+      overflow:auto;
+    }
+
+    .module {
+      border-bottom:1px solid var(--border);
+    }
+
+    .module-title {
+      padding:14px 15px;
+      color:#e7ecf8;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .lesson-btn {
+      width:100%;
+      display:flex;
+      align-items:flex-start;
+      gap:9px;
+      text-align:left;
+      padding:11px 15px 11px 21px;
+      border:0;
+      border-top:1px solid rgba(255,255,255,.035);
+      background:transparent;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .lesson-btn:hover {
+      background:rgba(255,255,255,.035);
+      color:white;
+    }
+
+    .lesson-btn.active {
+      background:rgba(61,124,255,.10);
+      color:white;
+      box-shadow:inset 3px 0 0 var(--blue);
+    }
+
+    .lesson-check {
+      flex:0 0 17px;
+      width:17px;
+      height:17px;
+      border-radius:50%;
+      border:1px solid #526079;
+      display:grid;
+      place-items:center;
+      font-size:9px;
+      margin-top:1px;
+    }
+
+    .lesson-btn.completed .lesson-check {
+      background:var(--green);
+      border-color:var(--green);
+      color:#07120d;
+      font-weight:900;
+    }
+
+    .lesson-name {
+      line-height:1.45;
+    }
+
+    .lesson-area {
+      min-height:600px;
+    }
+
+    .lesson-top {
+      padding:24px 27px;
+      border-bottom:1px solid var(--border);
+      background:
+        linear-gradient(135deg,rgba(61,124,255,.06),rgba(123,77,255,.05));
+    }
+
+    .lesson-number {
+      color:var(--gold);
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+
+    .lesson-top h2 {
+      font-size:29px;
+      line-height:1.15;
+      letter-spacing:-.7px;
+    }
+
+    .lesson-content {
+      padding:28px;
+    }
+
+    .lesson-content h3 {
+      font-size:18px;
+      margin:25px 0 10px;
+    }
+
+    .lesson-content h3:first-child {
+      margin-top:0;
+    }
+
+    .lesson-content p {
+      color:#c0c9db;
+      font-size:14px;
+      line-height:1.85;
+      margin-bottom:14px;
+      white-space:pre-line;
+    }
+
+    .lesson-content ul,
+    .lesson-content ol {
+      color:#c0c9db;
+      padding-left:22px;
+      margin-bottom:17px;
+    }
+
+    .lesson-content li {
+      font-size:14px;
+      line-height:1.8;
+      margin-bottom:5px;
+    }
+
+    .lesson-actions {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:20px 28px;
+      border-top:1px solid var(--border);
+    }
+
+    .action {
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:white;
+      border-radius:11px;
+      padding:11px 15px;
+    }
+
+    .action.primary {
+      border:0;
+      background:var(--gold);
+      color:#080b13;
+      font-weight:850;
+    }
+
+    .action:disabled {
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .empty,
+    .error,
+    .loading {
+      min-height:500px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:30px;
+      color:var(--muted);
+    }
+
+    .message h2 {
+      color:white;
+      margin-bottom:8px;
+    }
+
+    .message p {
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .retry {
+      margin-top:15px;
+      padding:10px 15px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:rgba(255,255,255,.05);
+      color:white;
+    }
+
+    .toast {
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translate(-50%,100px);
+      opacity:0;
+      background:#111a2e;
+      border:1px solid var(--border);
+      color:white;
+      padding:12px 16px;
+      border-radius:11px;
+      font-size:12px;
+      z-index:100;
+      transition:.25s;
+    }
+
+    .toast.show {
+      transform:translate(-50%,0);
+      opacity:1;
+    }
+
+    @media(max-width:800px) {
+      .layout {
+        grid-template-columns:1fr;
+      }
+
+      .sidebar {
+        position:static;
+      }
+
+      .modules {
+        max-height:350px;
+      }
+
+      .lesson-area {
+        min-height:500px;
+      }
+    }
+
+    @media(max-width:500px) {
+      .page {
+        width:calc(100% - 14px);
+      }
+
+      .brand small {
+        display:none;
+      }
+
+      .lesson-top,
+      .lesson-content {
+        padding:21px;
+      }
+
+      .lesson-top h2 {
+        font-size:24px;
+      }
+
+      .lesson-actions {
+        padding:16px 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <header>
+    <a href="courses.html" class="brand">
+      <div class="logo">AF</div>
+      <div>
+        <strong>AF Digital Hub</strong>
+        <small>Learn. Build. Grow.</small>
+      </div>
+    </a>
+
+    <button class="back" onclick="goBack()">
+      ← Courses
+    </button>
+  </header>
+
+  <main id="app">
+    <div class="loading">
+      <div class="message">
+        Loading your course...
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const DEFAULT_API_BASE =
+    "https://creator-marketplace-71rb.onrender.com";
+
+  const API_BASE =
+    (window.API_BASE || DEFAULT_API_BASE).replace(/\/$/, "");
+
+  const app =
+    document.getElementById("app");
+
+  const toast =
+    document.getElementById("toast");
+
+  const params =
+    new URLSearchParams(window.location.search);
+
+  const courseId =
+    params.get("id");
+
+  let course = null;
+  let currentLesson = null;
+  let completedLessons = new Set();
+
+  function getToken() {
+    const keys = [
+      "token",
+      "authToken",
+      "accessToken",
+      "jwt"
+    ];
+
+    for (const key of keys) {
+      const value = localStorage.getItem(key);
+      if (value) return value;
+    }
+
+    return null;
+  }
+
+  function headers() {
+    const token = getToken();
+
+    const result = {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    };
+
+    if (token) {
+      result.Authorization =
+        token.startsWith("Bearer ")
+          ? token
+          : `Bearer ${token}`;
+    }
+
+    return result;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer =
+      setTimeout(() => {
+        toast.classList.remove("show");
+      },3000);
+  }
+
+  function goBack() {
+    window.location.href =
+      `course-details.html?id=${encodeURIComponent(courseId || "")}`;
+  }
+
+  function normalizeCourse(data) {
+    return data.course || data;
+  }
+
+  function normalizeModules(data) {
+    if (Array.isArray(data.modules)) {
+      return data.modules;
+    }
+
+    if (Array.isArray(data.course?.modules)) {
+      return data.course.modules;
+    }
+
+    return [];
+  }
+
+  function allLessons() {
+    const result = [];
+
+    if (!course || !Array.isArray(course.modules)) {
+      return result;
+    }
+
+    course.modules.forEach(module => {
+      if (!Array.isArray(module.lessons)) return;
+
+      module.lessons.forEach(lesson => {
+        result.push({
+          ...lesson,
+          moduleTitle: module.title || "Module"
+        });
+      });
+    });
+
+    return result;
+  }
+
+  function renderShell() {
+
+    const lessons =
+      allLessons();
+
+    app.innerHTML = `
+      <div class="layout">
+
+        <aside class="sidebar">
+
+          <div class="course-head">
+
+            <h1>
+              ${escapeHtml(course.title || "Course")}
+            </h1>
+
+            <p>
+              Continue your learning journey on AF Digital Hub.
+            </p>
+
+            <div class="progress-wrap">
+
+              <div class="progress-label">
+                <span>Course progress</span>
+                <span id="progressText">0%</span>
+              </div>
+
+              <div class="progress">
+                <div
+                  id="progressBar"
+                  class="progress-bar"
+                ></div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="modules">
+
+            ${
+              course.modules.map((module,moduleIndex) => `
+
+                <div class="module">
+
+                  <div class="module-title">
+                    ${moduleIndex + 1}.
+                    ${escapeHtml(module.title || "Module")}
+                  </div>
+
+                  ${
+                    Array.isArray(module.lessons)
+                      ? module.lessons.map((lesson,lessonIndex) => {
+
+                          const id =
+                            lesson.id;
+
+                          const done =
+                            completedLessons.has(String(id));
+
+                          return `
+                            <button
+                              class="lesson-btn ${done ? "completed" : ""}"
+                              data-lesson-id="${escapeHtml(id)}"
+                              onclick="openLesson('${escapeHtml(id)}')"
+                            >
+
+                              <span class="lesson-check">
+                                ${done ? "✓" : ""}
+                              </span>
+
+                              <span class="lesson-name">
+                                ${escapeHtml(
+                                  lesson.title ||
+                                  `Lesson ${lessonIndex + 1}`
+                                )}
+                              </span>
+
+                            </button>
+                          `;
+                        }).join("")
+                      : ""
+                  }
+
+                </div>
+
+              `).join("")
+            }
+
+          </div>
+
+        </aside>
+
+        <section
+          id="lessonArea"
+          class="lesson-area"
+        >
+
+          <div class="empty">
+            <div class="message">
+              <h2>Select a lesson</h2>
+              <p>
+                Choose a lesson from the course outline to begin.
+              </p>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    `;
+
+    updateProgress();
+
+    if (lessons.length) {
+      openLesson(lessons[0].id);
+    }
+  }
+
+  function updateProgress() {
+
+    const lessons =
+      allLessons();
+
+    const total =
+      lessons.length;
+
+    const completed =
+      lessons.filter(
+        lesson =>
+          completedLessons.has(String(lesson.id))
+      ).length;
+
+    const percent =
+      total
+        ? Math.round((completed / total) * 100)
+        : 0;
+
+    const bar =
+      document.getElementById("progressBar");
+
+    const text =
+      document.getElementById("progressText");
+
+    if (bar) {
+      bar.style.width =
+        `${percent}%`;
+    }
+
+    if (text) {
+      text.textContent =
+        `${percent}%`;
+    }
+  }
+
+  async function openLesson(lessonId) {
+
+    if (!lessonId) return;
+
+    currentLesson =
+      allLessons().find(
+        lesson =>
+          String(lesson.id) === String(lessonId)
+      );
+
+    if (!currentLesson) {
+      showToast("Lesson not found.");
+      return;
+    }
+
+    document
+      .querySelectorAll(".lesson-btn")
+      .forEach(button => {
+        button.classList.toggle(
+          "active",
+          String(button.dataset.lessonId) ===
+          String(lessonId)
+        );
+      });
+
+    const area =
+      document.getElementById("lessonArea");
+
+    area.innerHTML = `
+      <div class="loading">
+        <div class="message">
+          Loading lesson...
+        </div>
+      </div>
+    `;
+
+    try {
+
+      const response =
+        await fetch(
+          `${API_BASE}/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`,
+          {
+            method:"GET",
+            headers:headers(),
+            cache:"no-store"
+          }
+        );
+
+      const data =
+        await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Unable to load lesson."
+        );
+      }
+
+      const lesson =
+        data.lesson ||
+        data;
+
+      currentLesson = {
+        ...currentLesson,
+        ...lesson
+      };
+
+      renderLesson();
+
+    } catch(error) {
+
+      console.error(error);
+
+      /*
+        If the detailed lesson endpoint is unavailable,
+        use the lesson already included in the course response.
+      */
+
+      renderLesson();
+    }
+  }
+
+  function formatLessonContent(content) {
+
+    if (!content) {
+      return `
+        <p>
+          This lesson does not have published content yet.
+        </p>
+      `;
+    }
+
+    const text =
+      String(content);
+
+    /*
+      Preserve normal course paragraphs while keeping
+      the content safe for the page.
+    */
+
+    return text
+      .split(/\n\s*\n/)
+      .map(block => {
+
+        const clean =
+          escapeHtml(block.trim());
+
+        if (!clean) return "";
+
+        return `<p>${clean}</p>`;
+      })
+      .join("");
+  }
+
+  function renderLesson() {
+
+    const area =
+      document.getElementById("lessonArea");
+
+    const lessons =
+      allLessons();
+
+    const currentIndex =
+      lessons.findIndex(
+        lesson =>
+          String(lesson.id) ===
+          String(currentLesson.id)
+      );
+
+    const previous =
+      currentIndex > 0
+        ? lessons[currentIndex - 1]
+        : null;
+
+    const next =
+      currentIndex < lessons.length - 1
+        ? lessons[currentIndex + 1]
+        : null;
+
+    const completed =
+      completedLessons.has(
+        String(currentLesson.id)
+      );
+
+    area.innerHTML = `
+
+      <div class="lesson-top">
+
+        <div class="lesson-number">
+          ${escapeHtml(
+            currentLesson.moduleTitle ||
+            "Course lesson"
+          )}
+        </div>
+
+        <h2>
+          ${escapeHtml(
+            currentLesson.title ||
+            "Lesson"
+          )}
+        </h2>
+
+      </div>
+
+      <article class="lesson-content">
+
+        ${formatLessonContent(
+          currentLesson.content
+        )}
+
+      </article>
+
+      <div class="lesson-actions">
+
+        <button
+          class="action"
+          ${previous ? "" : "disabled"}
+          onclick="${
+            previous
+              ? `openLesson('${escapeHtml(previous.id)}')`
+              : ""
+          }"
+        >
+          ← Previous
+        </button>
+
+        <button
+          id="completeBtn"
+          class="action primary"
+          onclick="toggleComplete()"
+        >
+          ${
+            completed
+              ? "✓ Completed"
+              : "Mark Lesson Complete"
+          }
+        </button>
+
+        <button
+          class="action"
+          ${next ? "" : "disabled"}
+          onclick="${
+            next
+              ? `openLesson('${escapeHtml(next.id)}')`
+              : ""
+          }"
+        >
+          Next →
+        </button>
+
+      </div>
+    `;
+
+    area.scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  }
+
+  async function toggleComplete() {
+
+    if (!currentLesson) return;
+
+    const lessonId =
+      currentLesson.id;
+
+    const wasCompleted =
+      completedLessons.has(
+        String(lessonId)
+      );
+
+    const newState =
+      !wasCompleted;
+
+    try {
+
+      const response =
+        await fetch(
+          `${API_BASE}/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/progress`,
+          {
+            method:"POST",
+            headers:headers(),
+            body:JSON.stringify({
+              completed:newState
+            })
+          }
+        );
+
+      const data =
+        await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Unable to save progress."
+        );
+      }
+
+      if (newState) {
+        completedLessons.add(
+          String(lessonId)
+        );
+      } else {
+        completedLessons.delete(
+          String(lessonId)
+        );
+      }
+
+      updateLessonButtons();
+      updateProgress();
+      renderLesson();
+
+      showToast(
+        newState
+          ? "Lesson completed."
+          : "Lesson marked incomplete."
+      );
+
+    } catch(error) {
+
+      console.error(error);
+
+      showToast(
+        error.message ||
+        "Could not save your progress."
+      );
+    }
+  }
+
+  function updateLessonButtons() {
+
+    document
+      .querySelectorAll(".lesson-btn")
+      .forEach(button => {
+
+        const done =
+          completedLessons.has(
+            String(button.dataset.lessonId)
+          );
+
+        button.classList.toggle(
+          "completed",
+          done
+        );
+
+        const check =
+          button.querySelector(".lesson-check");
+
+        if (check) {
+          check.textContent =
+            done ? "✓" : "";
+        }
+      });
+  }
+
+  async function loadProgress() {
+
+    const token =
+      getToken();
+
+    if (!token) {
+      return;
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          `${API_BASE}/courses/${encodeURIComponent(courseId)}/access`,
+          {
+            method:"GET",
+            headers:headers(),
+            cache:"no-store"
+          }
+        );
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data =
+        await response.json();
+
+      const progress =
+        data.progress ||
+        data.lesson_progress ||
+        [];
+
+      if (Array.isArray(progress)) {
+
+        progress.forEach(item => {
+
+          const lessonId =
+            item.lesson_id ||
+            item.lessonId ||
+            item.id;
+
+          if (
+            lessonId &&
+            (
+              item.completed === true ||
+              item.status === "completed"
+            )
+          ) {
+            completedLessons.add(
+              String(lessonId)
+            );
+          }
+
+        });
+      }
+
+    } catch(error) {
+      console.log(
+        "Progress loading skipped:",
+        error
+      );
+    }
+  }
+
+  async function loadCourse() {
+
+    if (!courseId) {
+
+      app.innerHTML = `
+        <div class="error">
+          <div class="message">
+            <h2>Course not selected</h2>
+            <p>
+              Please open a course from the Courses page.
+            </p>
+            <button
+              class="retry"
+              onclick="location.href='courses.html'"
+            >
+              Browse Courses
+            </button>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
+
+    if (!getToken()) {
+
+      app.innerHTML = `
+        <div class="error">
+          <div class="message">
+            <h2>Sign in required</h2>
+            <p>
+              Please sign in to access your course learning room.
+            </p>
+            <button
+              class="retry"
+              onclick="location.href='login.html?redirect=' + encodeURIComponent(location.href)"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          `${API_BASE}/courses/${encodeURIComponent(courseId)}/learn`,
+          {
+            method:"GET",
+            headers:headers(),
+            cache:"no-store"
+          }
+        );
+
+      const data =
+        await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Unable to access this course."
+        );
+      }
+
+      course =
+        normalizeCourse(data);
+
+      course.modules =
+        normalizeModules(data);
+
+      if (!course.modules.length) {
+
+        app.innerHTML = `
+          <div class="empty">
+            <div class="message">
+              <h2>Course content is being prepared</h2>
+              <p>
+                The course is available, but its lesson structure
+                has not been returned yet.
+              </p>
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+      await loadProgress();
+
+      renderShell();
+
+    } catch(error) {
+
+      console.error(
+        "Course learning error:",
+        error
+      );
+
+      app.innerHTML = `
+        <div class="error">
+          <div class="message">
+            <h2>Unable to open this course</h2>
+            <p>
+              ${
+                escapeHtml(
+                  error.message ||
+                  "Please make sure you have purchased and have access to this course."
+                )
+              }
+            </p>
+
+            <button
+              class="retry"
+              onclick="location.reload()"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  loadCourse();
+</script>
+
+</body>
+  </html>
