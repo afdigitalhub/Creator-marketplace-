@@ -42,9 +42,20 @@
   .rating-stars { color: var(--af-yellow); font-size: 15px; letter-spacing: 1px; }
   .rating-count { color: var(--text-muted); }
 
-  .action-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .action-row { display: flex; gap: 10px; margin-bottom: 12px; }
   .message-seller-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-light); font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .message-seller-btn:disabled { opacity: 0.6; }
+
+  .affiliate-card {
+    background: rgba(245,197,24,0.06); border: 1px solid rgba(245,197,24,0.25); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 20px;
+  }
+  .affiliate-card p { font-size: 12.5px; color: #e8d9a8; line-height: 1.5; margin-bottom: 10px; }
+  .affiliate-card strong { color: var(--af-yellow); }
+  .get-link-btn {
+    width: 100%; padding: 11px; border-radius: 10px; border: 1px solid rgba(245,197,24,0.4);
+    background: transparent; color: var(--af-yellow); font-weight: 700; font-size: 13px; cursor: pointer;
+  }
 
   .trust-section { margin: 20px 0; }
   .info-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
@@ -112,6 +123,12 @@
   .breakdown-label { color: var(--text-muted); }
   .breakdown-row.total .breakdown-label { color: var(--text-light); }
   .breakdown-value { font-weight: 700; }
+
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: var(--success); color: #052; padding: 12px 20px; border-radius: 12px;
+    font-size: 13.5px; font-weight: 700; z-index: 200; display: none;
+  }
 </style>
 </head>
 <body>
@@ -129,6 +146,8 @@
   <div class="skel-line short"></div>
   <div class="skel-line"></div>
 </div>
+
+<div class="toast" id="toast">Link copied!</div>
 
 <div class="modal-overlay" id="orderModal">
   <div class="modal-sheet" id="orderModalContent"></div>
@@ -148,6 +167,7 @@
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const params = new URLSearchParams(window.location.search);
   const productId = params.get('id');
+  const refParam = params.get('ref');
   const token = localStorage.getItem('af_token');
 
   const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
@@ -208,6 +228,34 @@
     window.location.href = 'login.html';
   }
 
+  function showToast(message) {
+    const t = document.getElementById('toast');
+    t.textContent = message;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2200);
+  }
+
+  function getMyLink() {
+    if (!token) {
+      openModal('loginModal');
+      return;
+    }
+    const currentUser = parseJwt(token);
+    if (!currentUser) return;
+
+    const link = `${window.location.origin}/product-details.html?id=${productId}&ref=${currentUser.id}`;
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => {
+        showToast('Your link is copied! Share it to earn 50%.');
+      }).catch(() => {
+        prompt('Copy your link:', link);
+      });
+    } else {
+      prompt('Copy your link:', link);
+    }
+  }
+
   async function handleBuy() {
     if (!token) {
       openModal('loginModal');
@@ -222,7 +270,7 @@
       const orderRes = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ product_id: Number(productId) })
+        body: JSON.stringify({ product_id: Number(productId), referrer_id: refParam || null })
       });
 
       const orderData = await orderRes.json();
@@ -471,6 +519,13 @@
         ${!isOwnProduct ? `
           <div class="action-row">
             <button class="message-seller-btn" id="messageSellerBtn" onclick="handleMessageSeller('${p.seller_id}')">💬 Message Seller</button>
+          </div>
+        ` : ''}
+
+        ${!isOwnProduct ? `
+          <div class="affiliate-card">
+            <p>Share this product with your own link and earn <strong>50% commission</strong> on every sale it brings in.</p>
+            <button class="get-link-btn" onclick="getMyLink()">🔗 Get My Link</button>
           </div>
         ` : ''}
 
