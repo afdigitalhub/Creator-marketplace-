@@ -131,6 +131,33 @@ async function verifyAndComplete(reference) {
       );
     }
 
+    // If this order came through someone's shared affiliate link, credit
+    // that person their 50% cut too — same earnings table, same pending
+    // clearance pattern as every other payout on the platform.
+    if (order.referrer_id && Number(order.affiliate_amount) > 0) {
+      const existingAffiliateEarning = await client.query(
+        "SELECT id FROM earnings WHERE source_type = 'affiliate_commission' AND source_id = $1",
+        [order.id]
+      );
+
+      if (existingAffiliateEarning.rows.length === 0) {
+        await client.query(
+          `INSERT INTO earnings
+            (user_id, source_type, source_id, gross_amount, platform_fee,
+             net_amount, currency, status, available_at)
+           VALUES ($1, 'affiliate_commission', $2, $3, $4, $5, $6, 'pending', now() + interval '7 days')`,
+          [
+            order.referrer_id,
+            order.id,
+            order.gross_amount,
+            0,
+            order.affiliate_amount,
+            order.currency
+          ]
+        );
+      }
+    }
+
     await client.query("COMMIT");
     return { ok: true, order_id: order.id, product_id: order.product_id };
 

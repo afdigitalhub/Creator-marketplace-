@@ -3,6 +3,12 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth } = require("../middleware/auth");
 
+// Every order that comes through with a referrer gives that referrer a
+// flat 50% of the sale, off the top — before the normal platform
+// commission is calculated on what's left. This is deliberately simple
+// and the same for every product, not just Courses.
+const AFFILIATE_RATE = 0.5;
+
 // Platform commission. Applies to every sale with no exceptions.
 async function getCommissionRate() {
   try {
@@ -19,16 +25,29 @@ async function getCommissionRate() {
   return 10;
 }
 
-function calculateAmounts(price, ratePercent) {
+function calculateAmounts(price, ratePercent, hasReferrer) {
   const gross = Math.round(Number(price) * 100) / 100;
-  const commission = Math.round(gross * (ratePercent / 100) * 100) / 100;
-  const seller = Math.round((gross - commission) * 100) / 100;
-  return { gross, commission, seller };
+
+  let affiliate = 0;
+  let base = gross;
+
+  if (hasReferrer) {
+    affiliate = Math.round(gross * AFFILIATE_RATE * 100) / 100;
+    base = Math.round((gross - affiliate) * 100) / 100;
+  }
+
+  const commission = Math.round(base * (ratePercent / 100) * 100) / 100;
+  const seller = Math.round((base - commission) * 100) / 100;
+
+  return { gross, commission, seller, affiliate };
 }
 
 // POST /orders - create a pending order for a product.
+// Accepts an optional referrer_id: the user whose shared link led to
+// this purchase. Validated so nobody can refer themselves or refer a
+// sale of their own product.
 router.post("/", requireAuth, async (req, res) => {
-  const { product_id } = req.body;
+  const { product_id, referrer_id } = req.body;
 
   if (!product_id) {
     return res.status(400).json({ error: "product_id is required" });
@@ -54,6 +73,24 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "You cannot buy your own product" });
     }
 
+    let validReferrerId = null;
+    if (referrer_id) {
+      const isSelf = referrer_id === req.user.id;
+      const isSeller = referrer_id === product.seller_id;
+
+      if (!isSelf && !isSeller) {
+        const referrerResult = await pool.query(
+          "SELECT id FROM users WHERE id = $1",
+          [referrer_id]
+        );
+        if (referrerResult.rows.length > 0) {
+          validReferrerId = referrerResult.rows[0].id;
+        }
+      }
+      // If the referrer is invalid, self, or the seller, we silently
+      // proceed without one rather than blocking the purchase.
+    }
+
     const existingEntitlement = await pool.query(
       "SELECT id FROM entitlements WHERE user_id = $1 AND product_id = $2 AND status = 'active'",
       [req.user.id, product_id]
@@ -73,14 +110,16 @@ router.post("/", requireAuth, async (req, res) => {
     }
 
     const ratePercent = await getCommissionRate();
-    const { gross, commission, seller } = calculateAmounts(product.price, ratePercent);
+    const { gross, commission, seller, affiliate } = calculateAmounts(
+      product.price, ratePercent, Boolean(validReferrerId)
+    );
 
     const result = await pool.query(
       `INSERT INTO orders
         (buyer_id, seller_id, product_id, product_title,
          gross_amount, currency, commission_rate, commission_amount,
-         seller_amount, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending')
+         seller_amount, status, referrer_id, affiliate_amount)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11)
        RETURNING *`,
       [
         req.user.id,
@@ -91,7 +130,9 @@ router.post("/", requireAuth, async (req, res) => {
         product.currency || "GHS",
         ratePercent,
         commission,
-        seller
+        seller,
+        validReferrerId,
+        affiliate
       ]
     );
 
