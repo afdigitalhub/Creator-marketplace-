@@ -15,6 +15,7 @@ function makeToken() {
 
 function visitorKey(req) {
   const raw = `${req.ip || "unknown"}|${req.get("user-agent") || "unknown"}`;
+
   return crypto
     .createHash("sha256")
     .update(raw)
@@ -36,8 +37,10 @@ async function getCourse(courseId) {
        p.status AS product_status,
        u.full_name AS creator_name
      FROM courses c
-     JOIN products p ON p.id = c.product_id
-     LEFT JOIN users u ON u.id = c.created_by
+     JOIN products p
+       ON p.id = c.product_id
+     LEFT JOIN users u
+       ON u.id = c.created_by
      WHERE c.id = $1`,
     [courseId]
   );
@@ -104,7 +107,11 @@ async function ensureEnrollment(userId, course) {
   return inserted.rows[0];
 }
 
-async function courseStructure(courseId, includeContent, userId) {
+async function courseStructure(
+  courseId,
+  includeContent,
+  userId
+) {
   const course = await getCourse(courseId);
 
   if (!course) {
@@ -538,7 +545,6 @@ router.get(
 
       await pool.query(
         `UPDATE course_affiliate_links
-
          SET
            click_count =
              click_count + 1,
@@ -702,9 +708,186 @@ router.post(
 );
 
 /* =========================================================
+   PROTECTED COURSE DOWNLOAD
+   Only enrolled/paying users can download.
+========================================================= */
+
+router.get(
+  "/:id/download",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const course =
+        await getCourse(
+          req.params.id
+        );
+
+      if (
+        !course ||
+        course.status !== "published" ||
+        course.product_status !== "published"
+      ) {
+        return res.status(404).json({
+          error:
+            "Course not found"
+        });
+      }
+
+      /*
+       * Confirm that the user actually owns
+       * the course through an active enrollment
+       * or a verified active entitlement.
+       */
+      const enrollment =
+        await ensureEnrollment(
+          req.user.id,
+          course
+        );
+
+      if (!enrollment) {
+        return res.status(403).json({
+          error:
+            "Purchase this course to download the course materials."
+        });
+      }
+
+      const downloadUrl =
+        course.download_url;
+
+      if (!downloadUrl) {
+        return res.status(404).json({
+          error:
+            "Course download is not available yet."
+        });
+      }
+
+      /*
+       * Fetch the actual file on the server.
+       * The download URL itself is not exposed
+       * to the customer as a JSON response.
+       */
+      const fileResponse =
+        await fetch(downloadUrl);
+
+      if (!fileResponse.ok) {
+        console.error(
+          "Course download source error:",
+          fileResponse.status
+        );
+
+        return res.status(502).json({
+          error:
+            "The course file could not be retrieved."
+        });
+      }
+
+      const contentType =
+        fileResponse.headers.get(
+          "content-type"
+        ) ||
+        "application/octet-stream";
+
+      const contentLength =
+        fileResponse.headers.get(
+          "content-length"
+        );
+
+      /*
+       * Create a clean download filename.
+       */
+      const safeTitle =
+        String(
+          course.title ||
+          "AF Digital Hub Course"
+        )
+          .replace(
+            /[^a-z0-9]+/gi,
+            "-"
+          )
+          .replace(
+            /^-+|-+$/g,
+            ""
+          )
+          .toLowerCase();
+
+      const filename =
+        `${
+          safeTitle ||
+          "af-digital-hub-course"
+        }-materials.pdf`;
+
+      res.setHeader(
+        "Content-Type",
+        contentType
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+
+      res.setHeader(
+        "Cache-Control",
+        "private, no-store, max-age=0"
+      );
+
+      if (contentLength) {
+        res.setHeader(
+          "Content-Length",
+          contentLength
+        );
+      }
+
+      /*
+       * Node/Render supports Web Streams.
+       * Stream the file directly to the user.
+       */
+      if (
+        fileResponse.body &&
+        typeof fileResponse.body.getReader ===
+          "function"
+      ) {
+        const { Readable } =
+          require("stream");
+
+        return Readable
+          .fromWeb(
+            fileResponse.body
+          )
+          .pipe(res);
+      }
+
+      /*
+       * Fallback for environments where
+       * Readable.fromWeb isn't available.
+       */
+      const buffer =
+        Buffer.from(
+          await fileResponse.arrayBuffer()
+        );
+
+      return res.end(buffer);
+
+    } catch (err) {
+      console.error(
+        "Protected course download error:",
+        err
+      );
+
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error:
+            "Could not download course materials."
+        });
+      }
+
+      res.end();
+    }
+  }
+);
+
+/* =========================================================
    COURSE DETAIL
-   IMPORTANT:
-   Normal :id route instead of fragile numeric pattern.
 ========================================================= */
 
 router.get(
@@ -1004,6 +1187,7 @@ router.post(
   "/:id/lessons/:lessonId/progress",
   requireAuth,
   async (req, res) => {
+
     const completed =
       Boolean(
         req.body?.completed
