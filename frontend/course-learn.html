@@ -58,6 +58,7 @@ body{
   place-items:center;
   font-size:21px;
   text-decoration:none;
+  color:white;
 }
 
 .logo{
@@ -106,6 +107,78 @@ body{
   line-height:1.5;
 }
 
+/* DOWNLOAD CARD */
+
+.download-card{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,210,26,.08),
+      rgba(78,124,255,.08),
+      rgba(123,69,255,.08)
+    );
+  border:1px solid rgba(255,210,26,.22);
+  border-radius:17px;
+  padding:16px;
+  margin-bottom:18px;
+}
+
+.download-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.download-info{
+  min-width:0;
+}
+
+.download-title{
+  font-size:14px;
+  font-weight:850;
+  margin-bottom:5px;
+}
+
+.download-description{
+  color:var(--muted);
+  font-size:11.5px;
+  line-height:1.5;
+}
+
+.download-btn{
+  flex:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  background:var(--gold);
+  color:#07070a;
+  border:0;
+  border-radius:11px;
+  padding:11px 14px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.download-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.download-status{
+  display:none;
+  margin-top:9px;
+  color:var(--green);
+  font-size:11px;
+}
+
+.download-status.error{
+  color:var(--red);
+}
+
 .progress-card{
   background:var(--card);
   border:1px solid var(--border);
@@ -144,7 +217,12 @@ body{
 .progress-bar{
   height:100%;
   width:0%;
-  background:linear-gradient(90deg,var(--gold),var(--blue),var(--violet));
+  background:linear-gradient(
+    90deg,
+    var(--gold),
+    var(--blue),
+    var(--violet)
+  );
   border-radius:999px;
   transition:width .25s ease;
 }
@@ -424,6 +502,15 @@ body{
   .lesson-title{
     font-size:22px;
   }
+
+  .download-top{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .download-btn{
+    width:100%;
+  }
 }
 </style>
 </head>
@@ -497,6 +584,42 @@ body{
 
     </div>
 
+    <!-- DOWNLOAD MATERIALS -->
+
+    <div class="download-card">
+
+      <div class="download-top">
+
+        <div class="download-info">
+
+          <div class="download-title">
+            Course Materials
+          </div>
+
+          <div class="download-description">
+            Download the course materials for offline study.
+            This download is available to enrolled students.
+          </div>
+
+        </div>
+
+        <button
+          class="download-btn"
+          id="downloadBtn"
+          onclick="downloadCourseMaterials()"
+        >
+          📥 Download Materials
+        </button>
+
+      </div>
+
+      <div
+        class="download-status"
+        id="downloadStatus"
+      ></div>
+
+    </div>
+
     <div class="progress-card">
 
       <div class="progress-top">
@@ -533,8 +656,7 @@ body{
           Course Content
         </div>
 
-        <div id="curriculum">
-        </div>
+        <div id="curriculum"></div>
 
       </aside>
 
@@ -659,7 +781,10 @@ let currentLesson = null;
 
 function escapeHtml(value){
 
-  if(value === null || value === undefined){
+  if(
+    value === null ||
+    value === undefined
+  ){
     return "";
   }
 
@@ -693,6 +818,199 @@ function authHeaders(){
   };
 }
 
+/* =========================================================
+   COURSE DOWNLOAD
+========================================================= */
+
+async function downloadCourseMaterials(){
+
+  const button =
+    document.getElementById(
+      "downloadBtn"
+    );
+
+  const status =
+    document.getElementById(
+      "downloadStatus"
+    );
+
+  if(!token){
+
+    status.className =
+      "download-status error";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      "Please sign in to download the course materials.";
+
+    return;
+  }
+
+  if(!courseId){
+
+    status.className =
+      "download-status error";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      "Course could not be identified.";
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Preparing download...";
+
+  status.className =
+    "download-status";
+
+  status.style.display =
+    "block";
+
+  status.textContent =
+    "Checking your course access...";
+
+  try{
+
+    const response =
+      await fetch(
+        `${API_BASE}/courses/${encodeURIComponent(courseId)}/download`,
+        {
+          method:"GET",
+          headers:{
+            "Authorization":
+              `Bearer ${token}`
+          }
+        }
+      );
+
+    if(!response.ok){
+
+      let message =
+        "The course materials could not be downloaded.";
+
+      try{
+
+        const data =
+          await response.json();
+
+        message =
+          data.error ||
+          data.message ||
+          message;
+
+      }catch(error){}
+
+      throw new Error(message);
+    }
+
+    const blob =
+      await response.blob();
+
+    if(
+      !blob ||
+      blob.size === 0
+    ){
+      throw new Error(
+        "The course file is empty."
+      );
+    }
+
+    /*
+     * Try to obtain the server-provided filename.
+     */
+    const disposition =
+      response.headers.get(
+        "Content-Disposition"
+      );
+
+    let filename =
+      "af-digital-hub-course-materials.pdf";
+
+    if(disposition){
+
+      const match =
+        disposition.match(
+          /filename="?([^"]+)"?/i
+        );
+
+      if(match && match[1]){
+        filename =
+          match[1];
+      }
+    }
+
+    const url =
+      window.URL.createObjectURL(
+        blob
+      );
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+
+    setTimeout(
+      () => {
+        window.URL.revokeObjectURL(
+          url
+        );
+      },
+      1000
+    );
+
+    status.className =
+      "download-status";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      "Download started.";
+
+  }catch(error){
+
+    console.error(
+      "Course download error:",
+      error
+    );
+
+    status.className =
+      "download-status error";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      error.message ||
+      "Could not download the course materials.";
+
+  }finally{
+
+    button.disabled = false;
+
+    button.innerHTML =
+      "📥 Download Materials";
+  }
+}
+
+/* =========================================================
+   LOAD COURSE
+========================================================= */
+
 async function loadCourse(){
 
   if(!token){
@@ -708,7 +1026,9 @@ async function loadCourse(){
     hide("loading");
 
     const error =
-      document.getElementById("error");
+      document.getElementById(
+        "error"
+      );
 
     error.textContent =
       "No course was selected.";
@@ -773,7 +1093,9 @@ async function loadCourse(){
     hide("loading");
 
     const errorBox =
-      document.getElementById("error");
+      document.getElementById(
+        "error"
+      );
 
     errorBox.textContent =
       error.message ||
@@ -782,6 +1104,10 @@ async function loadCourse(){
     show("error");
   }
 }
+
+/* =========================================================
+   BUILD LESSONS
+========================================================= */
 
 function buildLessons(){
 
@@ -798,7 +1124,8 @@ function buildLessons(){
 
           lessons.push({
             ...lesson,
-            moduleId:module.id,
+            moduleId:
+              module.id,
             moduleIndex,
             lessonIndex
           });
@@ -809,6 +1136,10 @@ function buildLessons(){
     }
   );
 }
+
+/* =========================================================
+   RENDER COURSE
+========================================================= */
 
 function renderCourse(){
 
@@ -837,6 +1168,10 @@ function renderCourse(){
   renderCurriculum();
 }
 
+/* =========================================================
+   CURRICULUM
+========================================================= */
+
 function renderCurriculum(){
 
   const container =
@@ -847,9 +1182,15 @@ function renderCurriculum(){
   if(!modules.length){
 
     container.innerHTML =
-      `<div style="padding:10px;color:var(--muted);font-size:12px;">
+      `
+      <div style="
+        padding:10px;
+        color:var(--muted);
+        font-size:12px;
+      ">
         No lessons available.
-      </div>`;
+      </div>
+      `;
 
     return;
   }
@@ -867,7 +1208,8 @@ function renderCurriculum(){
             <div class="module-title">
               ${moduleIndex + 1}.
               ${escapeHtml(
-                module.title || "Module"
+                module.title ||
+                "Module"
               )}
             </div>
 
@@ -890,7 +1232,8 @@ function renderCurriculum(){
                   return `
                     <button
                       class="lesson ${
-                        globalIndex === currentIndex
+                        globalIndex ===
+                        currentIndex
                           ? "active"
                           : ""
                       } ${
@@ -912,7 +1255,9 @@ function renderCurriculum(){
                       <span class="lesson-name">
                         ${escapeHtml(
                           lesson.title ||
-                          `Lesson ${lessonIndex + 1}`
+                          `Lesson ${
+                            lessonIndex + 1
+                          }`
                         )}
                       </span>
 
@@ -930,10 +1275,18 @@ function renderCurriculum(){
     ).join("");
 }
 
-function isLessonCompleted(lessonId){
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+function isLessonCompleted(
+  lessonId
+){
 
   const item =
-    progress[String(lessonId)];
+    progress[
+      String(lessonId)
+    ];
 
   if(!item){
     return false;
@@ -984,10 +1337,14 @@ async function loadProgress(){
             item.lessonId ||
             item.id;
 
-          if(id !== undefined){
+          if(
+            id !== undefined
+          ){
 
-            progress[String(id)] =
-              item;
+            progress[
+              String(id)
+            ] = item;
+
           }
 
         }
@@ -1020,8 +1377,7 @@ function updateProgressUI(){
   const total =
     lessons.length;
 
-  let completed =
-    0;
+  let completed = 0;
 
   lessons.forEach(
     lesson => {
@@ -1031,7 +1387,9 @@ function updateProgressUI(){
           lesson.id
         )
       ){
+
         completed++;
+
       }
 
     }
@@ -1040,7 +1398,9 @@ function updateProgressUI(){
   const percent =
     total
       ? Math.round(
-          completed / total * 100
+          completed /
+          total *
+          100
         )
       : 0;
 
@@ -1055,12 +1415,17 @@ function updateProgressUI(){
     `${percent}%`;
 }
 
+/* =========================================================
+   LESSON DISPLAY
+========================================================= */
+
 function selectLesson(index){
 
   if(
     index < 0 ||
     index >= lessons.length
   ){
+
     return;
   }
 
@@ -1078,7 +1443,6 @@ function selectLesson(index){
 function renderLesson(){
 
   if(!currentLesson){
-
     return;
   }
 
@@ -1086,7 +1450,10 @@ function renderLesson(){
     currentIndex;
 
   const moduleNumber =
-    (currentLesson.moduleIndex || 0) + 1;
+    (
+      currentLesson.moduleIndex ||
+      0
+    ) + 1;
 
   document.getElementById(
     "lessonNumber"
@@ -1142,10 +1509,13 @@ function renderLesson(){
   document.getElementById(
     "nextBtn"
   ).disabled =
-    index === lessons.length - 1;
+    index ===
+    lessons.length - 1;
 }
 
-function formatLessonContent(content){
+function formatLessonContent(
+  content
+){
 
   if(!content){
     return "";
@@ -1158,10 +1528,17 @@ function formatLessonContent(content){
     .split(/\n{2,}/)
     .map(
       block =>
-        `<p>${block.replace(/\n/g,"<br>")}</p>`
+        `<p>${block.replace(
+          /\n/g,
+          "<br>"
+        )}</p>`
     )
     .join("");
 }
+
+/* =========================================================
+   COMPLETE LESSON
+========================================================= */
 
 async function toggleComplete(){
 
@@ -1182,8 +1559,7 @@ async function toggleComplete(){
       "completeBtn"
     );
 
-  button.disabled =
-    true;
+  button.disabled = true;
 
   try{
 
@@ -1194,8 +1570,11 @@ async function toggleComplete(){
           method:"POST",
           headers:authHeaders(),
           body:JSON.stringify({
-            completed:nextValue,
-            last_position:0
+            completed:
+              nextValue,
+
+            last_position:
+              0
           })
         }
       );
@@ -1212,13 +1591,20 @@ async function toggleComplete(){
       );
     }
 
-    progress[String(currentLesson.id)] = {
+    progress[
+      String(currentLesson.id)
+    ] = {
+
       ...(
-        progress[String(currentLesson.id)] ||
-        {}
+        progress[
+          String(currentLesson.id)
+        ] || {}
       ),
+
       ...data,
-      completed:nextValue
+
+      completed:
+        nextValue
     };
 
     updateProgressUI();
@@ -1232,6 +1618,9 @@ async function toggleComplete(){
         "completeMessage"
       );
 
+    message.style.color =
+      "var(--green)";
+
     message.style.display =
       "block";
 
@@ -1242,8 +1631,10 @@ async function toggleComplete(){
 
     setTimeout(
       () => {
+
         message.style.display =
           "none";
+
       },
       1800
     );
@@ -1273,6 +1664,10 @@ async function toggleComplete(){
       false;
   }
 }
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
 function previousLesson(){
 
@@ -1308,6 +1703,10 @@ function nextLesson(){
 
   }
 }
+
+/* =========================================================
+   START
+========================================================= */
 
 loadCourse();
 
