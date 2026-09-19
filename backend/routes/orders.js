@@ -3,13 +3,11 @@ const router = express.Router();
 const pool = require("../config/db");
 const { requireAuth } = require("../middleware/auth");
 
-// Every order that comes through with a referrer gives that referrer a
-// flat 50% of the sale, off the top — before the normal platform
-// commission is calculated on what's left. This is deliberately simple
-// and the same for every product, not just Courses.
-const AFFILIATE_RATE = 0.5;
+// Affiliate commission is stored on each product.
+// Database default is 50%.
+const DEFAULT_AFFILIATE_RATE = 50;
 
-// Platform commission. Applies to every sale with no exceptions.
+// Platform commission.
 async function getCommissionRate() {
   try {
     const result = await pool.query(
@@ -30,32 +28,53 @@ async function getCommissionRate() {
   return 10;
 }
 
-function calculateAmounts(price, ratePercent, hasReferrer) {
+function calculateAmounts(
+  price,
+  ratePercent,
+  affiliateRatePercent,
+  hasReferrer
+) {
   const gross = Math.round(Number(price) * 100) / 100;
 
   let affiliate = 0;
   let base = gross;
 
   if (hasReferrer) {
-    affiliate = Math.round(gross * AFFILIATE_RATE * 100) / 100;
+    const safeAffiliateRate =
+      Number.isFinite(Number(affiliateRatePercent)) &&
+      Number(affiliateRatePercent) >= 0 &&
+      Number(affiliateRatePercent) <= 100
+        ? Number(affiliateRatePercent)
+        : DEFAULT_AFFILIATE_RATE;
+
+    affiliate =
+      Math.round(gross * (safeAffiliateRate / 100) * 100) / 100;
+
     base = Math.round((gross - affiliate) * 100) / 100;
   }
 
-  const commission = Math.round(base * (ratePercent / 100) * 100) / 100;
-  const seller = Math.round((base - commission) * 100) / 100;
+  const commission =
+    Math.round(base * (ratePercent / 100) * 100) / 100;
 
-  return { gross, commission, seller, affiliate };
+  const seller =
+    Math.round((base - commission) * 100) / 100;
+
+  return {
+    gross,
+    commission,
+    seller,
+    affiliate
+  };
 }
 
-// POST /orders - create a pending order for a product.
-// Accepts an optional referrer_id: the user whose shared link led to
-// this purchase. Validated so nobody can refer themselves or refer a
-// sale of their own product.
+// POST /orders
 router.post("/", requireAuth, async (req, res) => {
   const { product_id, referrer_id } = req.body;
 
   if (!product_id) {
-    return res.status(400).json({ error: "product_id is required" });
+    return res.status(400).json({
+      error: "product_id is required"
+    });
   }
 
   try {
@@ -65,7 +84,9 @@ router.post("/", requireAuth, async (req, res) => {
     );
 
     if (productResult.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(404).json({
+        error: "Product not found"
+      });
     }
 
     const product = productResult.rows[0];
@@ -101,7 +122,11 @@ router.post("/", requireAuth, async (req, res) => {
     }
 
     const existingEntitlement = await pool.query(
-      "SELECT id FROM entitlements WHERE user_id = $1 AND product_id = $2 AND status = 'active'",
+      `SELECT id
+       FROM entitlements
+       WHERE user_id = $1
+         AND product_id = $2
+         AND status = 'active'`,
       [req.user.id, product_id]
     );
 
@@ -112,7 +137,8 @@ router.post("/", requireAuth, async (req, res) => {
     }
 
     const existingOrder = await pool.query(
-      `SELECT * FROM orders
+      `SELECT *
+       FROM orders
        WHERE buyer_id = $1
          AND product_id = $2
          AND status = 'pending'
@@ -130,19 +156,43 @@ router.post("/", requireAuth, async (req, res) => {
 
     const ratePercent = await getCommissionRate();
 
-    const { gross, commission, seller, affiliate } =
-      calculateAmounts(
-        product.price,
-        ratePercent,
-        Boolean(validReferrerId)
-      );
+    const affiliateRatePercent =
+      Number.isFinite(Number(product.affiliate_commission_percent)) &&
+      Number(product.affiliate_commission_percent) >= 0 &&
+      Number(product.affiliate_commission_percent) <= 100
+        ? Number(product.affiliate_commission_percent)
+        : DEFAULT_AFFILIATE_RATE;
+
+    const {
+      gross,
+      commission,
+      seller,
+      affiliate
+    } = calculateAmounts(
+      product.price,
+      ratePercent,
+      affiliateRatePercent,
+      Boolean(validReferrerId)
+    );
 
     const result = await pool.query(
       `INSERT INTO orders
-        (buyer_id, seller_id, product_id, product_title,
-         gross_amount, currency, commission_rate, commission_amount,
-         seller_amount, status, referrer_id, affiliate_amount)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11)
+        (
+          buyer_id,
+          seller_id,
+          product_id,
+          product_title,
+          gross_amount,
+          currency,
+          commission_rate,
+          commission_amount,
+          seller_amount,
+          status,
+          referrer_id,
+          affiliate_amount
+        )
+       VALUES
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9,'pending',$10,$11)
        RETURNING *`,
       [
         req.user.id,
@@ -164,13 +214,14 @@ router.post("/", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Create order error:", err);
+
     res.status(500).json({
       error: "Could not create order"
     });
   }
 });
 
-// GET /orders/mine - the buyer's own order history.
+// GET /orders/mine
 router.get("/mine", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
@@ -186,12 +237,14 @@ router.get("/mine", requireAuth, async (req, res) => {
          p.cover_url,
          p.category,
          u.full_name AS seller_name,
-         (SELECT pm.provider_reference
-          FROM payments pm
-          WHERE pm.order_id = o.id
-            AND pm.status = 'successful'
-          ORDER BY pm.created_at DESC
-          LIMIT 1) AS payment_reference,
+         (
+           SELECT pm.provider_reference
+           FROM payments pm
+           WHERE pm.order_id = o.id
+             AND pm.status = 'successful'
+           ORDER BY pm.created_at DESC
+           LIMIT 1
+         ) AS payment_reference,
          EXISTS (
            SELECT 1
            FROM entitlements e
@@ -199,8 +252,10 @@ router.get("/mine", requireAuth, async (req, res) => {
              AND e.status = 'active'
          ) AS has_access
        FROM orders o
-       LEFT JOIN products p ON o.product_id = p.id
-       LEFT JOIN users u ON o.seller_id = u.id
+       LEFT JOIN products p
+         ON o.product_id = p.id
+       LEFT JOIN users u
+         ON o.seller_id = u.id
        WHERE o.buyer_id = $1
        ORDER BY o.created_at DESC`,
       [req.user.id]
@@ -211,13 +266,14 @@ router.get("/mine", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("List my orders error:", err);
+
     res.status(500).json({
       error: "Could not load your orders"
     });
   }
 });
 
-// GET /orders/:id - a single order, visible only to its buyer or seller
+// GET /orders/:id
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
@@ -225,15 +281,19 @@ router.get("/:id", requireAuth, async (req, res) => {
          o.*,
          p.cover_url,
          u.full_name AS seller_name,
-         (SELECT pm.provider_reference
-          FROM payments pm
-          WHERE pm.order_id = o.id
-            AND pm.status = 'successful'
-          ORDER BY pm.created_at DESC
-          LIMIT 1) AS payment_reference
+         (
+           SELECT pm.provider_reference
+           FROM payments pm
+           WHERE pm.order_id = o.id
+             AND pm.status = 'successful'
+           ORDER BY pm.created_at DESC
+           LIMIT 1
+         ) AS payment_reference
        FROM orders o
-       LEFT JOIN products p ON o.product_id = p.id
-       LEFT JOIN users u ON o.seller_id = u.id
+       LEFT JOIN products p
+         ON o.product_id = p.id
+       LEFT JOIN users u
+         ON o.seller_id = u.id
        WHERE o.id = $1`,
       [req.params.id]
     );
@@ -260,6 +320,7 @@ router.get("/:id", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Get order error:", err);
+
     res.status(500).json({
       error: "Could not load order"
     });
