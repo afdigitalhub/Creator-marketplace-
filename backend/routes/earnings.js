@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
@@ -145,7 +144,6 @@ router.get("/", requireAuth, async (req, res) => {
 
       currencies: currencyResult.rows.map((row) => ({
         currency: row.currency,
-
         pending: Number(row.pending),
         available: Number(row.available),
         withdrawn: Number(row.withdrawn),
