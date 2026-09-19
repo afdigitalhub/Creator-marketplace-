@@ -398,7 +398,7 @@ async function createAffiliateLink(){
 async function copyAffiliateLink(){
   const input=document.getElementById("affiliateLink");if(!input)return;
   try{await navigator.clipboard.writeText(input.value)}catch{input.select();document.execCommand("copy")}
-  affiliateMessage.style.display="block";affiliateMessage.style.color="var(--green");affiliateMessage.textContent="Affiliate link copied.";
+  affiliateMessage.style.display="block";affiliateMessage.style.color="var(--green)";affiliateMessage.textContent="Affiliate link copied.";
 }
 load();
 </script>
