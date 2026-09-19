@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
@@ -167,4 +168,18 @@ router.get("/", requireAuth, async (req, res) => {
         product_title: row.product_title || null,
 
         gross_amount: Number(row.gross_amount),
-        platform_fee: Number(row.platform_fee
+        platform_fee: Number(row.platform_fee),
+        net_amount: Number(row.net_amount),
+        currency: row.currency,
+        status: row.status,
+        available_at: row.available_at,
+        created_at: row.created_at
+      }))
+    });
+  } catch (err) {
+    console.error("Load earnings error:", err);
+    res.status(500).json({ error: "Could not load your earnings" });
+  }
+});
+
+module.exports = router;
