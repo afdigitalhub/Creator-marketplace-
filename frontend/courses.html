@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Courses | AF Digital Hub</title>
+
+  <meta
+    name="description"
+    content="Learn practical digital skills through professional courses on AF Digital Hub."
+  />
+
+  <meta name="theme-color" content="#070b16" />
+
+  <style>
+    :root {
+      --bg: #050814;
+      --bg-soft: #0a1020;
+      --card: #0d1426;
+      --card-2: #111a30;
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f5f7ff;
+      --muted: #9ba7bd;
+      --gold: #ffd400;
+      --blue: #3d7cff;
+      --purple: #7b4dff;
+      --success: #28d17c;
+      --danger: #ff5d73;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background:
+        radial-gradient(
+          circle at 10% 0%,
+          rgba(61, 124, 255, 0.13),
+          transparent 28%
+        ),
+        radial-gradient(
+          circle at 90% 10%,
+          rgba(123, 77, 255, 0.12),
+          transparent 28%
+        ),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding-bottom: 70px;
+    }
+
+    /* HEADER */
+
+    .topbar {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, #ffd400, #f3b800);
+      color: #070b16;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 0 24px rgba(255, 212, 0, 0.18);
+      flex-shrink: 0;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.035);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      border-color: rgba(255,212,0,0.35);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.primary {
+      background: var(--gold);
+      color: #080b13;
+      border-color: var(--gold);
+      font-weight: 800;
+    }
+
+    /* HERO */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-top: 28px;
+      padding: 42px 34px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(61,124,255,0.14),
+          rgba(123,77,255,0.11)
+        ),
+        var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: rgba(255,212,0,0.07);
+      filter: blur(50px);
+      right: -100px;
+      top: -100px;
+    }
+
+    .hero-content {
+      position: relative;
+      max-width: 760px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255,212,0,0.08);
+      border: 1px solid rgba(255,212,0,0.18);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -1.7px;
+      margin-bottom: 15px;
+    }
+
+    .hero h1 span {
+      color: var(--gold);
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 690px;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .hero-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .hero-point {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--border);
+      color: #dce3f3;
+      font-size: 12px;
+    }
+
+    /* CONTROLS */
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin: 26px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1 1 300px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      outline: none;
+      background: var(--card);
+      color: var(--text);
+      padding: 0 16px 0 43px;
+    }
+
+    .search-wrap input:focus {
+      border-color: rgba(61,124,255,0.6);
+      box-shadow: 0 0 0 3px rgba(61,124,255,0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 14px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .filter {
+      height: 48px;
+      min-width: 160px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+    }
+
+    /* SECTION */
+
+    .section-heading {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 15px;
+      margin: 25px 0 17px;
+    }
+
+    .section-heading h2 {
+      font-size: 23px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-heading p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .course-count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* GRID */
+
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .course-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,0.025),
+          rgba(255,255,255,0)
+        ),
+        var(--card);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+      transition: transform 0.22s ease, border-color 0.22s ease;
+    }
+
+    .course-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(61,124,255,0.35);
+    }
+
+    .course-cover {
+      height: 180px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at 20% 20%,
+          rgba(255,212,0,0.16),
+          transparent 30%
+        ),
+        linear-gradient(
+          135deg,
+          #101a36,
+          #101126 55%,
+          #090d1b
+        );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .course-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-placeholder {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .cover-placeholder .af {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--gold);
+      color: #070b16;
+      font-weight: 950;
+      font-size: 20px;
+    }
+
+    .cover-placeholder span {
+      display: block;
+      color: #d8def0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .course-level {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(5,8,20,0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      color: #e8edfa;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .course-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .course-body h3 {
+      font-size: 18px;
+      line-height: 1.3;
+      margin-bottom: 9px;
+    }
+
+    .course-description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 63px;
+    }
+
+    .course-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .meta-item {
+      color: #c7d0e3;
+      font-size: 11px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 8px;
+    }
+
+    .course-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .price-label {
+      color: var(--muted);
+      font-size: 10px;
+      margin-bottom: 3px;
+    }
+
+    .price {
+      font-size: 21px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+
+    .commission {
+      margin-top: 5px;
+      color: var(--success);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .view-btn {
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      padding: 11px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      min-width: 100px;
+    }
+
+    .view-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    /* EMPTY / LOADING */
+
+    .state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .state-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .state h3 {
+      font-size: 18px;
+      margin-bottom: 7px;
+    }
+
+    .state p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .retry-btn {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: rgba(255,255,255,0.05);
+      color: white;
+      padding: 10px 15px;
+    }
+
+    /* INFO STRIP */
+
+    .info-strip {
+      margin-top: 28px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255,212,0,0.05),
+          rgba(61,124,255,0.06)
+        ),
+        var(--card);
+    }
+
+    .info-strip h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .info-strip p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .info-strip strong {
+      color: #f2f5ff;
+    }
+
+    /* FOOTER */
+
+    footer {
+      margin-top: 45px;
+      padding: 25px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* TOAST */
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 120px);
+      opacity: 0;
+      z-index: 100;
+      max-width: calc(100% - 30px);
+      padding: 13px 16px;
+      border-radius: 13px;
+      background: #111a2e;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      color: white;
+      font-size: 13px;
+      transition: 0.25s ease;
+    }
+
+    .toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-color: rgba(255,93,115,0.35);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 900px) {
+      .course-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .topbar {
+        min-height: 68px;
+      }
+
+      .brand-text span {
+        display: none;
+      }
+
+      .top-actions .nav-btn:first-child {
+        display: none;
+      }
+
+      .hero {
+        padding: 30px 20px;
+        border-radius: 22px;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .course-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .course-cover {
+        height: 200px;
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="AF Digital Hub home">
+        <div class="brand-mark">AF</div>
+
+        <div class="brand-text">
+          <strong>AF Digital Hub</strong>
+          <span>Discover. Do Business. Find Opportunities. Grow.</span>
+        </div>
+      </a>
+
+      <div class="top-actions">
+        <button
+          class="nav-btn"
+          type="button"
+          onclick="goBack()"
+        >
+          ← Back
+        </button>
+
+        <a
+          class="nav-btn primary"
+          href="dashboard.html"
+        >
+          Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-content">
+
+        <div class="eyebrow">
+          ✦ AF DIGITAL HUB COURSES
+        </div>
+
+        <h1>
+          Learn skills you can
+          <span>use in the real world.</span>
+        </h1>
+
+        <p>
+          Explore practical courses built to help you develop useful digital
+          skills, create opportunities, and grow your income through real
+          work, products and services.
+        </p>
+
+        <div class="hero-points">
+          <div class="hero-point">✓ Practical learning</div>
+          <div class="hero-point">✓ Beginner-friendly</div>
+          <div class="hero-point">✓ Learn at your pace</div>
+          <div class="hero-point">✓ Affiliate opportunities</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SEARCH / FILTER -->
+    <div class="controls">
+
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search courses..."
+          autocomplete="off"
+        />
+      </div>
+
+      <select
+        id="levelFilter"
+        class="filter"
+      >
+        <option value="all">All levels</option>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
+      </select>
+
+    </div>
+
+    <!-- COURSES -->
+    <section>
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Courses</h2>
+          <p>
+            Build useful skills and keep growing.
+          </p>
+        </div>
+
+        <div
+          id="courseCount"
+          class="course-count"
+        >
+          Loading...
+        </div>
+
+      </div>
+
+      <div
+        id="courseGrid"
+        class="course-grid"
+      >
+
+        <div class="state">
+
+          <div class="state-icon">◌</div>
+
+          <h3>Loading courses...</h3>
+
+          <p>
+            Please wait while AF Digital Hub loads the available courses.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- AFFILIATE INFO -->
+    <section class="info-strip">
+
+      <h3>
+        Earn by sharing courses
+      </h3>
+
+      <p>
+        Some courses on AF Digital Hub may offer affiliate commissions.
+        When a course has an affiliate commission, eligible users can create
+        a unique affiliate link and share it with their audience.
+        <strong>Commissions are earned from verified successful sales.</strong>
+      </p>
+
+    </section>
+
+    <footer>
+      © <span id="year"></span> AF Digital Hub. All rights reserved.
+    </footer>
+
+  </div>
+
+  <div
+    id="toast"
+    class="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+  <script>
+    /*
+      AF DIGITAL HUB COURSES
+
+      Backend endpoint:
+      GET /courses
+
+      The frontend first uses the production API.
+      A global window.API_BASE can override it if the existing
+      AF Digital Hub frontend defines one.
+    */
+
+    const DEFAULT_API_BASE =
+      "https://creator-marketplace-71rb.onrender.com";
+
+    const API_BASE =
+      (window.API_BASE || DEFAULT_API_BASE).replace(/\/$/, "");
+
+    const courseGrid =
+      document.getElementById("courseGrid");
+
+    const courseCount =
+      document.getElementById("courseCount");
+
+    const searchInput =
+      document.getElementById("searchInput");
+
+    const levelFilter =
+      document.getElementById("levelFilter");
+
+    const toast =
+      document.getElementById("toast");
+
+    let allCourses = [];
+
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    function showToast(message, isError = false) {
+      toast.textContent = message;
+
+      toast.classList.toggle("error", isError);
+      toast.classList.add("show");
+
+      clearTimeout(window.__toastTimer);
+
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3200);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeCourse(item) {
+      const course =
+        item.course ||
+        item;
+
+      const product =
+        item.product ||
+        course.product ||
+        {};
+
+      return {
+        id:
+          course.id ||
+          item.course_id,
+
+        productId:
+          course.product_id ||
+          product.id ||
+          item.product_id,
+
+        title:
+          course.title ||
+          product.title ||
+          item.title ||
+          "Untitled Course",
+
+        slug:
+          course.slug ||
+          item.slug ||
+          "",
+
+        shortDescription:
+          course.short_description ||
+          product.subtitle ||
+          item.short_description ||
+          "",
+
+        description:
+          course.description ||
+          product.description ||
+          item.description ||
+          "",
+
+        level:
+          course.level ||
+          item.level ||
+          "beginner",
+
+        estimatedHours:
+          course.estimated_hours ??
+          item.estimated_hours ??
+          null,
+
+        price:
+          product.price ??
+          item.price ??
+          0,
+
+        currency:
+          product.currency ||
+          item.currency ||
+          "GHS",
+
+        coverUrl:
+          product.cover_url ||
+          item.cover_url ||
+          "",
+
+        affiliateCommissionPercent:
+          product.affiliate_commission_percent ??
+          item.affiliate_commission_percent ??
+          0,
+
+        status:
+          course.status ||
+          item.status ||
+          "published"
+      };
+    }
+
+    function formatMoney(amount, currency) {
+      const value = Number(amount || 0);
+
+      try {
+        return new Intl.NumberFormat(
+          "en-GH",
+          {
+            style: "currency",
+            currency: currency || "GHS",
+            maximumFractionDigits: 2
+          }
+        ).format(value);
+      } catch {
+        return `${currency || "GHS"} ${value.toFixed(2)}`;
+      }
+    }
+
+    function renderCover(course) {
+      if (course.coverUrl) {
+        return `
+          <img
+            src="${escapeHtml(course.coverUrl)}"
+            alt="${escapeHtml(course.title)} cover"
+            loading="lazy"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          >
+
+          <div
+            class="cover-placeholder"
+            style="display:none;"
+          >
+            <div class="af">AF</div>
+            <span>AF Digital Hub</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="cover-placeholder">
+          <div class="af">AF</div>
+          <span>AF Digital Hub Course</span>
+        </div>
+      `;
+    }
+
+    function renderCourses(courses) {
+
+      if (!courses.length) {
+
+        courseGrid.innerHTML = `
+          <div class="state">
+
+            <div class="state-icon">⌕</div>
+
+            <h3>No courses found</h3>
+
+            <p>
+              Try another search or change the level filter.
+            </p>
+
+          </div>
+        `;
+
+        courseCount.textContent = "0 courses";
+
+        return;
+      }
+
+      courseCount.textContent =
+        `${courses.length} course${courses.length === 1 ? "" : "s"}`;
+
+      courseGrid.innerHTML =
+        courses.map(course => {
+
+          const level =
+            String(course.level || "beginner");
+
+          const description =
+            course.shortDescription ||
+            course.description ||
+            "Practical learning designed to help you build useful skills.";
+
+          const commission =
+            Number(
+              course.affiliateCommissionPercent || 0
+            );
+
+          const hours =
+            Number(course.estimatedHours || 0);
+
+          return `
+            <article
+              class="course-card"
+              data-title="${escapeHtml(course.title.toLowerCase())}"
+              data-level="${escapeHtml(level.toLowerCase())}"
+            >
+
+              <div class="course-cover">
+
+                ${renderCover(course)}
+
+                <div class="course-level">
+                  ${escapeHtml(level)}
+                </div>
+
+              </div>
+
+              <div class="course-body">
+
+                <h3>
+                  ${escapeHtml(course.title)}
+                </h3>
+
+                <p class="course-description">
+                  ${escapeHtml(
+                    description.length > 145
+                      ? description.substring(0, 145) + "..."
+                      : description
+                  )}
+                </p>
+
+                <div class="course-meta">
+
+                  ${
+                    hours > 0
+                      ? `
+                        <span class="meta-item">
+                          ⏱ ${hours} hrs
+                        </span>
+                      `
+                      : ""
+                  }
+
+                  <span class="meta-item">
+                    🎓 Course
+                  </span>
+
+                  ${
+                    commission > 0
+                      ? `
+                        <span class="meta-item">
+                          💰 ${commission}% affiliate
+                        </span>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+                <div class="course-bottom">
+
+                  <div>
+
+                    <div class="price-label">
+                      Course price
+                    </div>
+
+                    <div class="price">
+                      ${formatMoney(
+                        course.price,
+                        course.currency
+                      )}
+                    </div>
+
+                    ${
+                      commission > 0
+                        ? `
+                          <div class="commission">
+                            Earn ${commission}% commission
+                          </div>
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+                  <button
+                    class="view-btn"
+                    type="button"
+                    onclick="openCourse(${Number(course.id)})"
+                  >
+                    View Course
+                  </button>
+
+                </div>
+
+              </div>
+
+            </article>
+          `;
+        }).join("");
+    }
+
+    function filterCourses() {
+
+      const query =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+      const level =
+        levelFilter.value
+          .toLowerCase();
+
+      const filtered =
+        allCourses.filter(course => {
+
+          const searchable = [
+            course.title,
+            course.shortDescription,
+            course.description,
+            course.level
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          const matchesSearch =
+            !query ||
+            searchable.includes(query);
+
+          const matchesLevel =
+            level === "all" ||
+            String(course.level).toLowerCase() === level;
+
+          return matchesSearch && matchesLevel;
+        });
+
+      renderCourses(filtered);
+    }
+
+    function openCourse(courseId) {
+
+      if (!courseId) {
+        showToast(
+          "This course is currently unavailable.",
+          true
+        );
+        return;
+      }
+
+      window.location.href =
+        `course-details.html?id=${encodeURIComponent(courseId)}`;
+    }
+
+    async function loadCourses() {
+
+      courseGrid.innerHTML = `
+        <div class="state">
+
+          <div class="state-icon">◌</div>
+
+          <h3>Loading courses...</h3>
+
+          <p>
+            Connecting to AF Digital Hub.
+          </p>
+
+        </div>
+      `;
+
+      courseCount.textContent =
+        "Loading...";
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_BASE}/courses`,
+            {
+              method: "GET",
+              headers: {
+                "Accept": "application/json"
+              },
+              cache: "no-store"
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            `Courses request failed: ${response.status}`
+          );
+        }
+
+        const data =
+          await response.json();
+
+        /*
+          Support the common response shapes used by the
+          AF Digital Hub API.
+        */
+
+        let rawCourses = [];
+
+        if (Array.isArray(data)) {
+          rawCourses = data;
+        } else if (Array.isArray(data.courses)) {
+          rawCourses = data.courses;
+        } else if (Array.isArray(data.data)) {
+          rawCourses = data.data;
+        } else if (Array.isArray(data.items)) {
+          rawCourses = data.items;
+        }
+
+        allCourses =
+          rawCourses
+            .map(normalizeCourse)
+            .filter(course =>
+              course.id &&
+              course.status !== "draft"
+            );
+
+        renderCourses(allCourses);
+
+      } catch (error) {
+
+        console.error(
+          "AF Courses loading error:",
+          error
+        );
+
+        courseCount.textContent =
+          "Unable to load";
+
+        courseGrid.innerHTML = `
+          <div class="state">
+
+            <div class="state-icon">⚠</div>
+
+            <h3>Courses couldn't be loaded</h3>
+
+            <p>
+              Please check your connection and try again.
+            </p>
+
+            <button
+              class="retry-btn"
+              type="button"
+              onclick="loadCourses()"
+            >
+              Try Again
+            </button>
+
+          </div>
+        `;
+
+      }
+    }
+
+    searchInput.addEventListener(
+      "input",
+      filterCourses
+    );
+
+    levelFilter.addEventListener(
+      "change",
+      filterCourses
+    );
+
+    loadCourses();
+  </script>
+
+</body>
+</html>
