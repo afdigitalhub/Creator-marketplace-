@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Learning | AF Digital Hub</title>
+  <meta name="description" content="Continue your courses and track your learning progress on AF Digital Hub.">
+  <meta name="theme-color" content="#050814">
+
+  <style>
+    :root {
+      --bg:#050814;
+      --card:#0d1426;
+      --card2:#111a30;
+      --border:rgba(255,255,255,.09);
+      --text:#f5f7ff;
+      --muted:#9ba7bd;
+      --gold:#ffd400;
+      --blue:#3d7cff;
+      --purple:#7b4dff;
+      --green:#28d17c;
+      --red:#ff5d73;
+    }
+
+    * {
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body {
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%,rgba(61,124,255,.13),transparent 28%),
+        radial-gradient(circle at 90% 10%,rgba(123,77,255,.12),transparent 28%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    button {
+      font:inherit;
+      cursor:pointer;
+    }
+
+    a {
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .page {
+      width:min(1160px,calc(100% - 24px));
+      margin:auto;
+      padding-bottom:60px;
+    }
+
+    /* HEADER */
+
+    header {
+      min-height:74px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:11px;
+    }
+
+    .logo {
+      width:43px;
+      height:43px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:var(--gold);
+      color:#070b16;
+      font-weight:950;
+      box-shadow:0 0 25px rgba(255,212,0,.18);
+    }
+
+    .brand strong {
+      display:block;
+      font-size:15px;
+    }
+
+    .brand small {
+      display:block;
+      color:var(--muted);
+      font-size:10px;
+      margin-top:2px;
+    }
+
+    .header-actions {
+      display:flex;
+      gap:8px;
+    }
+
+    .header-btn {
+      padding:10px 13px;
+      border-radius:11px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:white;
+    }
+
+    .header-btn.primary {
+      background:var(--gold);
+      color:#070b16;
+      border-color:var(--gold);
+      font-weight:850;
+    }
+
+    /* HERO */
+
+    .hero {
+      margin-top:28px;
+      padding:32px;
+      border:1px solid var(--border);
+      border-radius:24px;
+      background:
+        linear-gradient(135deg,rgba(61,124,255,.11),rgba(123,77,255,.08)),
+        var(--card);
+    }
+
+    .eyebrow {
+      display:inline-flex;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,212,0,.08);
+      border:1px solid rgba(255,212,0,.17);
+      color:var(--gold);
+      font-size:10px;
+      font-weight:850;
+      margin-bottom:13px;
+    }
+
+    .hero h1 {
+      font-size:clamp(30px,5vw,45px);
+      line-height:1.08;
+      letter-spacing:-1.4px;
+    }
+
+    .hero p {
+      max-width:700px;
+      margin-top:11px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    /* STATS */
+
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:13px;
+      margin-top:18px;
+    }
+
+    .stat {
+      padding:17px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--card);
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+    }
+
+    .stat-value {
+      margin-top:6px;
+      font-size:24px;
+      font-weight:900;
+    }
+
+    /* SECTION */
+
+    .section-heading {
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:15px;
+      margin:30px 0 16px;
+    }
+
+    .section-heading h2 {
+      font-size:22px;
+    }
+
+    .section-heading p {
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .count {
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* GRID */
+
+    .course-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .course-card {
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border:1px solid var(--border);
+      border-radius:19px;
+      background:var(--card);
+      transition:.2s ease;
+    }
+
+    .course-card:hover {
+      transform:translateY(-3px);
+      border-color:rgba(61,124,255,.35);
+    }
+
+    .cover {
+      height:175px;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 20% 20%,rgba(255,212,0,.15),transparent 30%),
+        linear-gradient(135deg,#101a36,#101126 55%,#090d1b);
+    }
+
+    .cover img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .placeholder {
+      height:100%;
+      display:grid;
+      place-items:center;
+      text-align:center;
+    }
+
+    .af {
+      width:58px;
+      height:58px;
+      margin:auto;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:var(--gold);
+      color:#070b16;
+      font-size:19px;
+      font-weight:950;
+    }
+
+    .placeholder span {
+      display:block;
+      margin-top:9px;
+      color:#dbe2f1;
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .status {
+      position:absolute;
+      top:11px;
+      left:11px;
+      padding:6px 9px;
+      border-radius:999px;
+      background:rgba(5,8,20,.78);
+      border:1px solid rgba(255,255,255,.12);
+      color:white;
+      font-size:9px;
+      font-weight:850;
+      text-transform:uppercase;
+    }
+
+    .body {
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      flex:1;
+    }
+
+    .body h3 {
+      font-size:17px;
+      line-height:1.35;
+    }
+
+    .description {
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+      margin-top:7px;
+      min-height:39px;
+    }
+
+    .progress-area {
+      margin-top:17px;
+    }
+
+    .progress-label {
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--muted);
+      font-size:10px;
+      margin-bottom:6px;
+    }
+
+    .progress {
+      height:7px;
+      border-radius:99px;
+      overflow:hidden;
+      background:#1a2338;
+    }
+
+    .progress-bar {
+      height:100%;
+      background:linear-gradient(90deg,var(--blue),var(--purple));
+      border-radius:99px;
+    }
+
+    .card-bottom {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-top:17px;
+    }
+
+    .lesson-info {
+      color:var(--muted);
+      font-size:10px;
+    }
+
+    .continue-btn {
+      border:0;
+      border-radius:11px;
+      padding:10px 13px;
+      background:var(--gold);
+      color:#080b13;
+      font-size:11px;
+      font-weight:850;
+    }
+
+    .complete {
+      color:var(--green);
+      font-weight:800;
+    }
+
+    /* STATES */
+
+    .state {
+      grid-column:1/-1;
+      padding:60px 20px;
+      border:1px dashed var(--border);
+      border-radius:20px;
+      text-align:center;
+    }
+
+    .state-icon {
+      font-size:31px;
+      margin-bottom:11px;
+    }
+
+    .state h3 {
+      font-size:18px;
+      margin-bottom:7px;
+    }
+
+    .state p {
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .state button {
+      margin-top:15px;
+      padding:10px 15px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      color:white;
+    }
+
+    footer {
+      border-top:1px solid var(--border);
+      margin-top:45px;
+      padding:24px;
+      text-align:center;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .toast {
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translate(-50%,100px);
+      opacity:0;
+      z-index:100;
+      padding:12px 16px;
+      border-radius:11px;
+      background:#111a2e;
+      border:1px solid var(--border);
+      color:white;
+      font-size:12px;
+      transition:.25s;
+    }
+
+    .toast.show {
+      transform:translate(-50%,0);
+      opacity:1;
+    }
+
+    @media(max-width:850px) {
+      .course-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media(max-width:600px) {
+      .page {
+        width:calc(100% - 14px);
+      }
+
+      .brand small {
+        display:none;
+      }
+
+      .header-actions .header-btn:first-child {
+        display:none;
+      }
+
+      .hero {
+        padding:24px 20px;
+      }
+
+      .stats {
+        grid-template-columns:1fr;
+      }
+
+      .course-grid {
+        grid-template-columns:1fr;
+      }
+
+      .section-heading {
+        align-items:flex-start;
+        flex-direction:column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <header>
+
+    <a href="index.html" class="brand">
+      <div class="logo">AF</div>
+
+      <div>
+        <strong>AF Digital Hub</strong>
+        <small>Discover. Do Business. Find Opportunities. Grow.</small>
+      </div>
+    </a>
+
+    <div class="header-actions">
+
+      <button
+        class="header-btn"
+        onclick="location.href='courses.html'"
+      >
+        Browse Courses
+      </button>
+
+      <button
+        class="header-btn primary"
+        onclick="location.href='dashboard.html'"
+      >
+        Dashboard
+      </button>
+
+    </div>
+
+  </header>
+
+  <section class="hero">
+
+    <div class="eyebrow">
+      ✦ MY LEARNING
+    </div>
+
+    <h1>
+      Keep building your skills.
+    </h1>
+
+    <p>
+      Continue the courses you've enrolled in, track your progress,
+      and pick up exactly where you left off.
+    </p>
+
+  </section>
+
+  <section class="stats">
+
+    <div class="stat">
+      <div class="stat-label">Enrolled</div>
+      <div id="enrolledCount" class="stat-value">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">In Progress</div>
+      <div id="progressCount" class="stat-value">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Completed</div>
+      <div id="completedCount" class="stat-value">0</div>
+    </div>
+
+  </section>
+
+  <section>
+
+    <div class="section-heading">
+
+      <div>
+        <h2>Your Courses</h2>
+        <p>Your learning library on AF Digital Hub.</p>
+      </div>
+
+      <div
+        id="courseCount"
+        class="count"
+      >
+        Loading...
+      </div>
+
+    </div>
+
+    <div
+      id="courseGrid"
+      class="course-grid"
+    >
+
+      <div class="state">
+
+        <div class="state-icon">◌</div>
+
+        <h3>Loading your courses...</h3>
+
+        <p>
+          Connecting to your AF Digital Hub learning account.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <footer>
+    © <span id="year"></span> AF Digital Hub. All rights reserved.
+  </footer>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const DEFAULT_API_BASE =
+    "https://creator-marketplace-71rb.onrender.com";
+
+  const API_BASE =
+    (window.API_BASE || DEFAULT_API_BASE).replace(/\/$/,"");
+
+  const grid =
+    document.getElementById("courseGrid");
+
+  const count =
+    document.getElementById("courseCount");
+
+  const enrolledCount =
+    document.getElementById("enrolledCount");
+
+  const progressCount =
+    document.getElementById("progressCount");
+
+  const completedCount =
+    document.getElementById("completedCount");
+
+  const toast =
+    document.getElementById("toast");
+
+  document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+  function getToken() {
+
+    const keys = [
+      "token",
+      "authToken",
+      "accessToken",
+      "jwt"
+    ];
+
+    for (const key of keys) {
+
+      const value =
+        localStorage.getItem(key);
+
+      if (value) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
+  function authHeaders() {
+
+    const token =
+      getToken();
+
+    const headers = {
+      "Accept":"application/json",
+      "Content-Type":"application/json"
+    };
+
+    if (token) {
+      headers.Authorization =
+        token.startsWith("Bearer ")
+          ? token
+          : `Bearer ${token}`;
+    }
+
+    return headers;
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function showToast(message) {
+
+    toast.textContent =
+      message;
+
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer =
+      setTimeout(() => {
+        toast.classList.remove("show");
+      },3000);
+  }
+
+  function formatProgress(item) {
+
+    const possible =
+      item.progress_percent ??
+      item.progressPercent ??
+      item.percent ??
+      item.completion_percent ??
+      item.completionPercent;
+
+    if (possible !== undefined && possible !== null) {
+
+      return Math.max(
+        0,
+        Math.min(
+          100,
+          Math.round(Number(possible) || 0)
+        )
+      );
+    }
+
+    const completed =
+      Number(
+        item.completed_lessons ??
+        item.completedLessons ??
+        item.completed_count ??
+        0
+      );
+
+    const total =
+      Number(
+        item.total_lessons ??
+        item.totalLessons ??
+        item.lesson_count ??
+        0
+      );
+
+    if (total > 0) {
+
+      return Math.round(
+        (completed / total) * 100
+      );
+    }
+
+    return 0;
+  }
+
+  function normalizeItem(item) {
+
+    const course =
+      item.course ||
+      {};
+
+    const product =
+      item.product ||
+      course.product ||
+      {};
+
+    return {
+
+      id:
+        item.course_id ||
+        item.courseId ||
+        course.id ||
+        item.id,
+
+      productId:
+        item.product_id ||
+        item.productId ||
+        course.product_id ||
+        product.id,
+
+      title:
+        item.title ||
+        course.title ||
+        product.title ||
+        "Untitled Course",
+
+      shortDescription:
+        item.short_description ||
+        item.shortDescription ||
+        course.short_description ||
+        product.subtitle ||
+        product.description ||
+        "",
+
+      description:
+        item.description ||
+        course.description ||
+        product.description ||
+        "",
+
+      coverUrl:
+        item.cover_url ||
+        item.coverUrl ||
+        product.cover_url ||
+        "",
+
+      level:
+        item.level ||
+        course.level ||
+        "beginner",
+
+      completedLessons:
+        Number(
+          item.completed_lessons ??
+          item.completedLessons ??
+          item.completed_count ??
+          0
+        ),
+
+      totalLessons:
+        Number(
+          item.total_lessons ??
+          item.totalLessons ??
+          item.lesson_count ??
+          0
+        ),
+
+      progress:
+        formatProgress(item),
+
+      status:
+        item.status ||
+        item.enrollment_status ||
+        "active",
+
+      completed:
+        item.completed === true ||
+        item.status === "completed" ||
+        formatProgress(item) >= 100
+
+    };
+  }
+
+  function renderCover(course) {
+
+    if (course.coverUrl) {
+
+      return `
+        <img
+          src="${escapeHtml(course.coverUrl)}"
+          alt="${escapeHtml(course.title)} cover"
+          loading="lazy"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"
+        >
+
+        <div
+          class="placeholder"
+          style="display:none;"
+        >
+          <div>
+            <div class="af">AF</div>
+            <span>AF Digital Hub</span>
+          </div>
+        </div>
+      `;
+
+    }
+
+    return `
+      <div class="placeholder">
+        <div>
+          <div class="af">AF</div>
+          <span>AF Digital Hub Course</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCourses(courses) {
+
+    enrolledCount.textContent =
+      courses.length;
+
+    const inProgress =
+      courses.filter(
+        course =>
+          !course.completed &&
+          course.progress > 0
+      ).length;
+
+    const completed =
+      courses.filter(
+        course =>
+          course.completed ||
+          course.progress >= 100
+      ).length;
+
+    progressCount.textContent =
+      inProgress;
+
+    completedCount.textContent =
+      completed;
+
+    count.textContent =
+      `${courses.length} course${courses.length === 1 ? "" : "s"}`;
+
+    if (!courses.length) {
+
+      grid.innerHTML = `
+        <div class="state">
+
+          <div class="state-icon">📚</div>
+
+          <h3>You haven't enrolled in a course yet</h3>
+
+          <p>
+            Explore the AF Digital Hub Courses marketplace
+            and start learning a practical skill.
+          </p>
+
+          <button
+            onclick="location.href='courses.html'"
+          >
+            Browse Courses
+          </button>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    grid.innerHTML =
+      courses.map(course => {
+
+        const progress =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              Number(course.progress) || 0
+            )
+          );
+
+        const completed =
+          course.completed ||
+          progress >= 100;
+
+        const lessonText =
+          course.totalLessons > 0
+            ? `${course.completedLessons}/${course.totalLessons} lessons`
+            : `${progress}% complete`;
+
+        return `
+          <article class="course-card">
+
+            <div class="cover">
+
+              ${renderCover(course)}
+
+              <div class="status">
+                ${
+                  completed
+                    ? "Completed"
+                    : progress > 0
+                      ? "In Progress"
+                      : "Not Started"
+                }
+              </div>
+
+            </div>
+
+            <div class="body">
+
+              <h3>
+                ${escapeHtml(course.title)}
+              </h3>
+
+              <p class="description">
+                ${escapeHtml(
+                  course.shortDescription.length > 105
+                    ? course.shortDescription.substring(0,105) + "..."
+                    : course.shortDescription
+                )}
+              </p>
+
+              <div class="progress-area">
+
+                <div class="progress-label">
+
+                  <span>
+                    Learning progress
+                  </span>
+
+                  <span>
+                    ${progress}%
+                  </span>
+
+                </div>
+
+                <div class="progress">
+                  <div
+                    class="progress-bar"
+                    style="width:${progress}%"
+                  ></div>
+                </div>
+
+              </div>
+
+              <div class="card-bottom">
+
+                <div
+                  class="lesson-info ${
+                    completed ? "complete" : ""
+                  }"
+                >
+                  ${
+                    completed
+                      ? "✓ Course completed"
+                      : lessonText
+                  }
+                </div>
+
+                <button
+                  class="continue-btn"
+                  onclick="continueCourse('${escapeHtml(course.id)}')"
+                >
+                  ${
+                    completed
+                      ? "Review Course"
+                      : progress > 0
+                        ? "Continue"
+                        : "Start Learning"
+                  }
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+  }
+
+  function continueCourse(courseId) {
+
+    if (!courseId) {
+
+      showToast(
+        "Course information is unavailable."
+      );
+
+      return;
+    }
+
+    location.href =
+      `course-learn.html?id=${encodeURIComponent(courseId)}`;
+  }
+
+  async function loadLearning() {
+
+    const token =
+      getToken();
+
+    if (!token) {
+
+      count.textContent =
+        "Sign in required";
+
+      grid.innerHTML = `
+        <div class="state">
+
+          <div class="state-icon">🔐</div>
+
+          <h3>Sign in to view your learning</h3>
+
+          <p>
+            Your enrolled courses are connected to your AF Digital Hub account.
+          </p>
+
+          <button
+            onclick="location.href='login.html?redirect=' + encodeURIComponent(location.href)"
+          >
+            Sign In
+          </button>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          `${API_BASE}/courses/mine/learning`,
+          {
+            method:"GET",
+            headers:authHeaders(),
+            cache:"no-store"
+          }
+        );
+
+      const data =
+        await response.json().catch(
+          () => ({})
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          data.error ||
+          `Learning request failed: ${response.status}`
+        );
+      }
+
+      let raw = [];
+
+      if (Array.isArray(data)) {
+        raw = data;
+      } else if (Array.isArray(data.courses)) {
+        raw = data.courses;
+      } else if (Array.isArray(data.learning)) {
+        raw = data.learning;
+      } else if (Array.isArray(data.enrollments)) {
+        raw = data.enrollments;
+      } else if (Array.isArray(data.data)) {
+        raw = data.data;
+      } else if (Array.isArray(data.items)) {
+        raw = data.items;
+      }
+
+      const courses =
+        raw.map(normalizeItem);
+
+      renderCourses(courses);
+
+    } catch(error) {
+
+      console.error(
+        "My Learning error:",
+        error
+      );
+
+      count.textContent =
+        "Unable to load";
+
+      grid.innerHTML = `
+        <div class="state">
+
+          <div class="state-icon">⚠</div>
+
+          <h3>Couldn't load your learning</h3>
+
+          <p>
+            Please check your connection and try again.
+          </p>
+
+          <button
+            onclick="loadLearning()"
+          >
+            Try Again
+          </button>
+
+        </div>
+      `;
+
+    }
+  }
+
+  loadLearning();
+</script>
+
+</body>
+  </html>
