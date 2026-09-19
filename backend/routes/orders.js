@@ -13,15 +13,20 @@ const AFFILIATE_RATE = 0.5;
 async function getCommissionRate() {
   try {
     const result = await pool.query(
-      "SELECT value FROM platform_settings WHERE key = 'commission_rate'"
+      "SELECT value FROM platform_settings WHERE key = 'commission_percent'"
     );
+
     if (result.rows.length > 0) {
       const parsed = parseFloat(result.rows[0].value);
-      if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) return parsed;
+
+      if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+        return parsed;
+      }
     }
   } catch (err) {
     console.error("Could not read commission rate, using default:", err);
   }
+
   return 10;
 }
 
@@ -66,14 +71,19 @@ router.post("/", requireAuth, async (req, res) => {
     const product = productResult.rows[0];
 
     if (product.status !== "published") {
-      return res.status(400).json({ error: "This product is not available for purchase" });
+      return res.status(400).json({
+        error: "This product is not available for purchase"
+      });
     }
 
     if (product.seller_id === req.user.id) {
-      return res.status(400).json({ error: "You cannot buy your own product" });
+      return res.status(400).json({
+        error: "You cannot buy your own product"
+      });
     }
 
     let validReferrerId = null;
+
     if (referrer_id) {
       const isSelf = referrer_id === req.user.id;
       const isSeller = referrer_id === product.seller_id;
@@ -83,36 +93,49 @@ router.post("/", requireAuth, async (req, res) => {
           "SELECT id FROM users WHERE id = $1",
           [referrer_id]
         );
+
         if (referrerResult.rows.length > 0) {
           validReferrerId = referrerResult.rows[0].id;
         }
       }
-      // If the referrer is invalid, self, or the seller, we silently
-      // proceed without one rather than blocking the purchase.
     }
 
     const existingEntitlement = await pool.query(
       "SELECT id FROM entitlements WHERE user_id = $1 AND product_id = $2 AND status = 'active'",
       [req.user.id, product_id]
     );
+
     if (existingEntitlement.rows.length > 0) {
-      return res.status(400).json({ error: "You already own this product" });
+      return res.status(400).json({
+        error: "You already own this product"
+      });
     }
 
     const existingOrder = await pool.query(
       `SELECT * FROM orders
-       WHERE buyer_id = $1 AND product_id = $2 AND status = 'pending'
-       ORDER BY created_at DESC LIMIT 1`,
+       WHERE buyer_id = $1
+         AND product_id = $2
+         AND status = 'pending'
+       ORDER BY created_at DESC
+       LIMIT 1`,
       [req.user.id, product_id]
     );
+
     if (existingOrder.rows.length > 0) {
-      return res.json({ order: existingOrder.rows[0], reused: true });
+      return res.json({
+        order: existingOrder.rows[0],
+        reused: true
+      });
     }
 
     const ratePercent = await getCommissionRate();
-    const { gross, commission, seller, affiliate } = calculateAmounts(
-      product.price, ratePercent, Boolean(validReferrerId)
-    );
+
+    const { gross, commission, seller, affiliate } =
+      calculateAmounts(
+        product.price,
+        ratePercent,
+        Boolean(validReferrerId)
+      );
 
     const result = await pool.query(
       `INSERT INTO orders
@@ -136,29 +159,44 @@ router.post("/", requireAuth, async (req, res) => {
       ]
     );
 
-    res.status(201).json({ order: result.rows[0] });
+    res.status(201).json({
+      order: result.rows[0]
+    });
   } catch (err) {
     console.error("Create order error:", err);
-    res.status(500).json({ error: "Could not create order" });
+    res.status(500).json({
+      error: "Could not create order"
+    });
   }
 });
 
 // GET /orders/mine - the buyer's own order history.
-// Includes payment status and whether they still have access.
 router.get("/mine", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT
-         o.id, o.product_id, o.product_title, o.gross_amount, o.currency,
-         o.status, o.created_at, o.updated_at,
-         p.cover_url, p.category,
+         o.id,
+         o.product_id,
+         o.product_title,
+         o.gross_amount,
+         o.currency,
+         o.status,
+         o.created_at,
+         o.updated_at,
+         p.cover_url,
+         p.category,
          u.full_name AS seller_name,
-         (SELECT pm.provider_reference FROM payments pm
-          WHERE pm.order_id = o.id AND pm.status = 'successful'
-          ORDER BY pm.created_at DESC LIMIT 1) AS payment_reference,
+         (SELECT pm.provider_reference
+          FROM payments pm
+          WHERE pm.order_id = o.id
+            AND pm.status = 'successful'
+          ORDER BY pm.created_at DESC
+          LIMIT 1) AS payment_reference,
          EXISTS (
-           SELECT 1 FROM entitlements e
-           WHERE e.order_id = o.id AND e.status = 'active'
+           SELECT 1
+           FROM entitlements e
+           WHERE e.order_id = o.id
+             AND e.status = 'active'
          ) AS has_access
        FROM orders o
        LEFT JOIN products p ON o.product_id = p.id
@@ -168,10 +206,14 @@ router.get("/mine", requireAuth, async (req, res) => {
       [req.user.id]
     );
 
-    res.json({ orders: result.rows });
+    res.json({
+      orders: result.rows
+    });
   } catch (err) {
     console.error("List my orders error:", err);
-    res.status(500).json({ error: "Could not load your orders" });
+    res.status(500).json({
+      error: "Could not load your orders"
+    });
   }
 });
 
@@ -179,10 +221,16 @@ router.get("/mine", requireAuth, async (req, res) => {
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, p.cover_url, u.full_name AS seller_name,
-         (SELECT pm.provider_reference FROM payments pm
-          WHERE pm.order_id = o.id AND pm.status = 'successful'
-          ORDER BY pm.created_at DESC LIMIT 1) AS payment_reference
+      `SELECT
+         o.*,
+         p.cover_url,
+         u.full_name AS seller_name,
+         (SELECT pm.provider_reference
+          FROM payments pm
+          WHERE pm.order_id = o.id
+            AND pm.status = 'successful'
+          ORDER BY pm.created_at DESC
+          LIMIT 1) AS payment_reference
        FROM orders o
        LEFT JOIN products p ON o.product_id = p.id
        LEFT JOIN users u ON o.seller_id = u.id
@@ -191,19 +239,30 @@ router.get("/:id", requireAuth, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({
+        error: "Order not found"
+      });
     }
 
     const order = result.rows[0];
 
-    if (order.buyer_id !== req.user.id && order.seller_id !== req.user.id) {
-      return res.status(403).json({ error: "Not authorized to view this order" });
+    if (
+      order.buyer_id !== req.user.id &&
+      order.seller_id !== req.user.id
+    ) {
+      return res.status(403).json({
+        error: "Not authorized to view this order"
+      });
     }
 
-    res.json({ order });
+    res.json({
+      order
+    });
   } catch (err) {
     console.error("Get order error:", err);
-    res.status(500).json({ error: "Could not load order" });
+    res.status(500).json({
+      error: "Could not load order"
+    });
   }
 });
 
