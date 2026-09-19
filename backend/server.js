@@ -22,6 +22,7 @@ const paymentRoutes = require("./routes/payments");
 const earningsRoutes = require("./routes/earnings");
 const productReviewRoutes = require("./routes/productReviews");
 const withdrawalRoutes = require("./routes/withdrawals");
+const withdrawalWindowRoutes = require("./routes/withdrawalWindow");
 const adminStatsRoutes = require("./routes/adminStats");
 const gigsRoutes = require("./routes/gigs");
 const newsRoutes = require("./routes/news");
@@ -66,6 +67,7 @@ app.use("/orders", orderRoutes);
 app.use("/library", libraryRoutes);
 app.use("/earnings", earningsRoutes);
 app.use("/withdrawals", withdrawalRoutes);
+app.use("/withdrawal-window", withdrawalWindowRoutes);
 app.use("/news", newsRoutes);
 app.use("/videos", videosRoutes);
 
