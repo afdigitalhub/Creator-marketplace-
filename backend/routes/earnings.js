@@ -147,16 +147,10 @@ router.get("/", requireAuth, async (req, res) => {
         pending: Number(row.pending),
         available: Number(row.available),
         withdrawn: Number(row.withdrawn),
-
-        // Wallet = money currently pending + available.
         wallet: Number(row.wallet),
-
         this_week: Number(row.this_week),
         this_month: Number(row.this_month),
-
-        // Total earnings recorded for this currency.
         lifetime: Number(row.lifetime),
-
         sale_count: Number(row.sale_count)
       })),
 
@@ -164,7 +158,6 @@ router.get("/", requireAuth, async (req, res) => {
         id: row.id,
         source_type: row.source_type,
         product_title: row.product_title || null,
-
         gross_amount: Number(row.gross_amount),
         platform_fee: Number(row.platform_fee),
         net_amount: Number(row.net_amount),
@@ -176,7 +169,9 @@ router.get("/", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error("Load earnings error:", err);
-    res.status(500).json({ error: "Could not load your earnings" });
+    res.status(500).json({
+      error: "Could not load your earnings"
+    });
   }
 });
 
