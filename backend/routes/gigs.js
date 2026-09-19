@@ -12,7 +12,8 @@ const CATEGORY_LABELS = {
   errand: "Local Errand",
   voice: "Voice & Language",
   review: "Quick Review",
-  price_check: "Price Check"
+  price_check: "Price Check",
+  courses: "Courses"
 };
 
 function toMinorUnit(amount) {
