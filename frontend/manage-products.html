@@ -80,7 +80,7 @@
   const token = localStorage.getItem('af_token');
   const role = localStorage.getItem('af_role');
 
-  if (!token) window.location.href = 'login.html';
+  if (!token) window.location.href = 'signin.html';
 
   const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
   function formatMoney(amount, currency) {

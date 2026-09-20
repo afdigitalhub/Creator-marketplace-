@@ -274,7 +274,7 @@
   const token = localStorage.getItem('af_token');
   const role = localStorage.getItem('af_role');
 
-  if (!token) window.location.href = 'login.html';
+  if (!token) window.location.href = 'signin.html';
 
   const params = new URLSearchParams(window.location.search);
   const campaignId = params.get('id');

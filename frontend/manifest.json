@@ -2,7 +2,7 @@
   "name": "AF Digital Hub",
   "short_name": "AF Digital Hub",
   "description": "Creator & Business Marketplace",
-  "start_url": "/login.html",
+  "start_url": "/signin.html",
   "display": "standalone",
   "background_color": "#05050a",
   "theme_color": "#05050a",

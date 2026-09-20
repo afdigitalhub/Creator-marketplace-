@@ -67,7 +67,7 @@
   const params = new URLSearchParams(window.location.search);
   const productId = params.get('id');
 
-  if (!token) window.location.href = 'login.html';
+  if (!token) window.location.href = 'signin.html';
 
   function renderForm(p) {
     document.getElementById('mainContent').innerHTML = `

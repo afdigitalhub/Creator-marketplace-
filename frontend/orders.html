@@ -81,7 +81,7 @@
 
   if (!token) {
     localStorage.setItem('af_redirect_after_login', window.location.href);
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: '$' };
@@ -119,7 +119,7 @@
 
       if (res.status === 401) {
         localStorage.setItem('af_redirect_after_login', window.location.href);
-        window.location.href = 'login.html';
+        window.location.href = 'signin.html';
         return;
       }
 

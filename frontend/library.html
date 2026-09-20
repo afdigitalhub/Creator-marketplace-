@@ -98,7 +98,7 @@
 
   if (!token) {
     localStorage.setItem('af_redirect_after_login', window.location.href);
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   let selectedRating = 0;
@@ -282,7 +282,7 @@
 
       if (res.status === 401) {
         localStorage.setItem('af_redirect_after_login', window.location.href);
-        window.location.href = 'login.html';
+        window.location.href = 'signin.html';
         return;
       }
 

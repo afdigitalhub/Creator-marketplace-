@@ -466,7 +466,7 @@
   const urlParams = new URLSearchParams(window.location.search);
 
   // Preserve a safe post-login destination for links such as
-  // login.html?redirect=dashboard.html
+  // signin.html?redirect=dashboard.html
   const redirectParam = urlParams.get('redirect');
   if (redirectParam) {
     try {

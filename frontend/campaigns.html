@@ -336,7 +336,7 @@
   const name = localStorage.getItem('af_name');
 
   if (!token) {
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   document.getElementById('menuUserName').textContent = name || 'User';
@@ -371,7 +371,7 @@
   }
   function logout() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   function escapeHtml(str) {

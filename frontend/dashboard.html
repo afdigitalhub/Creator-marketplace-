@@ -555,7 +555,7 @@
   const name = localStorage.getItem('af_name');
 
   if (!token) {
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   const CURRENCY_SYMBOLS = { USD: '$', GHS: '₵', NGN: '₦', GBP: '£', EUR: '€', KES: 'KSh', ZAR: 'R', CAD: 'C$' };
@@ -614,7 +614,7 @@
 
   function logout() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    window.location.href = 'signin.html';
   }
 
   function showStats(v1, l1, v2, l2) {

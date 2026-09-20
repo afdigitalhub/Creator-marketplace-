@@ -110,7 +110,7 @@
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
   const token = localStorage.getItem('af_token');
   const currentUserId = localStorage.getItem('af_user_id'); // may not exist yet on all pages
-  if (!token) window.location.href = 'login.html';
+  if (!token) window.location.href = 'signin.html';
 
   const params = new URLSearchParams(window.location.search);
   const gigId = params.get('id');
