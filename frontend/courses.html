@@ -3,8 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Courses — AF Digital Hub</title>
-<meta name="description" content="Learn practical digital skills through professional courses on AF Digital Hub.">
+
+<meta
+  name="description"
+  content="Learn practical digital skills through professional courses on AF Digital Hub."
+>
+
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#05050b">
 
@@ -20,7 +26,12 @@
   --muted:#8992a7;
   --input:#0a0a12;
   --success:#34d399;
-  --gradient:linear-gradient(135deg,#ffd21a 0%,#4e7cff 60%,#7b45ff 100%);
+  --gradient:linear-gradient(
+    135deg,
+    #ffd21a 0%,
+    #4e7cff 60%,
+    #7b45ff 100%
+  );
 }
 
 *{
@@ -32,10 +43,23 @@
 
 body{
   background:
-    radial-gradient(circle at 85% 0%,rgba(123,69,255,.14),transparent 30%),
+    radial-gradient(
+      circle at 85% 0%,
+      rgba(123,69,255,.14),
+      transparent 30%
+    ),
     var(--bg);
+
   color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Inter",
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+
   min-height:100vh;
   padding-bottom:50px;
 }
@@ -48,15 +72,19 @@ a{
   position:sticky;
   top:0;
   z-index:20;
+
   background:rgba(5,5,11,.9);
   backdrop-filter:blur(14px);
+
   border-bottom:1px solid var(--border);
+
   padding:14px 18px;
 }
 
 .top-inner{
   max-width:1120px;
   margin:auto;
+
   display:flex;
   align-items:center;
   gap:12px;
@@ -65,11 +93,15 @@ a{
 .back{
   width:36px;
   height:36px;
+
   border:1px solid var(--border);
   border-radius:10px;
+
   background:var(--card);
+
   display:grid;
   place-items:center;
+
   text-decoration:none;
   font-size:18px;
 }
@@ -78,15 +110,20 @@ a{
   display:flex;
   align-items:center;
   gap:9px;
+
   text-decoration:none;
 }
 
 .brand img{
   width:38px;
   height:38px;
+
   border-radius:10px;
+
   object-fit:cover;
+
   border:1px solid rgba(255,210,26,.18);
+
   background:#05050b;
 }
 
@@ -104,69 +141,107 @@ a{
 
 .header-link{
   padding:9px 13px;
+
   border:1px solid var(--border);
   border-radius:10px;
+
   text-decoration:none;
+
   font-size:12px;
   font-weight:700;
+
   color:var(--muted);
 }
 
 .wrap{
   max-width:1120px;
   margin:auto;
+
   padding:30px 18px;
 }
 
 .hero{
   padding:30px;
+
   border:1px solid rgba(255,210,26,.14);
   border-radius:24px;
+
   background:
-    radial-gradient(circle at 85% 15%,rgba(255,210,26,.12),transparent 35%),
-    linear-gradient(135deg,rgba(78,124,255,.13),rgba(123,69,255,.13));
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(255,210,26,.12),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(78,124,255,.13),
+      rgba(123,69,255,.13)
+    );
+
   margin-bottom:26px;
 }
 
 .eyebrow{
   font-size:11px;
+
   color:var(--gold);
+
   font-weight:800;
+
   letter-spacing:.12em;
+
   text-transform:uppercase;
+
   margin-bottom:9px;
 }
 
 .hero h1{
   font-size:clamp(28px,5vw,48px);
+
   line-height:1.08;
+
   letter-spacing:-.04em;
+
   margin-bottom:12px;
 }
 
 .hero p{
   max-width:700px;
+
   color:var(--muted);
+
   line-height:1.7;
+
   font-size:14px;
 }
 
 .toolbar{
   display:flex;
+
   gap:10px;
+
   align-items:center;
+
   margin-bottom:22px;
+
   flex-wrap:wrap;
 }
 
 .search{
   flex:1;
+
   min-width:220px;
+
   background:var(--input);
+
   border:1px solid var(--border);
+
   border-radius:12px;
+
   padding:13px 15px;
+
   color:var(--text);
+
   outline:none;
 }
 
@@ -176,78 +251,127 @@ a{
 
 .filters{
   display:flex;
+
   gap:8px;
+
   overflow:auto;
 }
 
 .filter{
   border:1px solid var(--border);
+
   background:var(--card);
+
   color:var(--muted);
+
   padding:10px 14px;
+
   border-radius:20px;
+
   font-size:12px;
+
   font-weight:800;
+
   cursor:pointer;
+
   white-space:nowrap;
 }
 
 .filter.active{
   background:var(--gold);
+
   color:#07070a;
+
   border-color:var(--gold);
 }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+
   gap:18px;
 }
 
-/* =========================
-   UNIFIED COURSE COVER
-   ========================= */
+
+/* =====================================================
+   UNIFIED MEDIUM COURSE COVER
+   ===================================================== */
 
 .cover{
-  aspect-ratio:3 / 4;
+  /*
+    Medium professional landscape-style cover.
+    This prevents the old very-tall course covers.
+  */
+  aspect-ratio:16 / 10;
+
   position:relative;
+
   overflow:hidden;
+
   background:
-    radial-gradient(circle at 90% 10%,rgba(255,210,26,.18),transparent 30%),
-    linear-gradient(145deg,#070b18 0%,#11152a 48%,#18102d 100%);
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(255,210,26,.18),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      #070b18 0%,
+      #11152a 48%,
+      #18102d 100%
+    );
 }
 
 .course-cover{
   width:100%;
   height:100%;
+
   position:relative;
+
   display:flex;
+
   flex-direction:column;
+
   justify-content:space-between;
-  padding:22px 20px;
+
+  padding:18px 20px;
+
   overflow:hidden;
 }
 
 .course-cover::before{
   content:"";
+
   position:absolute;
+
   width:170px;
   height:170px;
+
   border-radius:50%;
+
   background:rgba(78,124,255,.14);
+
   filter:blur(2px);
-  top:-70px;
+
+  top:-90px;
   right:-60px;
 }
 
 .course-cover::after{
   content:"";
+
   position:absolute;
+
   width:150px;
   height:150px;
+
   border-radius:50%;
+
   background:rgba(123,69,255,.16);
-  bottom:-70px;
+
+  bottom:-100px;
   left:-60px;
 }
 
@@ -260,248 +384,330 @@ a{
 
 .cover-brand{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:8px;
 }
 
 .cover-brand-name{
   font-size:10px;
+
   font-weight:950;
+
   letter-spacing:.11em;
+
   color:#fff;
 }
 
 .cover-badge{
   padding:5px 8px;
+
   border-radius:999px;
+
   border:1px solid rgba(255,210,26,.4);
+
   color:var(--gold);
+
   font-size:8px;
+
   font-weight:900;
+
   letter-spacing:.08em;
 }
 
 .cover-label{
-  margin-top:24px;
-  font-size:9px;
+  margin-top:12px;
+
+  font-size:8px;
+
   color:var(--gold);
+
   font-weight:950;
+
   letter-spacing:.16em;
+
   text-transform:uppercase;
 }
 
 .cover-title{
-  margin-top:9px;
-  font-size:clamp(20px,2.2vw,29px);
+  margin-top:7px;
+
+  font-size:clamp(18px,2vw,26px);
+
   line-height:1.08;
+
   letter-spacing:-.035em;
+
   font-weight:950;
+
   color:#fff;
+
+  display:-webkit-box;
+
+  -webkit-line-clamp:2;
+
+  -webkit-box-orient:vertical;
+
+  overflow:hidden;
 }
 
 .cover-line{
-  width:55px;
+  width:48px;
+
   height:3px;
-  margin-top:15px;
+
+  margin-top:10px;
+
   border-radius:99px;
+
   background:var(--gradient);
 }
 
 .cover-description{
-  margin-top:14px;
+  margin-top:9px;
+
   color:#b8bfd1;
-  font-size:10px;
-  line-height:1.55;
+
+  font-size:9px;
+
+  line-height:1.4;
+
   display:-webkit-box;
-  -webkit-line-clamp:4;
+
+  -webkit-line-clamp:2;
+
   -webkit-box-orient:vertical;
+
   overflow:hidden;
 }
 
 .cover-founder{
   display:flex;
+
   align-items:center;
-  gap:9px;
-  padding-top:14px;
+
+  gap:8px;
+
+  padding-top:8px;
+
   border-top:1px solid rgba(255,255,255,.1);
 }
 
 .cover-founder img{
-  width:38px;
-  height:38px;
+  width:34px;
+  height:34px;
+
   border-radius:50%;
+
   object-fit:cover;
+
   object-position:center 20%;
+
   border:2px solid rgba(255,210,26,.55);
+
+  flex:none;
 }
 
 .cover-founder strong{
   display:block;
+
   color:#fff;
-  font-size:10px;
+
+  font-size:9px;
+
   font-weight:900;
 }
 
 .cover-founder small{
   display:block;
+
   color:#929bb0;
-  font-size:8px;
+
+  font-size:7px;
+
   margin-top:2px;
 }
 
-/* =========================
+
+/* =====================================================
    COURSE CARD
-   ========================= */
+   ===================================================== */
 
 .card{
   background:var(--card);
+
   border:1px solid var(--border);
+
   border-radius:18px;
+
   overflow:hidden;
+
   text-decoration:none;
+
   display:flex;
+
   flex-direction:column;
+
   transition:.18s ease;
 }
 
 .card:hover{
   transform:translateY(-2px);
+
   border-color:rgba(255,210,26,.35);
 }
 
 .body{
   padding:18px;
+
   display:flex;
+
   flex-direction:column;
+
   flex:1;
 }
 
 .tag{
   font-size:10px;
+
   color:var(--gold);
+
   font-weight:900;
+
   text-transform:uppercase;
+
   letter-spacing:.08em;
+
   margin-bottom:7px;
 }
 
 .title{
   font-size:18px;
+
   font-weight:850;
+
   line-height:1.25;
+
   margin-bottom:7px;
 }
 
 .desc{
   font-size:13px;
+
   color:var(--muted);
+
   line-height:1.55;
+
   margin-bottom:15px;
-}
-
-.author-line{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  margin:2px 0 12px;
-}
-
-.author-dot{
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  display:block;
-  object-fit:cover;
-  object-position:center 20%;
-  border:2px solid rgba(255,210,26,.45);
-  flex:none;
-}
-
-.author-line strong{
-  display:block;
-  color:var(--text);
-  font-size:11px;
-  font-weight:900;
-}
-
-.author-line small{
-  display:block;
-  color:var(--muted);
-  font-size:9px;
-  margin-top:2px;
 }
 
 .meta{
   display:flex;
+
   gap:10px;
+
   flex-wrap:wrap;
+
   color:var(--muted);
+
   font-size:11px;
+
   margin-bottom:16px;
 }
 
 .meta span{
   padding:5px 8px;
+
   background:var(--input);
+
   border-radius:8px;
 }
 
 .bottom{
   display:flex;
+
   justify-content:space-between;
+
   align-items:end;
+
   gap:12px;
+
   margin-top:auto;
 }
 
 .price{
   font-size:19px;
+
   font-weight:900;
+
   color:var(--gold);
 }
 
 .commission{
   font-size:10.5px;
+
   color:var(--success);
+
   font-weight:800;
+
   margin-top:3px;
 }
 
 .view{
   background:var(--gradient);
+
   border:0;
+
   border-radius:10px;
+
   padding:10px 14px;
+
   color:white;
+
   font-weight:850;
+
   font-size:12px;
 }
 
 .empty,
 .loading{
   text-align:center;
+
   padding:60px 20px;
+
   color:var(--muted);
 }
 
 .error{
   color:#ff8f8f;
+
   text-align:center;
+
   padding:40px 20px;
 }
 
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
 @media(max-width:850px){
+
   .grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
   }
 
   .cover-title{
-    font-size:24px;
+    font-size:22px;
   }
 }
 
 @media(max-width:580px){
+
   .wrap{
     padding:20px 14px;
   }
@@ -522,52 +728,86 @@ a{
     font-size:14px;
   }
 
+  /*
+    Keep the mobile cover medium,
+    not a huge portrait image.
+  */
+  .cover{
+    aspect-ratio:16 / 10;
+  }
+
   .cover-title{
-    font-size:28px;
+    font-size:25px;
   }
 }
 </style>
 </head>
 
+
 <body>
 
 <header class="top">
+
   <div class="top-inner">
 
-    <a class="back" href="javascript:history.back()" aria-label="Go back">
+    <a
+      class="back"
+      href="javascript:history.back()"
+      aria-label="Go back"
+    >
       ←
     </a>
 
-    <a class="brand" href="index.html">
+    <a
+      class="brand"
+      href="index.html"
+    >
+
       <img
         src="logo.png"
         alt="AF Digital Hub"
         onerror="this.style.display='none'"
       >
-      <strong>AF <span>Digital Hub</span></strong>
+
+      <strong>
+        AF <span>Digital Hub</span>
+      </strong>
+
     </a>
 
     <div class="spacer"></div>
 
-    <a class="header-link" href="my-learning.html">
+    <a
+      class="header-link"
+      href="my-learning.html"
+    >
       My Learning
     </a>
 
   </div>
+
 </header>
+
 
 <main class="wrap">
 
   <section class="hero">
-    <div class="eyebrow">AF Digital Hub Academy</div>
 
-    <h1>Learn skills that move you forward.</h1>
+    <div class="eyebrow">
+      AF Digital Hub Academy
+    </div>
+
+    <h1>
+      Learn skills that move you forward.
+    </h1>
 
     <p>
       Explore practical professional courses designed to help you build
       valuable digital skills, create opportunities and grow with confidence.
     </p>
+
   </section>
+
 
   <div class="toolbar">
 
@@ -579,74 +819,165 @@ a{
       autocomplete="off"
     >
 
-    <div class="filters" id="filters">
-      <button class="filter active" data-level="all">All</button>
-      <button class="filter" data-level="beginner">Beginner</button>
-      <button class="filter" data-level="intermediate">Intermediate</button>
-      <button class="filter" data-level="advanced">Advanced</button>
+    <div
+      class="filters"
+      id="filters"
+    >
+
+      <button
+        class="filter active"
+        data-level="all"
+      >
+        All
+      </button>
+
+      <button
+        class="filter"
+        data-level="beginner"
+      >
+        Beginner
+      </button>
+
+      <button
+        class="filter"
+        data-level="intermediate"
+      >
+        Intermediate
+      </button>
+
+      <button
+        class="filter"
+        data-level="advanced"
+      >
+        Advanced
+      </button>
+
     </div>
 
   </div>
 
-  <section id="grid" class="grid">
-    <div class="loading">Loading courses...</div>
+
+  <section
+    id="grid"
+    class="grid"
+  >
+
+    <div class="loading">
+      Loading courses...
+    </div>
+
   </section>
 
 </main>
 
+
 <script>
-const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+
+const API_BASE =
+  "https://creator-marketplace-71rb.onrender.com";
 
 const FOUNDER_PHOTO =
   "https://raw.githubusercontent.com/afdigitalhub/Creator-marketplace-/main/frontend/founder-photo.jpg";
 
 let courses = [];
+
 let activeLevel = "all";
 
-function esc(value) {
+
+function esc(value){
+
   return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
 }
 
-function money(value, currency = "GHS") {
-  const amount = Number(value || 0);
 
-  try {
-    return new Intl.NumberFormat("en-GH", {
-      style: "currency",
-      currency: currency || "GHS",
-      maximumFractionDigits: 2
-    }).format(amount);
-  } catch {
+function money(
+  value,
+  currency = "GHS"
+){
+
+  const amount =
+    Number(value || 0);
+
+  try{
+
+    return new Intl.NumberFormat(
+      "en-GH",
+      {
+        style:"currency",
+        currency:currency || "GHS",
+        maximumFractionDigits:2
+      }
+    ).format(amount);
+
+  }catch{
+
     return `${currency || "GHS"} ${amount.toFixed(2)}`;
+
   }
+
 }
 
-function levelLabel(level) {
-  const value = String(level || "beginner").toLowerCase();
 
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
+function levelLabel(level){
 
-function buildCover(course) {
-  const title = esc(course.title || "Professional Course");
+  const value =
+    String(
+      level || "beginner"
+    ).toLowerCase();
 
-  const description = esc(
-    course.short_description ||
-    course.description ||
-    "Build practical skills through structured professional learning."
+  return (
+    value.charAt(0).toUpperCase() +
+    value.slice(1)
   );
 
+}
+
+
+/*
+=====================================================
+UNIFIED COURSE COVER
+
+Important:
+Only ONE founder photo appears here.
+There is NO second author photo underneath.
+=====================================================
+*/
+
+function buildCover(course){
+
+  const title =
+    esc(
+      course.title ||
+      "Professional Course"
+    );
+
+  const description =
+    esc(
+      course.short_description ||
+      course.description ||
+      "Build practical skills through structured professional learning."
+    );
+
   return `
-    <div class="cover" aria-label="${title}">
+
+    <div
+      class="cover"
+      aria-label="${title}"
+    >
+
       <div class="course-cover">
 
+
         <div class="cover-top">
+
           <div class="cover-brand">
+
             <div class="cover-brand-name">
               AF DIGITAL HUB
             </div>
@@ -654,14 +985,19 @@ function buildCover(course) {
             <div class="cover-badge">
               COURSES
             </div>
+
           </div>
+
 
           <div class="cover-label">
             PROFESSIONAL COURSE
           </div>
+
         </div>
 
+
         <div class="cover-middle">
+
           <div class="cover-title">
             ${title}
           </div>
@@ -671,9 +1007,12 @@ function buildCover(course) {
           <div class="cover-description">
             ${description}
           </div>
+
         </div>
 
+
         <div class="cover-bottom">
+
           <div class="cover-founder">
 
             <img
@@ -684,243 +1023,346 @@ function buildCover(course) {
             >
 
             <div>
-              <strong>Adonle Fameye</strong>
-              <small>Founder, AF Digital Hub</small>
+
+              <strong>
+                Adonle Fameye
+              </strong>
+
+              <small>
+                Founder, AF Digital Hub
+              </small>
+
             </div>
 
           </div>
+
         </div>
 
+
       </div>
+
     </div>
+
   `;
 }
 
-function render() {
-  const grid = document.getElementById("grid");
-  const search = document.getElementById("search").value
-    .trim()
-    .toLowerCase();
 
-  const filtered = courses.filter(course => {
+function render(){
 
-    const title = String(course.title || "").toLowerCase();
-    const description = String(
-      course.short_description ||
-      course.description ||
-      ""
-    ).toLowerCase();
+  const grid =
+    document.getElementById("grid");
 
-    const level = String(course.level || "beginner").toLowerCase();
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .trim()
+      .toLowerCase();
 
-    const matchesSearch =
-      !search ||
-      title.includes(search) ||
-      description.includes(search);
 
-    const matchesLevel =
-      activeLevel === "all" ||
-      level === activeLevel;
+  const filtered =
+    courses.filter(course => {
 
-    return matchesSearch && matchesLevel;
-  });
+      const title =
+        String(
+          course.title || ""
+        ).toLowerCase();
 
-  if (!filtered.length) {
+      const description =
+        String(
+          course.short_description ||
+          course.description ||
+          ""
+        ).toLowerCase();
+
+      const level =
+        String(
+          course.level ||
+          "beginner"
+        ).toLowerCase();
+
+
+      const matchesSearch =
+        !search ||
+        title.includes(search) ||
+        description.includes(search);
+
+
+      const matchesLevel =
+        activeLevel === "all" ||
+        level === activeLevel;
+
+
+      return (
+        matchesSearch &&
+        matchesLevel
+      );
+
+    });
+
+
+  if(!filtered.length){
+
     grid.innerHTML = `
+
       <div class="empty">
         No courses match your search.
       </div>
+
     `;
+
     return;
+
   }
 
-  grid.innerHTML = filtered.map(course => {
 
-    const id = Number(course.id);
+  grid.innerHTML =
+    filtered.map(course => {
 
-    const title = esc(course.title || "Professional Course");
+      const id =
+        Number(course.id);
 
-    const description = esc(
-      course.short_description ||
-      course.description ||
-      "Build practical skills through structured professional learning."
-    );
 
-    const level = levelLabel(course.level);
+      const title =
+        esc(
+          course.title ||
+          "Professional Course"
+        );
 
-    const price = money(
-      course.price,
-      course.currency || "GHS"
-    );
 
-    const commission = Number(
-      course.affiliate_commission_percent ??
-      course.commission_percent ??
-      50
-    );
+      const description =
+        esc(
+          course.short_description ||
+          course.description ||
+          "Build practical skills through structured professional learning."
+        );
 
-    const hours =
-      course.estimated_hours ??
-      course.hours ??
-      "";
 
-    const lessons =
-      course.lesson_count ??
-      course.lessons_count ??
-      course.total_lessons ??
-      "";
+      const level =
+        levelLabel(course.level);
 
-    const creator =
-      course.creator_name ||
-      "Adonle Fameye";
 
-    return `
-      <a
-        class="card"
-        href="course-details.html?id=${encodeURIComponent(id)}"
-      >
+      const price =
+        money(
+          course.price,
+          course.currency || "GHS"
+        );
 
-        ${buildCover(course)}
 
-        <div class="body">
+      const commission =
+        Number(
+          course.affiliate_commission_percent ??
+          course.commission_percent ??
+          50
+        );
 
-          <div class="tag">
-            ${esc(level)} · Professional Course
-          </div>
 
-          <div class="title">
-            ${title}
-          </div>
+      const hours =
+        course.estimated_hours ??
+        course.hours ??
+        "";
 
-          <div class="desc">
-            ${description}
-          </div>
 
-          <div class="author-line">
+      const lessons =
+        course.lesson_count ??
+        course.lessons_count ??
+        course.total_lessons ??
+        "";
 
-            <img
-              class="author-dot"
-              src="${FOUNDER_PHOTO}"
-              alt="${esc(creator)}"
-              loading="lazy"
-              onerror="this.style.visibility='hidden'"
-            >
 
-            <div>
-              <strong>${esc(creator)}</strong>
-              <small>Founder, AF Digital Hub</small>
+      return `
+
+        <a
+          class="card"
+          href="course-details.html?id=${encodeURIComponent(id)}"
+        >
+
+
+          ${buildCover(course)}
+
+
+          <div class="body">
+
+
+            <div class="tag">
+              ${esc(level)} · Professional Course
             </div>
 
-          </div>
 
-          <div class="meta">
+            <div class="title">
+              ${title}
+            </div>
 
-            ${
-              hours !== ""
-                ? `<span>⏱ ${esc(hours)} hrs</span>`
-                : ""
-            }
 
-            ${
-              lessons !== ""
-                ? `<span>📚 ${esc(lessons)} lessons</span>`
-                : ""
-            }
+            <div class="desc">
+              ${description}
+            </div>
 
-            <span>🎓 ${esc(level)}</span>
 
-          </div>
+            <div class="meta">
 
-          <div class="bottom">
+              ${
+                hours !== ""
+                  ? `<span>⏱ ${esc(hours)} hrs</span>`
+                  : ""
+              }
 
-            <div>
-              <div class="price">
-                ${price}
+              ${
+                lessons !== ""
+                  ? `<span>📚 ${esc(lessons)} lessons</span>`
+                  : ""
+              }
+
+              <span>
+                🎓 ${esc(level)}
+              </span>
+
+            </div>
+
+
+            <div class="bottom">
+
+
+              <div>
+
+                <div class="price">
+                  ${price}
+                </div>
+
+                <div class="commission">
+                  ${commission}% affiliate commission
+                </div>
+
               </div>
 
-              <div class="commission">
-                ${commission}% affiliate commission
+
+              <div class="view">
+                View Course
               </div>
+
+
             </div>
 
-            <div class="view">
-              View Course
-            </div>
 
           </div>
 
-        </div>
 
-      </a>
-    `;
-  }).join("");
+        </a>
+
+      `;
+
+    }).join("");
+
 }
 
-async function loadCourses() {
-  const grid = document.getElementById("grid");
 
-  try {
+async function loadCourses(){
 
-    const response = await fetch(
-      `${API_BASE}/courses`,
-      {
-        headers: {
-          "Accept": "application/json"
+  const grid =
+    document.getElementById("grid");
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API_BASE}/courses`,
+        {
+          headers:{
+            "Accept":
+              "application/json"
+          }
         }
-      }
-    );
+      );
 
-    if (!response.ok) {
-      throw new Error("Unable to load courses.");
+
+    if(!response.ok){
+
+      throw new Error(
+        "Unable to load courses."
+      );
+
     }
 
-    const data = await response.json();
 
-    courses = Array.isArray(data)
-      ? data
-      : (data.courses || []);
+    const data =
+      await response.json();
+
+
+    courses =
+      Array.isArray(data)
+        ? data
+        : (
+            data.courses ||
+            []
+          );
+
 
     render();
 
-  } catch (error) {
+
+  }catch(error){
 
     console.error(error);
 
+
     grid.innerHTML = `
+
       <div class="error">
+
         Unable to load courses right now.
         Please try again.
+
       </div>
+
     `;
+
   }
+
 }
 
-document.getElementById("search").addEventListener(
-  "input",
-  render
-);
+
+document
+  .getElementById("search")
+  .addEventListener(
+    "input",
+    render
+  );
+
 
 document
   .querySelectorAll(".filter")
   .forEach(button => {
 
-    button.addEventListener("click", () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-      document
-        .querySelectorAll(".filter")
-        .forEach(item => item.classList.remove("active"));
+        document
+          .querySelectorAll(".filter")
+          .forEach(item =>
+            item.classList.remove("active")
+          );
 
-      button.classList.add("active");
 
-      activeLevel =
-        button.dataset.level || "all";
+        button.classList.add("active");
 
-      render();
-    });
+
+        activeLevel =
+          button.dataset.level ||
+          "all";
+
+
+        render();
+
+      }
+    );
 
   });
 
+
 loadCourses();
+
 </script>
 
 </body>
