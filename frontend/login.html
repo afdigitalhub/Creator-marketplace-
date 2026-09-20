@@ -1,1192 +1,1414 @@
+const express = require("express");
+const router = express.Router();
+const pool = require("../config/db");
+const { requireAuth } = require("../middleware/auth");
+const crypto = require("crypto");
+
+const PAYSTACK_SECRET = (process.env.PAYSTACK_SECRET_KEY || "").trim();
+const PAYSTACK_BASE = "https://api.paystack.co";
+
+const RESEND_API_KEY = (process.env.RESEND_API_KEY || "").trim();
+const RESEND_FROM_EMAIL = (process.env.RESEND_FROM_EMAIL || "").trim();
+
+const PUBLIC_APP_URL = (
+  process.env.PUBLIC_APP_URL ||
+  "https://afdigitalhub.net"
+).replace(/\/+$/, "");
+
+function toMinorUnit(amount) {
+  return Math.round(Number(amount) * 100);
+}
+
+/* =========================================================
+   COURSE ACCESS EMAIL
+========================================================= */
+
+async function sendCourseAccessEmail({
+  email,
+  fullName,
+  courseTitle,
+  courseId,
+  paymentReference
+}) {
+  if (!email) {
+    console.error(
+      "Course access email skipped: user email is missing."
+    );
+    return {
+      ok: false,
+      skipped: true,
+      reason: "missing_email"
+    };
+  }
+
+  if (!RESEND_API_KEY) {
+    console.error(
+      "Course access email skipped: RESEND_API_KEY is not configured."
+    );
+    return {
+      ok: false,
+      skipped: true,
+      reason: "missing_resend_api_key"
+    };
+  }
+
+  if (!RESEND_FROM_EMAIL) {
+    console.error(
+      "Course access email skipped: RESEND_FROM_EMAIL is not configured."
+    );
+    return {
+      ok: false,
+      skipped: true,
+      reason: "missing_resend_from_email"
+    };
+  }
+
+  if (!courseId) {
+    console.error(
+      "Course access email skipped: course ID is missing."
+    );
+    return {
+      ok: false,
+      skipped: true,
+      reason: "missing_course_id"
+    };
+  }
+
+  /*
+   * The customer is sent through the existing AF Digital Hub
+   * login page first. After login, login.html returns them to
+   * the requested destination.
+   */
+
+  const dashboardUrl =
+    `${PUBLIC_APP_URL}/login.html?redirect=` +
+    encodeURIComponent("dashboard.html");
+
+  const coursePath =
+    `course-learn.html?id=${encodeURIComponent(courseId)}`;
+
+  const courseUrl =
+    `${PUBLIC_APP_URL}/${coursePath}`;
+
+  const courseLoginUrl =
+    `${PUBLIC_APP_URL}/login.html?redirect=` +
+    encodeURIComponent(coursePath);
+
+  const safeName =
+    fullName ||
+    "there";
+
+  const safeCourseTitle =
+    courseTitle ||
+    "Your AF Digital Hub Course";
+
+  const subject =
+    "Your AF Digital Hub course is ready";
+
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AF Digital Hub | Sign In</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#05050a">
-
-<style>
-  :root {
-    --bg: #05050a;
-    --bg-glow-1: #1e1b4b;
-    --bg-glow-2: #312e81;
-    --card-bg: #0f0f1a;
-    --card-border: rgba(245, 197, 24, 0.18);
-    --accent-blue: #4f6ef7;
-    --accent-purple: #8b5cf6;
-    --accent-violet: #6d28d9;
-    --gradient: linear-gradient(135deg, #f5c518 0%, #4f6ef7 55%, #1e3a8a 100%);
-    --text-light: #f8f8fc;
-    --text-muted: #6b6b80;
-    --text-dim: #4a4a5e;
-    --af-yellow: #f5c518;
-    --input-bg: #0a0a12;
-    --border: #1c1c2e;
-    --success: #34d399;
-    --error: #f87171;
-  }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html, body {
-    height: 100%;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text-light);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    position: relative;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    top: -20%;
-    left: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(79, 110, 247, 0.15) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  body::after {
-    content: '';
-    position: fixed;
-    bottom: -15%;
-    right: -15%;
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .content-wrap {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .logo-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 40px;
-    text-decoration: none;
-  }
-
-  .logo-mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #05050a;
-    box-shadow: 0 4px 20px rgba(245, 197, 24, 0.3);
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .logo-mark img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .password-field-wrap {
-    position: relative;
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    color: var(--text-dim);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .password-toggle svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .password-toggle.visible {
-    color: var(--af-yellow);
-  }
-
-  .logo-text {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--text-light);
-  }
-
-  .logo-text .dim {
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  .logo-text .hub {
-    color: var(--af-yellow);
-  }
-
-  .card {
-    background: linear-gradient(180deg, var(--card-bg) 0%, #0c0c16 100%);
-    border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 32px 24px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255,255,255,0.02) inset;
-  }
-
-  h1 {
-    font-size: 23px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 26px;
-    line-height: 1.4;
-  }
-
-  .field {
-    margin-bottom: 16px;
-  }
-
-  label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 7px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  input,
-  select {
-    width: 100%;
-    padding: 13px 15px;
-    background: var(--input-bg);
-    border: 1.5px solid var(--border);
-    border-radius: 13px;
-    color: var(--text-light);
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.15s ease;
-    font-family: inherit;
-  }
-
-  .password-field-wrap input {
-    padding-right: 44px;
-  }
-
-  input::placeholder {
-    color: var(--text-dim);
-  }
-
-  input:focus,
-  select:focus {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
-  }
-
-  .btn-primary {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 13px;
-    background: var(--gradient);
-    color: white;
-    font-size: 15.5px;
-    font-weight: 700;
-    margin-top: 10px;
-    cursor: pointer;
-    letter-spacing: -0.01em;
-    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-  }
-
-  .btn-primary:active {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
-  }
-
-  .switch-row {
-    text-align: center;
-    margin-top: 22px;
-    font-size: 14px;
-    color: var(--text-muted);
-  }
-
-  .switch-row a {
-    color: var(--accent-blue);
-    text-decoration: none;
-    font-weight: 700;
-  }
-
-  .pin-toggle-row {
-    text-align: center;
-    margin-top: 14px;
-    font-size: 13px;
-  }
-
-  .pin-toggle-row a {
-    color: var(--af-yellow);
-    text-decoration: none;
-    font-weight: 700;
-  }
-
-  .error-msg {
-    background: rgba(248, 113, 113, 0.08);
-    border: 1px solid rgba(248, 113, 113, 0.25);
-    color: var(--error);
-    padding: 11px 13px;
-    border-radius: 11px;
-    font-size: 13px;
-    margin-bottom: 18px;
-    display: none;
-    line-height: 1.4;
-  }
-
-  .error-msg.success {
-    background: rgba(52, 211, 153, 0.08);
-    border-color: rgba(52, 211, 153, 0.25);
-    color: var(--success);
-  }
-
-  .role-toggle {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-    background: var(--input-bg);
-    padding: 4px;
-    border-radius: 13px;
-    border: 1px solid var(--border);
-  }
-
-  .role-btn {
-    flex: 1;
-    padding: 11px 8px;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text-muted);
-    text-align: center;
-    font-size: 13.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .role-btn.active {
-    background: var(--gradient);
-    color: white;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-  }
-
-  .role-hint {
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.45;
-    margin-bottom: 18px;
-    margin-top: -8px;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  .footer-tag {
-    margin-top: 28px;
-    font-size: 12px;
-    color: var(--text-dim);
-    text-align: center;
-    letter-spacing: 0.02em;
-  }
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>${escapeHtmlEmail(safeCourseTitle)}</title>
 </head>
 
-<body>
+<body style="
+  margin:0;
+  padding:0;
+  background:#05050b;
+  color:#f8f8fc;
+  font-family:Arial,Helvetica,sans-serif;
+">
 
-<div class="content-wrap">
+<div style="
+  max-width:620px;
+  margin:0 auto;
+  padding:35px 20px;
+">
 
-  <a href="index.html" class="logo-row">
-    <div class="logo-mark">
-      <img src="icons/logo-mark.png" alt="AF Digital Hub">
+  <div style="
+    background:#0f101a;
+    border:1px solid #202235;
+    border-radius:18px;
+    padding:30px 24px;
+  ">
+
+    <div style="
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:25px;
+    ">
+      AF Digital <span style="color:#ffd21a;">Hub</span>
     </div>
 
-    <div class="logo-text">
-      Digital<span class="hub">Hub</span>
-    </div>
-  </a>
+    <h1 style="
+      font-size:25px;
+      line-height:1.25;
+      margin:0 0 15px;
+      color:#ffffff;
+    ">
+      Your course is ready 🎓
+    </h1>
 
-  <div class="card">
-
-    <h1 id="form-title">Welcome back</h1>
-
-    <p class="subtitle" id="form-subtitle">
-      Sign in to continue to your AF Digital Hub account.
+    <p style="
+      color:#c5cad8;
+      font-size:15px;
+      line-height:1.7;
+      margin:0 0 18px;
+    ">
+      Hi ${escapeHtmlEmail(safeName)},
     </p>
 
-    <div class="error-msg" id="error-box"></div>
+    <p style="
+      color:#c5cad8;
+      font-size:15px;
+      line-height:1.7;
+      margin:0 0 18px;
+    ">
+      Your payment was successfully verified and your course
+      access is now active.
+    </p>
 
-    <div class="role-toggle hidden" id="role-toggle">
-      <div
-        class="role-btn active"
-        data-role="creator"
-        onclick="selectRole('creator')"
-      >
-        I'm a Creator
+    <div style="
+      background:#151724;
+      border:1px solid #292c40;
+      border-radius:13px;
+      padding:18px;
+      margin:22px 0;
+    ">
+
+      <div style="
+        color:#8992a7;
+        font-size:12px;
+        margin-bottom:7px;
+      ">
+        COURSE
       </div>
 
-      <div
-        class="role-btn"
-        data-role="business"
-        onclick="selectRole('business')"
-      >
-        I'm a Business
+      <div style="
+        color:#ffffff;
+        font-size:17px;
+        font-weight:800;
+        line-height:1.45;
+      ">
+        ${escapeHtmlEmail(safeCourseTitle)}
       </div>
+
     </div>
 
-    <div class="role-hint hidden" id="role-hint"></div>
+    <p style="
+      color:#c5cad8;
+      font-size:15px;
+      line-height:1.7;
+      margin:0 0 24px;
+    ">
+      Your course has been added to your AF Digital Hub account.
+      Log in to view your dashboard and start learning.
+    </p>
 
-    <form id="auth-form">
+    <!-- DASHBOARD BUTTON -->
 
-      <div class="field hidden" id="name-field">
-        <label>Full Name</label>
-
-        <input
-          type="text"
-          id="full_name"
-          placeholder="Your full name"
-        >
-      </div>
-
-      <div class="field">
-        <label>Email</label>
-
-        <input
-          type="email"
-          id="email"
-          placeholder="you@example.com"
-          required
-        >
-      </div>
-
-      <div class="field" id="password-field">
-
-        <label>Password</label>
-
-        <div class="password-field-wrap">
-
-          <input
-            type="password"
-            id="password"
-            placeholder="••••••••"
-          >
-
-          <button
-            type="button"
-            class="password-toggle"
-            id="passwordToggle"
-            onclick="togglePassword()"
-            aria-label="Show password"
-          >
-
-            <svg
-              id="eyeIcon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="field hidden" id="pin-field">
-
-        <label>PIN</label>
-
-        <input
-          type="password"
-          id="pin"
-          inputmode="numeric"
-          maxlength="6"
-          placeholder="••••"
-          autocomplete="off"
-        >
-
-      </div>
-
-      <button
-        type="submit"
-        class="btn-primary"
-        id="submit-btn"
-      >
-        Log In
-      </button>
-
-    </form>
-
-    <div class="pin-toggle-row" id="pin-toggle-row">
+    <div style="text-align:center;margin:28px 0 14px;">
 
       <a
-        href="#"
-        onclick="togglePinMode(event)"
-        id="pin-toggle-link"
+        href="${escapeAttributeEmail(dashboardUrl)}"
+        style="
+          display:inline-block;
+          background:#ffd21a;
+          color:#07070a;
+          text-decoration:none;
+          padding:14px 25px;
+          border-radius:10px;
+          font-size:14px;
+          font-weight:800;
+        "
       >
-        Log in with PIN instead
+        Open My Dashboard
       </a>
 
     </div>
 
-    <div class="switch-row">
+    <!-- COURSE BUTTON -->
 
-      <span id="switch-text">
-        Don't have an account?
-      </span>
+    <div style="text-align:center;margin:14px 0 28px;">
 
       <a
-        href="#"
-        onclick="toggleMode(event)"
-        id="switch-link"
+        href="${escapeAttributeEmail(courseLoginUrl)}"
+        style="
+          display:inline-block;
+          background:#4f6ef7;
+          color:#ffffff;
+          text-decoration:none;
+          padding:14px 25px;
+          border-radius:10px;
+          font-size:14px;
+          font-weight:800;
+        "
       >
-        Sign up
+        Start Learning
       </a>
 
     </div>
 
-  </div>
+    <div style="
+      background:#11131e;
+      border:1px solid #25283a;
+      border-radius:12px;
+      padding:15px;
+      margin-top:10px;
+    ">
 
-  <div class="footer-tag">
-    AF Digital Hub &copy; 2026
+      <p style="
+        color:#aeb5c7;
+        font-size:13px;
+        line-height:1.65;
+        margin:0;
+      ">
+        <strong style="color:#ffffff;">
+          New to AF Digital Hub?
+        </strong><br>
+        Use your registered email and password to sign in.
+        Your purchased course is already connected to your account.
+      </p>
+
+    </div>
+
+    <p style="
+      color:#8992a7;
+      font-size:12px;
+      line-height:1.6;
+      margin-top:25px;
+    ">
+      If the buttons do not work, log in to your AF Digital Hub
+      account and open your dashboard or My Learning.
+    </p>
+
+    <div style="
+      border-top:1px solid #202235;
+      margin-top:25px;
+      padding-top:20px;
+      color:#8992a7;
+      font-size:11px;
+      line-height:1.6;
+    ">
+      AF Digital Hub<br>
+      Learn. Create. Sell. Connect.
+    </div>
+
   </div>
 
 </div>
 
+</body>
+</html>
+`;
 
-<script>
+  const text = `
+Hi ${safeName},
 
-  const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+Your payment was successfully verified and your course access is now active.
 
-  let isLogin = true;
-  let isPinMode = false;
-  let selectedRole = "creator";
+COURSE:
+${safeCourseTitle}
 
+Your course has been added to your AF Digital Hub account.
 
-  /*
-   * ---------------------------------------------------------
-   * LOGIN REDIRECT SUPPORT
-   * ---------------------------------------------------------
-   *
-   * This allows links such as:
-   *
-   * login.html?redirect=dashboard.html
-   *
-   * or:
-   *
-   * login.html?redirect=course-learn.html?id=123
-   *
-   * After successful login, the user is returned to that page.
-   *
-   * This is used by the AF Digital Hub course email flow.
-   * ---------------------------------------------------------
-   */
+OPEN MY DASHBOARD:
+${dashboardUrl}
 
-  function getSafeRedirectFromUrl() {
+START LEARNING:
+${courseLoginUrl}
 
-    const params = new URLSearchParams(window.location.search);
+Use your registered email and password to sign in.
 
-    const redirect = params.get("redirect");
+Your purchased course is already connected to your account.
 
-    if (!redirect) {
-      return null;
-    }
+AF Digital Hub
+Learn. Create. Sell. Connect.
+`;
 
-    /*
-     * Only allow local AF Digital Hub pages.
-     * Prevents external websites from being used as redirects.
-     */
+  try {
+    const response = await fetch(
+      "https://api.resend.com/emails",
+      {
+        method: "POST",
+        headers: {
+          Authorization:
+            `Bearer ${RESEND_API_KEY}`,
 
-    if (
-      redirect.startsWith("/") ||
-      redirect.startsWith("https://afdigitalhub.net/") ||
-      redirect.startsWith("http://afdigitalhub.net/")
-    ) {
+          "Content-Type":
+            "application/json",
 
-      try {
+          "Idempotency-Key":
+            `course-access-${paymentReference}`
+        },
 
-        const parsed = new URL(
-          redirect,
-          window.location.origin
-        );
-
-        if (
-          parsed.origin === window.location.origin ||
-          parsed.origin === "https://afdigitalhub.net"
-        ) {
-          return parsed.pathname + parsed.search + parsed.hash;
-        }
-
-      } catch (err) {
-        return null;
+        body: JSON.stringify({
+          from: RESEND_FROM_EMAIL,
+          to: [email],
+          subject,
+          html,
+          text
+        })
       }
-    }
-
-    /*
-     * Allow normal relative frontend pages.
-     */
-
-    if (
-      !redirect.includes("://") &&
-      !redirect.startsWith("//")
-    ) {
-      return redirect;
-    }
-
-    return null;
-  }
-
-
-  /*
-   * Save redirect destination immediately when arriving
-   * from an email or another protected page.
-   */
-
-  const redirectFromUrl = getSafeRedirectFromUrl();
-
-  if (redirectFromUrl) {
-
-    localStorage.setItem(
-      "af_redirect_after_login",
-      redirectFromUrl
     );
 
-  }
+    const data =
+      await response.json();
 
-
-  const ROLE_HINTS = {
-
-    creator:
-      "As a creator, you can build your professional profile and apply to campaigns posted by businesses.",
-
-    business:
-      "As a business, you can present your business and post campaigns to find the right creators."
-
-  };
-
-
-  function togglePassword() {
-
-    const input = document.getElementById("password");
-    const btn = document.getElementById("passwordToggle");
-
-    const isHidden = input.type === "password";
-
-    input.type = isHidden ? "text" : "password";
-
-    btn.classList.toggle("visible", isHidden);
-
-    btn.setAttribute(
-      "aria-label",
-      isHidden ? "Hide password" : "Show password"
-    );
-
-  }
-
-
-  function selectRole(role) {
-
-    selectedRole = role;
-
-    document.querySelectorAll(".role-btn").forEach(btn => {
-
-      btn.classList.toggle(
-        "active",
-        btn.dataset.role === role
+    if (!response.ok) {
+      console.error(
+        "Resend course email failed:",
+        data
       );
 
-    });
-
-    document.getElementById("role-hint").textContent =
-      ROLE_HINTS[role];
-
-  }
-
-
-  function setMode(login) {
-
-    isLogin = login;
-
-    document.getElementById("form-title").textContent =
-      isLogin
-        ? "Welcome back"
-        : "Create your account";
-
-    document.getElementById("form-subtitle").textContent =
-      isLogin
-        ? "Sign in to continue to your AF Digital Hub account."
-        : "Join AF Digital Hub as a creator or a business.";
-
-    document
-      .getElementById("name-field")
-      .classList
-      .toggle("hidden", isLogin);
-
-    document
-      .getElementById("role-toggle")
-      .classList
-      .toggle("hidden", isLogin);
-
-    document
-      .getElementById("role-hint")
-      .classList
-      .toggle("hidden", isLogin);
-
-    document.getElementById("submit-btn").textContent =
-      isLogin
-        ? "Log In"
-        : "Create Account";
-
-    document.getElementById("switch-text").textContent =
-      isLogin
-        ? "Don't have an account?"
-        : "Already have an account?";
-
-    document.getElementById("switch-link").textContent =
-      isLogin
-        ? "Sign up"
-        : "Log in";
-
-
-    if (!isLogin) {
-
-      document.getElementById("role-hint").textContent =
-        ROLE_HINTS[selectedRole];
-
+      return {
+        ok: false,
+        reason: "resend_failed",
+        detail:
+          data.message ||
+          "Resend rejected the email"
+      };
     }
 
-
-    /*
-     * PIN login only makes sense when signing in.
-     */
-
-    document
-      .getElementById("pin-toggle-row")
-      .classList
-      .toggle("hidden", !isLogin);
-
-
-    if (!isLogin && isPinMode) {
-
-      isPinMode = false;
-
-      applyPinMode();
-
-    }
-
-    hideError();
-
-  }
-
-
-  function toggleMode(e) {
-
-    if (e) {
-      e.preventDefault();
-    }
-
-    setMode(!isLogin);
-
-  }
-
-
-  function applyPinMode() {
-
-    document
-      .getElementById("password-field")
-      .classList
-      .toggle("hidden", isPinMode);
-
-    document
-      .getElementById("pin-field")
-      .classList
-      .toggle("hidden", !isPinMode);
-
-    document.getElementById("password").required =
-      !isPinMode;
-
-    document.getElementById("pin-toggle-link").textContent =
-      isPinMode
-        ? "Use password instead"
-        : "Log in with PIN instead";
-
-    hideError();
-
-  }
-
-
-  function togglePinMode(e) {
-
-    if (e) {
-      e.preventDefault();
-    }
-
-    isPinMode = !isPinMode;
-
-    applyPinMode();
-
-  }
-
-
-  function showError(msg, isSuccess) {
-
-    const box = document.getElementById("error-box");
-
-    box.textContent = msg;
-
-    box.classList.toggle(
-      "success",
-      !!isSuccess
+    console.log(
+      "Course access email sent:",
+      {
+        email,
+        courseId,
+        paymentReference,
+        resendId: data.id || null
+      }
     );
 
-    box.style.display = "block";
+    return {
+      ok: true,
+      resend_id:
+        data.id || null
+    };
 
+  } catch (err) {
+
+    console.error(
+      "Course access email error:",
+      err
+    );
+
+    return {
+      ok: false,
+      reason: "email_request_failed",
+      detail: err.message
+    };
+  }
+}
+
+function escapeHtmlEmail(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
   }
 
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  function hideError() {
+function escapeAttributeEmail(value) {
+  return escapeHtmlEmail(value);
+}
 
-    document.getElementById("error-box").style.display =
-      "none";
+/* =========================================================
+   PAYSTACK VERIFICATION
+========================================================= */
 
+async function verifyAndComplete(reference) {
+
+  const verifyRes =
+    await fetch(
+      `${PAYSTACK_BASE}/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: {
+          Authorization:
+            `Bearer ${PAYSTACK_SECRET}`
+        }
+      }
+    );
+
+  const verifyData =
+    await verifyRes.json();
+
+  if (
+    !verifyRes.ok ||
+    !verifyData.status
+  ) {
+
+    return {
+      ok: false,
+      reason: "verification_failed",
+      detail:
+        verifyData.message ||
+        "Paystack did not confirm this payment"
+    };
   }
 
+  const txn =
+    verifyData.data;
 
-  /*
-   * ---------------------------------------------------------
-   * INITIAL PAGE MODE
-   * ---------------------------------------------------------
-   */
+  const client =
+    await pool.connect();
 
-  const urlParams =
-    new URLSearchParams(window.location.search);
+  let courseEmailData =
+    null;
 
+  try {
 
-  if (urlParams.get("mode") === "signup") {
+    await client.query("BEGIN");
 
-    setMode(false);
+    const paymentResult =
+      await client.query(
+        "SELECT * FROM payments WHERE provider_reference = $1 FOR UPDATE",
+        [reference]
+      );
 
-  }
+    if (
+      paymentResult.rows.length === 0
+    ) {
 
+      await client.query(
+        "ROLLBACK"
+      );
 
-  /*
-   * ---------------------------------------------------------
-   * LOGIN / REGISTRATION
-   * ---------------------------------------------------------
-   */
+      return {
+        ok: false,
+        reason: "unknown_payment"
+      };
+    }
 
-  document
-    .getElementById("auth-form")
-    .addEventListener("submit", async function(e) {
+    const payment =
+      paymentResult.rows[0];
 
-      e.preventDefault();
+    /*
+     * Prevent webhook + /verify from processing
+     * the same successful payment twice.
+     */
 
-      hideError();
+    if (
+      payment.status === "successful"
+    ) {
 
-      const email =
-        document.getElementById("email").value.trim();
+      await client.query(
+        "ROLLBACK"
+      );
 
+      return {
+        ok: true,
+        already_processed: true,
+        order_id:
+          payment.order_id
+      };
+    }
+
+    const orderResult =
+      await client.query(
+        "SELECT * FROM orders WHERE id = $1 FOR UPDATE",
+        [payment.order_id]
+      );
+
+    if (
+      orderResult.rows.length === 0
+    ) {
+
+      await client.query(
+        "ROLLBACK"
+      );
+
+      return {
+        ok: false,
+        reason: "unknown_order"
+      };
+    }
+
+    const order =
+      orderResult.rows[0];
+
+    /* =====================================================
+       PAYMENT STATUS
+    ===================================================== */
+
+    if (
+      txn.status !== "success"
+    ) {
+
+      await client.query(
+        `UPDATE payments
+         SET status = $1,
+             raw_response = $2
+         WHERE id = $3`,
+        [
+          txn.status === "abandoned"
+            ? "abandoned"
+            : "failed",
+          JSON.stringify(txn),
+          payment.id
+        ]
+      );
+
+      await client.query(
+        `UPDATE orders
+         SET status = 'failed',
+             updated_at = now()
+         WHERE id = $1`,
+        [order.id]
+      );
+
+      await client.query(
+        "COMMIT"
+      );
+
+      return {
+        ok: false,
+        reason:
+          "payment_not_successful",
+        status:
+          txn.status
+      };
+    }
+
+    /* =====================================================
+       CURRENCY CHECK
+    ===================================================== */
+
+    if (
+      String(txn.currency).toUpperCase() !==
+      String(order.currency).toUpperCase()
+    ) {
+
+      await client.query(
+        `UPDATE payments
+         SET status = 'failed',
+             raw_response = $1
+         WHERE id = $2`,
+        [
+          JSON.stringify(txn),
+          payment.id
+        ]
+      );
+
+      await client.query(
+        "COMMIT"
+      );
+
+      console.error(
+        "Currency mismatch:",
+        {
+          expected:
+            order.currency,
+          received:
+            txn.currency,
+          reference
+        }
+      );
+
+      return {
+        ok: false,
+        reason:
+          "currency_mismatch",
+        expected:
+          order.currency,
+        received:
+          txn.currency
+      };
+    }
+
+    /* =====================================================
+       AMOUNT CHECK
+    ===================================================== */
+
+    const expectedMinor =
+      toMinorUnit(
+        order.gross_amount
+      );
+
+    if (
+      Number(txn.amount) !==
+      expectedMinor
+    ) {
+
+      await client.query(
+        `UPDATE payments
+         SET status = 'failed',
+             raw_response = $1
+         WHERE id = $2`,
+        [
+          JSON.stringify(txn),
+          payment.id
+        ]
+      );
+
+      await client.query(
+        "COMMIT"
+      );
+
+      return {
+        ok: false,
+        reason:
+          "amount_mismatch",
+        expected:
+          expectedMinor,
+        received:
+          txn.amount
+      };
+    }
+
+    /* =====================================================
+       MARK PAYMENT SUCCESSFUL
+    ===================================================== */
+
+    await client.query(
+      `UPDATE payments
+       SET status = 'successful',
+           raw_response = $1,
+           verified_at = now()
+       WHERE id = $2`,
+      [
+        JSON.stringify(txn),
+        payment.id
+      ]
+    );
+
+    /* =====================================================
+       MARK ORDER PAID
+    ===================================================== */
+
+    await client.query(
+      `UPDATE orders
+       SET status = 'paid',
+           updated_at = now()
+       WHERE id = $1`,
+      [order.id]
+    );
+
+    /* =====================================================
+       PRODUCT ENTITLEMENT
+    ===================================================== */
+
+    await client.query(
+      `INSERT INTO entitlements
+        (user_id, product_id, order_id, status)
+       VALUES
+        ($1, $2, $3, 'active')
+       ON CONFLICT (user_id, product_id)
+       DO UPDATE SET
+         status = 'active'`,
+      [
+        order.buyer_id,
+        order.product_id,
+        order.id
+      ]
+    );
+
+    /* =====================================================
+       COURSE ENROLLMENT
+
+       If the purchased product is attached to a course,
+       enroll the buyer immediately.
+    ===================================================== */
+
+    const courseResult =
+      await client.query(
+        `SELECT
+           c.id,
+           c.title
+         FROM courses c
+         WHERE c.product_id = $1
+         LIMIT 1`,
+        [order.product_id]
+      );
+
+    if (
+      courseResult.rows.length > 0
+    ) {
+
+      const course =
+        courseResult.rows[0];
+
+      await client.query(
+        `INSERT INTO course_enrollments
+          (
+            course_id,
+            user_id,
+            product_id,
+            order_id,
+            status
+          )
+         VALUES
+          ($1, $2, $3, $4, 'active')
+         ON CONFLICT
+          (course_id, user_id)
+         DO UPDATE SET
+           status = 'active',
+           order_id = COALESCE(
+             course_enrollments.order_id,
+             EXCLUDED.order_id
+           ),
+           updated_at = now()`,
+        [
+          course.id,
+          order.buyer_id,
+          order.product_id,
+          order.id
+        ]
+      );
+
+      /*
+       * Get the buyer's email and name while the
+       * verified transaction is still being processed.
+       *
+       * The actual email is NOT sent until after COMMIT.
+       */
+
+      const userResult =
+        await client.query(
+          `SELECT
+             email,
+             full_name
+           FROM users
+           WHERE id = $1
+           LIMIT 1`,
+          [order.buyer_id]
+        );
+
+      if (
+        userResult.rows.length > 0
+      ) {
+
+        courseEmailData = {
+          email:
+            userResult.rows[0].email,
+
+          fullName:
+            userResult.rows[0].full_name,
+
+          courseTitle:
+            course.title,
+
+          courseId:
+            course.id,
+
+          paymentReference:
+            reference
+        };
+      }
+    }
+
+    /* =====================================================
+       SELLER EARNING
+    ===================================================== */
+
+    const existingEarning =
+      await client.query(
+        `SELECT id
+         FROM earnings
+         WHERE source_type = 'product_sale'
+         AND source_id = $1`,
+        [order.id]
+      );
+
+    if (
+      existingEarning.rows.length === 0
+    ) {
+
+      await client.query(
+        `INSERT INTO earnings
+          (
+            user_id,
+            source_type,
+            source_id,
+            gross_amount,
+            platform_fee,
+            net_amount,
+            currency,
+            status,
+            available_at
+          )
+         VALUES
+          (
+            $1,
+            'product_sale',
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            'pending',
+            now() + interval '7 days'
+          )`,
+        [
+          order.seller_id,
+          order.id,
+          order.gross_amount,
+          order.commission_amount,
+          order.seller_amount,
+          order.currency
+        ]
+      );
+    }
+
+    /* =====================================================
+       AFFILIATE EARNING
+    ===================================================== */
+
+    if (
+      order.referrer_id &&
+      Number(order.affiliate_amount) > 0
+    ) {
+
+      const existingAffiliateEarning =
+        await client.query(
+          `SELECT id
+           FROM earnings
+           WHERE source_type =
+             'affiliate_commission'
+           AND source_id = $1`,
+          [order.id]
+        );
+
+      if (
+        existingAffiliateEarning.rows.length === 0
+      ) {
+
+        await client.query(
+          `INSERT INTO earnings
+            (
+              user_id,
+              source_type,
+              source_id,
+              gross_amount,
+              platform_fee,
+              net_amount,
+              currency,
+              status,
+              available_at
+            )
+           VALUES
+            (
+              $1,
+              'affiliate_commission',
+              $2,
+              $3,
+              $4,
+              $5,
+              $6,
+              'pending',
+              now() + interval '7 days'
+            )`,
+          [
+            order.referrer_id,
+            order.id,
+            order.gross_amount,
+            0,
+            order.affiliate_amount,
+            order.currency
+          ]
+        );
+      }
+    }
+
+    /* =====================================================
+       COMMIT VERIFIED PAYMENT
+    ===================================================== */
+
+    await client.query(
+      "COMMIT"
+    );
+
+    /*
+     * IMPORTANT:
+     * Email is sent only AFTER the database transaction
+     * has successfully committed.
+     */
+
+    if (courseEmailData) {
 
       try {
 
-        let response;
-        let data;
+        await sendCourseAccessEmail(
+          courseEmailData
+        );
 
-
-        /*
-         * ---------------------------------------------------
-         * PIN LOGIN
-         * ---------------------------------------------------
-         */
-
-        if (isLogin && isPinMode) {
-
-          const pin =
-            document.getElementById("pin").value.trim();
-
-
-          if (!/^\d{4,6}$/.test(pin)) {
-
-            showError(
-              "Please enter your 4-6 digit PIN."
-            );
-
-            return;
-
-          }
-
-
-          response = await fetch(
-            `${API_BASE}/auth/pin-login`,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body: JSON.stringify({
-                email,
-                pin
-              })
-            }
-          );
-
-        }
-
+      } catch (emailError) {
 
         /*
-         * ---------------------------------------------------
-         * PASSWORD LOGIN
-         * ---------------------------------------------------
+         * Email failure must NOT turn a successful
+         * payment into a failed payment.
          */
-
-        else if (isLogin) {
-
-          const password =
-            document.getElementById("password").value;
-
-
-          response = await fetch(
-            `${API_BASE}/auth/login`,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body: JSON.stringify({
-                email,
-                password
-              })
-            }
-          );
-
-        }
-
-
-        /*
-         * ---------------------------------------------------
-         * REGISTRATION
-         * ---------------------------------------------------
-         */
-
-        else {
-
-          const password =
-            document.getElementById("password").value;
-
-          const full_name =
-            document
-              .getElementById("full_name")
-              .value
-              .trim();
-
-
-          if (!full_name) {
-
-            showError(
-              "Please enter your full name"
-            );
-
-            return;
-
-          }
-
-
-          response = await fetch(
-            `${API_BASE}/auth/register`,
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body: JSON.stringify({
-                full_name,
-                email,
-                password,
-                role: selectedRole
-              })
-            }
-          );
-
-        }
-
-
-        data = await response.json();
-
-
-        /*
-         * ---------------------------------------------------
-         * SERVER ERROR
-         * ---------------------------------------------------
-         */
-
-        if (!response.ok) {
-
-          showError(
-            data.error || "Something went wrong"
-          );
-
-          return;
-
-        }
-
-
-        /*
-         * ---------------------------------------------------
-         * SUCCESSFUL LOGIN
-         * ---------------------------------------------------
-         */
-
-        if (isLogin) {
-
-          /*
-           * Store the same authentication information
-           * already used throughout AF Digital Hub.
-           */
-
-          localStorage.setItem(
-            "af_token",
-            data.token
-          );
-
-          localStorage.setItem(
-            "af_role",
-            data.user.role
-          );
-
-          localStorage.setItem(
-            "af_name",
-            data.user.full_name
-          );
-
-
-          /*
-           * ------------------------------------------------
-           * RETURN USER TO ORIGINAL DESTINATION
-           * ------------------------------------------------
-           *
-           * Priority:
-           *
-           * 1. Saved redirect from email/protected page
-           * 2. Normal dashboard
-           */
-
-          const redirect =
-            localStorage.getItem(
-              "af_redirect_after_login"
-            );
-
-
-          if (redirect) {
-
-            localStorage.removeItem(
-              "af_redirect_after_login"
-            );
-
-
-            /*
-             * Small protection against accidental
-             * external redirects.
-             */
-
-            const safeRedirect =
-              getSafeRedirectDestination(redirect);
-
-
-            if (safeRedirect) {
-
-              window.location.href =
-                safeRedirect;
-
-              return;
-
-            }
-
-          }
-
-
-          /*
-           * Normal login destination.
-           */
-
-          window.location.href =
-            "dashboard.html";
-
-        }
-
-
-        /*
-         * ---------------------------------------------------
-         * SUCCESSFUL REGISTRATION
-         * ---------------------------------------------------
-         */
-
-        else {
-
-          showError(
-            "Account created. Please log in.",
-            true
-          );
-
-          setMode(true);
-
-        }
-
-      }
-
-
-      catch (err) {
 
         console.error(
-          "AF Digital Hub authentication error:",
-          err
+          "Course access email failed after successful payment:",
+          emailError
         );
-
-        showError(
-          "Could not connect to server. Please try again."
-        );
-
       }
-
-    });
-
-
-  /*
-   * ---------------------------------------------------------
-   * SAFE REDIRECT VALIDATION
-   * ---------------------------------------------------------
-   */
-
-  function getSafeRedirectDestination(redirect) {
-
-    if (!redirect) {
-      return null;
     }
 
+    return {
+      ok: true,
+
+      order_id:
+        order.id,
+
+      product_id:
+        order.product_id,
+
+      course_enrolled:
+        Boolean(courseEmailData),
+
+      course_id:
+        courseEmailData
+          ? courseEmailData.courseId
+          : null
+    };
+
+  } catch (err) {
 
     try {
 
-      const parsed =
-        new URL(
-          redirect,
-          window.location.origin
-        );
-
-
-      /*
-       * Only allow AF Digital Hub itself.
-       */
-
-      const allowedOrigins = [
-        window.location.origin,
-        "https://afdigitalhub.net"
-      ];
-
-
-      if (!allowedOrigins.includes(parsed.origin)) {
-        return null;
-      }
-
-
-      /*
-       * Never allow login to redirect back to another
-       * external website.
-       */
-
-      return (
-        parsed.pathname +
-        parsed.search +
-        parsed.hash
+      await client.query(
+        "ROLLBACK"
       );
 
+    } catch (rollbackError) {
+
+      console.error(
+        "Rollback error:",
+        rollbackError
+      );
     }
 
+    throw err;
 
-    catch (err) {
+  } finally {
 
-      /*
-       * Relative paths such as dashboard.html
-       * are acceptable.
-       */
+    client.release();
+  }
+}
+
+/* =========================================================
+   PAYSTACK WEBHOOK
+========================================================= */
+
+router.post(
+  "/webhook",
+  express.raw({
+    type: "*/*"
+  }),
+  async (req, res) => {
+
+    try {
+
+      const signature =
+        req.headers[
+          "x-paystack-signature"
+        ];
+
+      const rawBody =
+        req.body;
+
+      const expected =
+        crypto
+          .createHmac(
+            "sha512",
+            PAYSTACK_SECRET
+          )
+          .update(rawBody)
+          .digest("hex");
 
       if (
-        !redirect.includes("://") &&
-        !redirect.startsWith("//")
+        signature !== expected
       ) {
 
-        return redirect;
+        console.error(
+          "Webhook signature mismatch, ignoring request"
+        );
 
+        return res.sendStatus(
+          401
+        );
       }
 
-      return null;
+      const event =
+        JSON.parse(
+          rawBody.toString()
+        );
 
+      /*
+       * Acknowledge Paystack immediately.
+       */
+
+      res.sendStatus(
+        200
+      );
+
+      if (
+        event.event ===
+        "charge.success"
+      ) {
+
+        try {
+
+          await verifyAndComplete(
+            event.data.reference
+          );
+
+        } catch (err) {
+
+          console.error(
+            "Webhook processing error:",
+            err
+          );
+        }
+      }
+
+    } catch (err) {
+
+      console.error(
+        "Webhook error:",
+        err
+      );
+
+      if (
+        !res.headersSent
+      ) {
+        res.sendStatus(
+          500
+        );
+      }
+    }
+  }
+);
+
+/* =========================================================
+   JSON BODY PARSER
+========================================================= */
+
+router.use(
+  express.json()
+);
+
+/* =========================================================
+   INITIALISE PAYMENT
+========================================================= */
+
+router.post(
+  "/initialise",
+  requireAuth,
+  async (req, res) => {
+
+    const {
+      order_id
+    } = req.body;
+
+    if (!order_id) {
+
+      return res.status(400).json({
+        error:
+          "order_id is required"
+      });
     }
 
+    if (!PAYSTACK_SECRET) {
+
+      return res.status(500).json({
+        error:
+          "Payments are not configured yet"
+      });
+    }
+
+    try {
+
+      const orderResult =
+        await pool.query(
+          "SELECT * FROM orders WHERE id = $1",
+          [order_id]
+        );
+
+      if (
+        orderResult.rows.length === 0
+      ) {
+
+        return res.status(404).json({
+          error:
+            "Order not found"
+        });
+      }
+
+      const order =
+        orderResult.rows[0];
+
+      if (
+        order.buyer_id !==
+        req.user.id
+      ) {
+
+        return res.status(403).json({
+          error:
+            "Not authorized to pay for this order"
+        });
+      }
+
+      if (
+        order.status === "paid"
+      ) {
+
+        return res.status(400).json({
+          error:
+            "This order has already been paid"
+        });
+      }
+
+      if (
+        order.status !== "pending"
+      ) {
+
+        return res.status(400).json({
+          error:
+            "This order can no longer be paid"
+        });
+      }
+
+      const userResult =
+        await pool.query(
+          "SELECT email FROM users WHERE id = $1",
+          [req.user.id]
+        );
+
+      const email =
+        userResult.rows[0].email;
+
+      const orderCurrency =
+        String(
+          order.currency ||
+          "GHS"
+        ).toUpperCase();
+
+      const initRes =
+        await fetch(
+          `${PAYSTACK_BASE}/transaction/initialize`,
+          {
+            method: "POST",
+
+            headers: {
+              Authorization:
+                `Bearer ${PAYSTACK_SECRET}`,
+
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                email,
+
+                amount:
+                  toMinorUnit(
+                    order.gross_amount
+                  ),
+
+                currency:
+                  orderCurrency,
+
+                channels: [
+                  "card",
+                  "mobile_money",
+                  "bank",
+                  "bank_transfer",
+                  "ussd"
+                ],
+
+                metadata: {
+                  order_id:
+                    order.id,
+
+                  product_title:
+                    order.product_title,
+
+                  expected_currency:
+                    orderCurrency
+                }
+              })
+          }
+        );
+
+      const initData =
+        await initRes.json();
+
+      if (
+        !initRes.ok ||
+        !initData.status
+      ) {
+
+        console.error(
+          "Paystack init failed:",
+          initData
+        );
+
+        return res.status(502).json({
+          error:
+            "Could not start payment",
+
+          detail:
+            initData.message ||
+            "Payment provider rejected the request"
+        });
+      }
+
+      const reference =
+        initData.data.reference;
+
+      await pool.query(
+        `INSERT INTO payments
+          (
+            order_id,
+            provider,
+            provider_reference,
+            amount,
+            currency,
+            status
+          )
+         VALUES
+          (
+            $1,
+            'paystack',
+            $2,
+            $3,
+            $4,
+            'pending'
+          )`,
+        [
+          order.id,
+          reference,
+          order.gross_amount,
+          orderCurrency
+        ]
+      );
+
+      res.json({
+
+        authorization_url:
+          initData.data.authorization_url,
+
+        reference,
+
+        currency:
+          orderCurrency,
+
+        amount:
+          order.gross_amount
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        "Initialise payment error:",
+        err
+      );
+
+      res.status(500).json({
+        error:
+          "Could not start payment"
+      });
+    }
   }
+);
 
-</script>
+/* =========================================================
+   VERIFY PAYMENT
+========================================================= */
 
-</body>
-  </html>
+router.get(
+  "/verify/:reference",
+  requireAuth,
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await verifyAndComplete(
+          req.params.reference
+        );
+
+      if (!result.ok) {
+
+        if (
+          result.reason ===
+          "currency_mismatch"
+        ) {
+
+          return res.status(400).json({
+
+            error:
+              "Payment was charged in the wrong currency and has not been accepted",
+
+            reason:
+              result.reason
+
+          });
+        }
+
+        return res.status(400).json({
+
+          error:
+            "Payment not confirmed",
+
+          reason:
+            result.reason
+
+        });
+      }
+
+      res.json({
+
+        success:
+          true,
+
+        order_id:
+          result.order_id,
+
+        product_id:
+          result.product_id,
+
+        course_enrolled:
+          Boolean(
+            result.course_enrolled
+          ),
+
+        course_id:
+          result.course_id || null
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        "Verify payment error:",
+        err
+      );
+
+      res.status(500).json({
+        error:
+          "Could not verify payment"
+      });
+    }
+  }
+);
+
+module.exports =
+  router;
