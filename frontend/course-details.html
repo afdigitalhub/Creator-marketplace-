@@ -6,14 +6,26 @@
 <meta name="theme-color" content="#05050b">
 <meta name="description" content="Professional course on AF Digital Hub.">
 <title>Course Details | AF Digital Hub</title>
+
 <style>
 :root{
-  --bg:#05050b;--panel:#0c0f19;--panel2:#101426;--line:rgba(255,255,255,.09);
-  --text:#f7f8fc;--muted:#929aae;--gold:#ffd21a;--blue:#4e7cff;--violet:#7b45ff;
-  --green:#34d399;--danger:#f87171;
+  --bg:#05050b;
+  --panel:#0c0f19;
+  --panel2:#101426;
+  --line:rgba(255,255,255,.09);
+  --text:#f7f8fc;
+  --muted:#929aae;
+  --gold:#ffd21a;
+  --blue:#4e7cff;
+  --violet:#7b45ff;
+  --green:#34d399;
+  --danger:#f87171;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
+
 html{scroll-behavior:smooth}
+
 body{
   background:
     radial-gradient(circle at 85% 0%,rgba(123,69,255,.14),transparent 30%),
@@ -21,386 +33,1708 @@ body{
     var(--bg);
   color:var(--text);
   font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  min-height:100vh;padding-bottom:105px;overflow-x:hidden;
+  min-height:100vh;
+  padding-bottom:105px;
+  overflow-x:hidden;
 }
-a{color:inherit;text-decoration:none}button{font:inherit}
+
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+
 .header{
-  position:sticky;top:0;z-index:50;background:rgba(5,5,11,.94);
-  backdrop-filter:blur(18px);border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(5,5,11,.94);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
 }
+
 .nav{
-  width:min(1180px,calc(100% - 24px));height:64px;margin:auto;
-  display:flex;align-items:center;gap:10px;min-width:0;
+  width:min(1180px,calc(100% - 24px));
+  height:64px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
 }
+
 .back{
-  width:40px;height:40px;flex:none;border:1px solid var(--line);border-radius:12px;
-  display:grid;place-items:center;background:#0a0c14;color:#fff;font-size:22px;
+  width:40px;
+  height:40px;
+  flex:none;
+  border:1px solid var(--line);
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:#0a0c14;
+  color:#fff;
+  font-size:22px;
 }
+
 .nav-title{
-  min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-size:14px;font-weight:850;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:14px;
+  font-weight:850;
 }
-.nav-links{margin-left:auto;display:flex;gap:6px}
-.nav-links a{font-size:11px;font-weight:800;color:#aeb6c8;padding:9px 10px}
-.container{width:min(1120px,calc(100% - 24px));margin:auto}
+
+.nav-links{
+  margin-left:auto;
+  display:flex;
+  gap:6px;
+}
+
+.nav-links a{
+  font-size:11px;
+  font-weight:800;
+  color:#aeb6c8;
+  padding:9px 10px;
+}
+
+.container{
+  width:min(1120px,calc(100% - 24px));
+  margin:auto;
+}
+
 .hero{
   padding:22px 0 18px;
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,540px);
-  gap:24px;align-items:start;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(360px,540px);
+  gap:24px;
+  align-items:start;
 }
-.hero-copy{padding-top:10px}
+
+.hero-copy{
+  padding-top:10px;
+}
+
 .eyebrow{
-  display:inline-flex;align-items:center;gap:7px;color:var(--gold);
-  font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:11px;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:var(--gold);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-bottom:11px;
 }
-.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--gold)}
-h1{font-size:clamp(30px,4vw,47px);line-height:1.04;letter-spacing:-.05em;margin-bottom:13px}
-.lead{color:#a6aec0;line-height:1.65;font-size:14px;max-width:650px}
-.meta{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+
+.eyebrow i{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--gold);
+}
+
+h1{
+  font-size:clamp(30px,4vw,47px);
+  line-height:1.04;
+  letter-spacing:-.05em;
+  margin-bottom:13px;
+}
+
+.lead{
+  color:#a6aec0;
+  line-height:1.65;
+  font-size:14px;
+  max-width:650px;
+}
+
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:18px 0;
+}
+
 .meta-item{
-  padding:9px 11px;border:1px solid var(--line);background:#0b0e18;
-  border-radius:10px;color:#aeb6c8;font-size:10px;font-weight:750;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  background:#0b0e18;
+  border-radius:10px;
+  color:#aeb6c8;
+  font-size:10px;
+  font-weight:750;
 }
-.meta-item strong{color:#fff}
+
+.meta-item strong{
+  color:#fff;
+}
+
 .price-card{
-  margin-top:12px;padding:17px;border-radius:18px;
+  margin-top:12px;
+  padding:17px;
+  border-radius:18px;
   border:1px solid rgba(255,210,26,.2);
-  background:linear-gradient(145deg,rgba(255,210,26,.06),rgba(78,124,255,.08));
+  background:linear-gradient(
+    145deg,
+    rgba(255,210,26,.06),
+    rgba(78,124,255,.08)
+  );
 }
-.price-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
-.price{font-size:28px;font-weight:950;letter-spacing:-.04em}
-.price small{display:block;color:#788196;font-size:9px;font-weight:700;margin-top:2px}
+
+.price-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.price{
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:-.04em;
+}
+
+.price small{
+  display:block;
+  color:#788196;
+  font-size:9px;
+  font-weight:700;
+  margin-top:2px;
+}
+
 .buy{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-height:45px;padding:0 19px;border-radius:12px;
-  background:linear-gradient(135deg,#4e7cff,#7b2ff7);color:#fff;font-size:12px;font-weight:950;
-  border:0;cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:45px;
+  padding:0 19px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#4e7cff,#7b2ff7);
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+  border:0;
+  cursor:pointer;
 }
-.buy.disabled{opacity:.45;pointer-events:none}
+
+.buy.disabled{
+  opacity:.45;
+  pointer-events:none;
+}
+
+/* =========================================================
+   EXISTING AF DIGITAL HUB COURSE COVER
+   Uses the REAL founder photo already in the repository.
+   No generated image.
+   ========================================================= */
+
 .cover-card{
-  width:100%;min-width:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;
-  background:#080a11;box-shadow:0 25px 60px -30px rgba(0,0,0,.8);
+  width:100%;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+  background:#080a11;
+  box-shadow:0 25px 60px -30px rgba(0,0,0,.8);
 }
-.cover-image{width:100%;line-height:0;background:#080a11}
+
+.cover-image{
+  width:100%;
+  line-height:0;
+  background:#080a11;
+}
+
 .cover-image img{
-  display:block;width:100%;height:auto;max-width:100%;object-fit:contain;
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  object-fit:contain;
 }
-.cover-note{padding:10px 14px;color:#727c90;font-size:9px;border-top:1px solid var(--line)}
+
+/* Used only when the course has no stored cover image. */
+.af-course-cover{
+  position:relative;
+  min-height:540px;
+  padding:30px 28px 25px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+  background:
+    radial-gradient(
+      circle at 82% 16%,
+      rgba(78,124,255,.26),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 18% 85%,
+      rgba(255,210,26,.08),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      #101322 0%,
+      #080a11 55%,
+      #15101e 100%
+    );
+}
+
+.af-course-cover::before{
+  content:"";
+  position:absolute;
+  inset:14px;
+  border:1px solid rgba(255,210,26,.20);
+  border-radius:17px;
+  pointer-events:none;
+}
+
+.af-cover-brand{
+  position:relative;
+  z-index:2;
+}
+
+.af-cover-brand-name{
+  color:#ffd21a;
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:2px;
+}
+
+.af-cover-brand-type{
+  margin-top:5px;
+  color:#aab2c3;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:2px;
+}
+
+.af-cover-main{
+  position:relative;
+  z-index:2;
+  padding:35px 0 25px;
+}
+
+.af-cover-label{
+  color:#ffd21a;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.8px;
+  margin-bottom:12px;
+}
+
+.af-cover-title{
+  color:#fff;
+  font-size:clamp(26px,4vw,39px);
+  line-height:1.04;
+  letter-spacing:-.045em;
+  font-weight:950;
+  max-width:92%;
+}
+
+.af-cover-line{
+  width:100%;
+  max-width:300px;
+  height:2px;
+  margin-top:18px;
+  background:linear-gradient(
+    90deg,
+    #ffd21a,
+    rgba(255,210,26,0)
+  );
+}
+
+.af-cover-author{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.af-cover-author-photo{
+  width:76px;
+  height:76px;
+  flex:none;
+  border-radius:12px;
+  object-fit:cover;
+  object-position:center;
+  border:2px solid rgba(255,210,26,.75);
+}
+
+.af-cover-author-name{
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+}
+
+.af-cover-author-role{
+  color:#ffd21a;
+  font-size:9px;
+  font-weight:850;
+  margin-top:4px;
+}
+
+.cover-note{
+  padding:10px 14px;
+  color:#727c90;
+  font-size:9px;
+  border-top:1px solid var(--line);
+}
+
 .section{
-  margin:12px 0;padding:20px;border-radius:20px;
-  border:1px solid var(--line);background:linear-gradient(145deg,#0e111c,#090b14);
+  margin:12px 0;
+  padding:20px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,#0e111c,#090b14);
 }
-.section h2{font-size:19px;letter-spacing:-.03em;margin-bottom:7px}
-.section-intro{color:#818b9f;font-size:11px;line-height:1.65;margin-bottom:14px}
-.author{display:flex;align-items:center;gap:14px}
+
+.section h2{
+  font-size:19px;
+  letter-spacing:-.03em;
+  margin-bottom:7px;
+}
+
+.section-intro{
+  color:#818b9f;
+  font-size:11px;
+  line-height:1.65;
+  margin-bottom:14px;
+}
+
+.author{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
 .author-photo{
-  width:76px;height:76px;flex:none;border-radius:50%;object-fit:cover;
+  width:76px;
+  height:76px;
+  flex:none;
+  border-radius:50%;
+  object-fit:cover;
   border:2px solid rgba(255,210,26,.4);
 }
-.author-name{font-size:17px;font-weight:900}.author-role{color:var(--gold);font-size:10px;font-weight:850;margin-top:3px}
-.author-bio{color:#858ea2;font-size:11px;line-height:1.6;margin-top:6px}
-.outcomes{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.outcome{
-  display:flex;gap:9px;align-items:flex-start;padding:12px;border-radius:13px;
-  background:#0a0d16;border:1px solid var(--line);
+
+.author-name{
+  font-size:17px;
+  font-weight:900;
 }
-.check{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(52,211,153,.1);color:var(--green)}
-.outcome span{font-size:11px;line-height:1.5;color:#c2c8d6}
-.curriculum{display:grid;gap:8px}
-.module{border:1px solid var(--line);background:#0a0d16;border-radius:14px;overflow:hidden}
-.module-head{display:flex;justify-content:space-between;gap:10px;padding:14px;cursor:pointer}
-.module-title{font-size:12px;font-weight:850}.module-count{color:#737d91;font-size:10px}
-.lesson-list{display:none;border-top:1px solid var(--line)}
-.module.open .lesson-list{display:block}
-.lesson{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;gap:12px;color:#aab2c3;font-size:10.5px}
-.lesson:last-child{border-bottom:0}
-.lesson-no{color:#697387}
+
+.author-role{
+  color:var(--gold);
+  font-size:10px;
+  font-weight:850;
+  margin-top:3px;
+}
+
+.author-bio{
+  color:#858ea2;
+  font-size:11px;
+  line-height:1.6;
+  margin-top:6px;
+}
+
+.outcomes{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+
+.outcome{
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  padding:12px;
+  border-radius:13px;
+  background:#0a0d16;
+  border:1px solid var(--line);
+}
+
+.check{
+  width:22px;
+  height:22px;
+  flex:none;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:rgba(52,211,153,.1);
+  color:var(--green);
+}
+
+.outcome span{
+  font-size:11px;
+  line-height:1.5;
+  color:#c2c8d6;
+}
+
+.curriculum{
+  display:grid;
+  gap:8px;
+}
+
+.module{
+  border:1px solid var(--line);
+  background:#0a0d16;
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.module-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:14px;
+  cursor:pointer;
+}
+
+.module-title{
+  font-size:12px;
+  font-weight:850;
+}
+
+.module-count{
+  color:#737d91;
+  font-size:10px;
+}
+
+.lesson-list{
+  display:none;
+  border-top:1px solid var(--line);
+}
+
+.module.open .lesson-list{
+  display:block;
+}
+
+.lesson{
+  padding:10px 14px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  color:#aab2c3;
+  font-size:10.5px;
+}
+
+.lesson:last-child{
+  border-bottom:0;
+}
+
+.lesson-no{
+  color:#697387;
+}
+
 .affiliate{
   border-color:rgba(255,210,26,.18);
-  background:radial-gradient(circle at 90% 10%,rgba(78,124,255,.14),transparent 30%),linear-gradient(145deg,rgba(255,210,26,.06),rgba(123,69,255,.07));
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(78,124,255,.14),
+      transparent 30%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255,210,26,.06),
+      rgba(123,69,255,.07)
+    );
 }
+
 .commission{
-  display:inline-flex;margin-top:8px;padding:7px 10px;border-radius:999px;color:var(--gold);
-  border:1px solid rgba(255,210,26,.2);background:rgba(255,210,26,.06);font-size:11px;font-weight:950;
+  display:inline-flex;
+  margin-top:8px;
+  padding:7px 10px;
+  border-radius:999px;
+  color:var(--gold);
+  border:1px solid rgba(255,210,26,.2);
+  background:rgba(255,210,26,.06);
+  font-size:11px;
+  font-weight:950;
 }
-.link-box{display:flex;gap:8px;margin-top:13px}.link-box input{min-width:0;flex:1;background:#070910;color:#dfe4ef;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:10px}
-.copy-btn{border:1px solid rgba(78,124,255,.35);background:#111a35;color:#fff;padding:11px 14px;border-radius:11px;font-size:11px;font-weight:850;cursor:pointer}
-.message{display:none;margin-top:9px;font-size:10px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.trust{padding:13px;border:1px solid var(--line);background:#0a0d16;border-radius:13px}
-.trust strong{display:block;font-size:11px}.trust span{display:block;color:#778195;font-size:9.5px;line-height:1.5;margin-top:3px}
-.loading,.error{text-align:center;padding:80px 15px;color:var(--muted)}
-.error{color:var(--danger)}
+
+.link-box{
+  display:flex;
+  gap:8px;
+  margin-top:13px;
+}
+
+.link-box input{
+  min-width:0;
+  flex:1;
+  background:#070910;
+  color:#dfe4ef;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:11px;
+  font-size:10px;
+}
+
+.copy-btn{
+  border:1px solid rgba(78,124,255,.35);
+  background:#111a35;
+  color:#fff;
+  padding:11px 14px;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.message{
+  display:none;
+  margin-top:9px;
+  font-size:10px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.trust{
+  padding:13px;
+  border:1px solid var(--line);
+  background:#0a0d16;
+  border-radius:13px;
+}
+
+.trust strong{
+  display:block;
+  font-size:11px;
+}
+
+.trust span{
+  display:block;
+  color:#778195;
+  font-size:9.5px;
+  line-height:1.5;
+  margin-top:3px;
+}
+
+.loading,
+.error{
+  text-align:center;
+  padding:80px 15px;
+  color:var(--muted);
+}
+
+.error{
+  color:var(--danger);
+}
+
 .bottom{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 12px 16px;
-  background:rgba(7,8,14,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line);
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:60;
+  padding:10px 12px 16px;
+  background:rgba(7,8,14,.96);
+  backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);
 }
-.bottom-inner{width:min(1120px,100%);margin:auto;display:flex;align-items:center;gap:10px}
-.bottom-price{flex:1}.bottom-price strong{font-size:17px}.bottom-price span{display:block;color:#6f788b;font-size:8px;margin-top:2px}
-.bottom .buy{min-width:150px}
+
+.bottom-inner{
+  width:min(1120px,100%);
+  margin:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.bottom-price{
+  flex:1;
+}
+
+.bottom-price strong{
+  font-size:17px;
+}
+
+.bottom-price span{
+  display:block;
+  color:#6f788b;
+  font-size:8px;
+  margin-top:2px;
+}
+
+.bottom .buy{
+  min-width:150px;
+}
 
 @media(max-width:800px){
-  .hero{display:flex;flex-direction:column;gap:16px;padding-top:16px}
-  .cover-card{order:0;width:100%}
-  .hero-copy{order:1;padding-top:0}
-  .nav-links{display:none}
-  .outcomes,.grid-2{grid-template-columns:1fr}
+
+  .hero{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding-top:16px;
+  }
+
+  .cover-card{
+    order:0;
+    width:100%;
+  }
+
+  .hero-copy{
+    order:1;
+    padding-top:0;
+  }
+
+  .nav-links{
+    display:none;
+  }
+
+  .outcomes,
+  .grid-2{
+    grid-template-columns:1fr;
+  }
 }
+
 @media(max-width:560px){
-  .container{width:calc(100% - 20px)}
-  .nav{width:calc(100% - 20px)}
-  .nav-title{font-size:13px}
-  .cover-card{border-radius:18px}
-  .hero{padding-top:12px}
-  h1{font-size:30px}
-  .lead{font-size:13px}
-  .price-card{display:none}
-  .section{padding:17px}
-  .bottom .buy{min-width:138px}
-  .author-photo{width:64px;height:64px}
+
+  .container{
+    width:calc(100% - 20px);
+  }
+
+  .nav{
+    width:calc(100% - 20px);
+  }
+
+  .nav-title{
+    font-size:13px;
+  }
+
+  .cover-card{
+    border-radius:18px;
+  }
+
+  .hero{
+    padding-top:12px;
+  }
+
+  h1{
+    font-size:30px;
+  }
+
+  .lead{
+    font-size:13px;
+  }
+
+  .price-card{
+    display:none;
+  }
+
+  .section{
+    padding:17px;
+  }
+
+  .bottom .buy{
+    min-width:138px;
+  }
+
+  .author-photo{
+    width:64px;
+    height:64px;
+  }
+
+  .af-course-cover{
+    min-height:455px;
+    padding:24px 20px 21px;
+  }
+
+  .af-cover-title{
+    font-size:27px;
+  }
+
+  .af-cover-author-photo{
+    width:65px;
+    height:65px;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <header class="header">
   <div class="nav">
+
     <a class="back" href="courses.html" aria-label="Back">←</a>
-    <div class="nav-title" id="navTitle">Course Details</div>
+
+    <div class="nav-title" id="navTitle">
+      Course Details
+    </div>
+
     <nav class="nav-links">
       <a href="courses.html">All Courses</a>
       <a href="my-learning.html">My Learning</a>
     </nav>
+
   </div>
 </header>
 
-<main id="loading" class="container loading">Loading course...</main>
+<main id="loading" class="container loading">
+  Loading course...
+</main>
+
 <main id="error" class="container error" style="display:none"></main>
 
 <main id="content" class="container" style="display:none">
+
   <section class="hero">
 
-    <!-- MOBILE: this is the complete cover, never cropped -->
     <div class="cover-card">
-      <div class="cover-image">
-        <img id="cover" alt="Course cover">
+
+      <div class="cover-image" id="coverArea"></div>
+
+      <div class="cover-note">
+        Professional course by AF Digital Hub
       </div>
-      <div class="cover-note">Professional course by AF Digital Hub</div>
+
     </div>
 
     <div class="hero-copy">
-      <div class="eyebrow"><i></i><span id="category">COURSES</span></div>
+
+      <div class="eyebrow">
+        <i></i>
+        <span id="category">COURSES</span>
+      </div>
+
       <h1 id="title"></h1>
+
       <p class="lead" id="description"></p>
 
       <div class="meta">
-        <div class="meta-item"><strong id="level">Beginner</strong> level</div>
-        <div class="meta-item"><strong id="hours">Self-paced</strong></div>
-        <div class="meta-item"><strong id="modulesCount">0</strong> modules</div>
-        <div class="meta-item"><strong id="lessonsCount">0</strong> lessons</div>
+
+        <div class="meta-item">
+          <strong id="level">Beginner</strong> level
+        </div>
+
+        <div class="meta-item">
+          <strong id="hours">Self-paced</strong>
+        </div>
+
+        <div class="meta-item">
+          <strong id="modulesCount">0</strong> modules
+        </div>
+
+        <div class="meta-item">
+          <strong id="lessonsCount">0</strong> lessons
+        </div>
+
       </div>
 
       <div class="price-card">
+
         <div class="price-row">
-          <div class="price" id="price">GHS 0.00<small>Total course price</small></div>
-          <a id="buyButtonTop" class="buy disabled" href="#">Buy Now</a>
+
+          <div class="price" id="price">
+            GHS 0.00
+            <small>Total course price</small>
+          </div>
+
+          <a id="buyButtonTop" class="buy disabled" href="#">
+            Buy Now
+          </a>
+
         </div>
+
       </div>
+
     </div>
+
   </section>
 
+
   <section class="section">
+
     <h2>Course Author</h2>
+
     <div class="author">
-      <img id="authorPhoto" class="author-photo"
-           src="https://raw.githubusercontent.com/afdigitalhub/Creator-marketplace-/main/frontend/founder-photo.jpg"
-           alt="Adonle Fameye">
+
+      <img
+        id="authorPhoto"
+        class="author-photo"
+        src="https://raw.githubusercontent.com/afdigitalhub/Creator-marketplace-/main/frontend/founder-photo.jpg"
+        alt="Adonle Fameye"
+      >
+
       <div>
-        <div class="author-name" id="authorName">Adonle Fameye</div>
-        <div class="author-role" id="authorRole">Founder, AF Digital Hub</div>
-        <p class="author-bio" id="authorBio">Founder of AF Digital Hub. Built from Ghana with a vision to create a trusted digital platform where people can discover products, learn, connect, find opportunities and build something of their own.</p>
+
+        <div class="author-name" id="authorName">
+          Adonle Fameye
+        </div>
+
+        <div class="author-role" id="authorRole">
+          Founder, AF Digital Hub
+        </div>
+
+        <p class="author-bio" id="authorBio">
+          Founder of AF Digital Hub. Built from Ghana with a vision to create
+          a trusted digital platform where people can discover products,
+          learn, connect, find opportunities and build something of their own.
+        </p>
+
       </div>
+
     </div>
+
   </section>
 
+
   <section class="section">
+
     <h2>What you'll learn</h2>
-    <p class="section-intro">A practical learning path built around the actual course curriculum.</p>
+
+    <p class="section-intro">
+      A practical learning path built around the actual course curriculum.
+    </p>
+
     <div id="outcomes" class="outcomes"></div>
+
   </section>
 
+
   <section class="section">
+
     <h2>Course Curriculum</h2>
-    <p class="section-intro">Preview the modules and lesson titles before you enroll.</p>
+
+    <p class="section-intro">
+      Preview the modules and lesson titles before you enroll.
+    </p>
+
     <div id="curriculum" class="curriculum"></div>
+
   </section>
+
 
   <section class="section affiliate">
+
     <h2>Earn by promoting this course</h2>
-    <p class="section-intro">Get your unique affiliate link and earn the configured commission from verified course sales.</p>
-    <div id="commission" class="commission">50% commission</div>
-    <div id="affiliateArea" style="margin-top:13px">
-      <button class="copy-btn" onclick="createAffiliateLink()">Get My Affiliate Link</button>
+
+    <p class="section-intro">
+      Get your unique affiliate link and earn the configured commission
+      from verified course sales.
+    </p>
+
+    <div id="commission" class="commission">
+      50% commission
     </div>
+
+    <div id="affiliateArea" style="margin-top:13px">
+
+      <button
+        class="copy-btn"
+        onclick="createAffiliateLink()"
+      >
+        Get My Affiliate Link
+      </button>
+
+    </div>
+
     <div id="affiliateMessage" class="message"></div>
+
   </section>
+
 
   <section class="section">
+
     <h2>Why learn on AF Digital Hub?</h2>
+
     <div class="grid-2">
-      <div class="trust"><strong>✓ Learn at your pace</strong><span>Follow the structured curriculum and track your progress.</span></div>
-      <div class="trust"><strong>◆ Real course information</strong><span>Pricing, curriculum and affiliate rates come from the platform data.</span></div>
-      <div class="trust"><strong>↗ Promote professionally</strong><span>Eligible users can create unique affiliate links for verified sales.</span></div>
-      <div class="trust"><strong>🌍 Global audience</strong><span>AF Digital Hub is built from Ghana for learners everywhere.</span></div>
+
+      <div class="trust">
+        <strong>✓ Learn at your pace</strong>
+        <span>
+          Follow the structured curriculum and track your progress.
+        </span>
+      </div>
+
+      <div class="trust">
+        <strong>◆ Real course information</strong>
+        <span>
+          Pricing, curriculum and affiliate rates come from platform data.
+        </span>
+      </div>
+
+      <div class="trust">
+        <strong>↗ Promote professionally</strong>
+        <span>
+          Eligible users can create unique affiliate links for verified sales.
+        </span>
+      </div>
+
+      <div class="trust">
+        <strong>🌍 Global audience</strong>
+        <span>
+          AF Digital Hub is built from Ghana for learners everywhere.
+        </span>
+      </div>
+
     </div>
+
   </section>
+
 </main>
 
+
 <div class="bottom">
+
   <div class="bottom-inner">
+
     <div class="bottom-price">
-      <strong id="bottomPrice">GHS 0.00</strong>
-      <span>Total price</span>
+
+      <strong id="bottomPrice">
+        GHS 0.00
+      </strong>
+
+      <span>
+        Total price
+      </span>
+
     </div>
-    <a id="buyButton" class="buy disabled" href="#">Buy Now</a>
+
+    <a
+      id="buyButton"
+      class="buy disabled"
+      href="#"
+    >
+      Buy Now
+    </a>
+
   </div>
+
 </div>
 
+
 <script>
-const API_BASE="https://creator-marketplace-71rb.onrender.com";
-const RAW_COVER="https://raw.githubusercontent.com/afdigitalhub/Creator-marketplace-/main/frontend/ghostwriting-course-cover.jpg";
-const params=new URLSearchParams(location.search);
-const courseId=params.get("id");
-const ref=params.get("ref");
-let courseData=null;
+
+const API_BASE =
+  "https://creator-marketplace-71rb.onrender.com";
+
+const EXISTING_FOUNDER_PHOTO =
+  "https://raw.githubusercontent.com/afdigitalhub/Creator-marketplace-/main/frontend/founder-photo.jpg";
+
+const params =
+  new URLSearchParams(location.search);
+
+const courseId =
+  params.get("id");
+
+const ref =
+  params.get("ref");
+
+let courseData = null;
+
 
 function token(){
-  return localStorage.getItem("af_token")||localStorage.getItem("token")||
-         localStorage.getItem("authToken")||localStorage.getItem("accessToken")||
-         localStorage.getItem("jwt")||"";
+
+  return (
+    localStorage.getItem("af_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("jwt") ||
+    ""
+  );
+
 }
-function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-function getCourse(d){return d?.course||d||{}}
-function getModules(d){return d?.modules||d?.course?.modules||[]}
+
+
+function esc(v){
+
+  return String(v ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function getCourse(d){
+
+  return d?.course || d || {};
+
+}
+
+
+function getModules(d){
+
+  return (
+    d?.modules ||
+    d?.course?.modules ||
+    []
+  );
+
+}
+
+
 function productId(d){
-  return d?.course?.product_id||d?.product_id||d?.course?.product?.id||null;
+
+  return (
+    d?.course?.product_id ||
+    d?.product_id ||
+    d?.course?.product?.id ||
+    null
+  );
+
 }
+
+
 function money(c){
-  const currency=c.currency||"GHS";
-  const amount=Number(c.price??c.product?.price??0);
+
+  const currency =
+    c.currency ||
+    c.product?.currency ||
+    "GHS";
+
+  const amount =
+    Number(
+      c.price ??
+      c.product?.price ??
+      0
+    );
+
   return `${currency} ${amount.toFixed(2)}`;
+
 }
+
+
 function fail(msg){
-  loading.style.display="none";error.textContent=msg;error.style.display="block";
+
+  loading.style.display = "none";
+
+  error.textContent = msg;
+
+  error.style.display = "block";
+
 }
+
+
 async function load(){
-  if(!courseId)return fail("No course was selected.");
+
+  if(!courseId){
+
+    return fail("No course was selected.");
+
+  }
+
   try{
-    const headers={};if(token())headers.Authorization=`Bearer ${token()}`;
-    const r=await fetch(`${API_BASE}/courses/${encodeURIComponent(courseId)}`,{headers});
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    courseData=await r.json();
+
+    const headers = {};
+
+    if(token()){
+
+      headers.Authorization =
+        `Bearer ${token()}`;
+
+    }
+
+    const r =
+      await fetch(
+        `${API_BASE}/courses/${encodeURIComponent(courseId)}`,
+        {headers}
+      );
+
+    if(!r.ok){
+
+      throw new Error(`HTTP ${r.status}`);
+
+    }
+
+    courseData =
+      await r.json();
+
     render(courseData);
-  }catch(e){console.error(e);fail("This course could not be loaded right now.")}
+
+  }catch(e){
+
+    console.error(e);
+
+    fail(
+      "This course could not be loaded right now."
+    );
+
+  }
+
 }
+
+
 function render(data){
-  const c=getCourse(data), modules=getModules(data);
-  const title=c.title||"Course";
-  const desc=c.description||c.short_description||"Professional course on AF Digital Hub.";
-  const totalLessons=Number(c.total_lessons||modules.reduce((n,m)=>n+Number(m.lesson_count||m.lessons?.length||0),0));
-  const rate=Number(c.affiliate_commission_percent??c.product?.affiliate_commission_percent??50);
-  const creator=c.creator_name||"Adonle Fameye";
-  const founder=creator.toLowerCase().includes("adonle")||Number(c.id)===2;
 
-  document.title=`${title} | AF Digital Hub`;
-  navTitle.textContent=title;
-  category.textContent=c.category||"COURSES";
-  document.getElementById("title").textContent=title;
-  description.textContent=desc;
-  level.textContent=(c.level||"beginner").replace(/^./,x=>x.toUpperCase());
-  hours.textContent=c.estimated_hours?`${c.estimated_hours} hours`:"Self-paced";
-  modulesCount.textContent=modules.length;
-  lessonsCount.textContent=totalLessons;
+  const c =
+    getCourse(data);
 
-  const formatted=money(c);
-  price.firstChild.textContent=formatted;
-  bottomPrice.textContent=formatted;
-  commission.textContent=`${rate}% commission`;
+  const modules =
+    getModules(data);
 
-  /* THE FIX: normal responsive image, no fixed height, no crop, no transform */
-  cover.src=(c.cover_url||c.product?.cover_url||c.preview_url||c.product?.preview_url||RAW_COVER);
-  cover.alt=title;
+  const title =
+    c.title ||
+    "Course";
 
-  authorName.textContent=founder?"Adonle Fameye":creator;
-  authorRole.textContent=founder?"Founder, AF Digital Hub":"Course Creator";
-  authorBio.textContent=founder
-    ?"Founder of AF Digital Hub. Built from Ghana with a vision to create a trusted digital platform where people can discover products, learn, connect, find opportunities and build something of their own."
-    :"Course creator on AF Digital Hub.";
+  const desc =
+    c.description ||
+    c.short_description ||
+    "Professional course on AF Digital Hub.";
+
+  const totalLessons =
+    Number(
+      c.total_lessons ||
+      modules.reduce(
+        (n,m) =>
+          n +
+          Number(
+            m.lesson_count ||
+            m.lessons?.length ||
+            0
+          ),
+        0
+      )
+    );
+
+  const rate =
+    Number(
+      c.affiliate_commission_percent ??
+      c.product?.affiliate_commission_percent ??
+      50
+    );
+
+
+  document.title =
+    `${title} | AF Digital Hub`;
+
+  navTitle.textContent =
+    title;
+
+  category.textContent =
+    c.category ||
+    "COURSES";
+
+  document.getElementById("title")
+    .textContent =
+    title;
+
+  description.textContent =
+    desc;
+
+  level.textContent =
+    (c.level || "beginner")
+      .replace(/^./,x => x.toUpperCase());
+
+  hours.textContent =
+    c.estimated_hours
+      ? `${c.estimated_hours} hours`
+      : "Self-paced";
+
+  modulesCount.textContent =
+    modules.length;
+
+  lessonsCount.textContent =
+    totalLessons;
+
+
+  const formatted =
+    money(c);
+
+  price.firstChild.textContent =
+    formatted;
+
+  bottomPrice.textContent =
+    formatted;
+
+  commission.textContent =
+    `${rate}% commission`;
+
+
+  /*
+   * IMPORTANT:
+   *
+   * If the course already has a real cover,
+   * use that existing cover.
+   *
+   * If the new course has no cover yet,
+   * use ONLY the existing AF Digital Hub
+   * founder photo and existing brand identity.
+   *
+   * No generated image.
+   */
+
+  const existingCover =
+    c.cover_url ||
+    c.product?.cover_url ||
+    c.preview_url ||
+    c.product?.preview_url;
+
+  if(existingCover){
+
+    coverArea.innerHTML = `
+      <img
+        id="cover"
+        src="${esc(existingCover)}"
+        alt="${esc(title)}"
+      >
+    `;
+
+  }else{
+
+    coverArea.innerHTML = `
+
+      <div class="af-course-cover">
+
+        <div class="af-cover-brand">
+
+          <div class="af-cover-brand-name">
+            AF DIGITAL HUB
+          </div>
+
+          <div class="af-cover-brand-type">
+            PROFESSIONAL COURSE
+          </div>
+
+        </div>
+
+
+        <div class="af-cover-main">
+
+          <div class="af-cover-label">
+            COURSES
+          </div>
+
+          <div class="af-cover-title">
+            ${esc(title)}
+          </div>
+
+          <div class="af-cover-line"></div>
+
+        </div>
+
+
+        <div class="af-cover-author">
+
+          <img
+            class="af-cover-author-photo"
+            src="${EXISTING_FOUNDER_PHOTO}"
+            alt="Adonle Fameye"
+          >
+
+          <div>
+
+            <div class="af-cover-author-name">
+              with Adonle Fameye
+            </div>
+
+            <div class="af-cover-author-role">
+              Founder, AF Digital Hub
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  authorPhoto.src =
+    EXISTING_FOUNDER_PHOTO;
+
+  authorName.textContent =
+    "Adonle Fameye";
+
+  authorRole.textContent =
+    "Founder, AF Digital Hub";
+
+  authorBio.textContent =
+    "Founder of AF Digital Hub. Built from Ghana with a vision to create a trusted digital platform where people can discover products, learn, connect, find opportunities and build something of their own.";
+
 
   renderOutcomes(modules);
+
   renderCurriculum(modules);
 
-  const pid=productId(data);
-  [buyButton,buyButtonTop].forEach(b=>{
+
+  const pid =
+    productId(data);
+
+  [buyButton,buyButtonTop].forEach(b => {
+
     if(pid){
-      b.href=`product-details.html?id=${encodeURIComponent(pid)}${ref?`&ref=${encodeURIComponent(ref)}`:""}`;
-      b.textContent=`Buy Now · ${formatted}`;
+
+      b.href =
+        `product-details.html?id=${encodeURIComponent(pid)}${
+          ref
+            ? `&ref=${encodeURIComponent(ref)}`
+            : ""
+        }`;
+
+      b.textContent =
+        `Buy Now · ${formatted}`;
+
       b.classList.remove("disabled");
+
     }else{
-      b.textContent="Course unavailable";b.classList.add("disabled");
+
+      b.textContent =
+        "Course unavailable";
+
+      b.classList.add("disabled");
+
     }
+
   });
 
-  if(ref)sessionStorage.setItem("af_course_ref",ref);
-  loading.style.display="none";content.style.display="block";
+
+  if(ref){
+
+    sessionStorage.setItem(
+      "af_course_ref",
+      ref
+    );
+
+  }
+
+
+  loading.style.display =
+    "none";
+
+  content.style.display =
+    "block";
+
 }
+
+
 function renderOutcomes(modules){
-  const items=[];
-  modules.slice(0,4).forEach(m=>{if(m.title)items.push(`Complete ${m.title} and the lessons inside it.`)});
-  const fallback=[
-    "Understand the core workflow covered throughout the course.",
-    "Work through the structured modules and practical lessons.",
-    "Build a repeatable process you can apply to real projects.",
-    "Develop professional skills you can continue improving."
-  ];
-  outcomes.innerHTML=(items.length>=4?items:fallback).slice(0,4)
-    .map(x=>`<div class="outcome"><div class="check">✓</div><span>${esc(x)}</span></div>`).join("");
-}
-function renderCurriculum(modules){
-  if(!modules.length){curriculum.innerHTML='<div style="color:var(--muted);font-size:11px">Curriculum is being prepared.</div>';return}
-  curriculum.innerHTML=modules.map((m,i)=>{
-    const lessons=m.lessons||[],count=Number(m.lesson_count||lessons.length||0);
-    return `<div class="module">
-      <div class="module-head" onclick="this.parentElement.classList.toggle('open')">
-        <div class="module-title">${i+1}. ${esc(m.title||"Module")}</div>
-        <div class="module-count">${count} ${count===1?"lesson":"lessons"} · +</div>
-      </div>
-      <div class="lesson-list">${lessons.length?lessons.map((l,j)=>
-        `<div class="lesson"><span>${esc(l.title||`Lesson ${j+1}`)}</span><span class="lesson-no">${l.duration_minutes?`${Number(l.duration_minutes)} min`:""}</span></div>`
-      ).join(""):'<div class="lesson"><span>Lessons available after enrollment</span><span class="lesson-no">Locked</span></div>'}</div>
-    </div>`;
-  }).join("");
-}
-async function createAffiliateLink(){
-  const msg=affiliateMessage;
-  if(!token()){msg.style.display="block";msg.style.color="var(--danger)";msg.textContent="Please log in first to create your affiliate link.";return}
-  const id=courseData?.course?.id||courseData?.id||courseId;
-  try{
-    const r=await fetch(`${API_BASE}/courses/${encodeURIComponent(id)}/affiliate-link`,{
-      method:"POST",headers:{Authorization:`Bearer ${token()}`,"Content-Type":"application/json"}
+
+  const items = [];
+
+  modules
+    .slice(0,4)
+    .forEach(m => {
+
+      if(m.title){
+
+        items.push(
+          `Complete ${m.title} and the lessons inside it.`
+        );
+
+      }
+
     });
-    const d=await r.json();if(!r.ok)throw new Error(d.message||d.error||"Could not create affiliate link.");
-    const link=d.url||d.link||d.affiliate_url;if(!link)throw new Error("Affiliate link was not returned.");
-    affiliateArea.innerHTML=`<div class="link-box"><input id="affiliateLink" value="${esc(link)}" readonly><button class="copy-btn" onclick="copyAffiliateLink()">Copy</button></div>`;
-    msg.style.display="block";msg.style.color="var(--green)";msg.textContent="Your unique affiliate link is ready.";
-  }catch(e){msg.style.display="block";msg.style.color="var(--danger)";msg.textContent=e.message||"Could not create affiliate link."}
+
+
+  const fallback = [
+
+    "Understand the core workflow covered throughout the course.",
+
+    "Work through the structured modules and practical lessons.",
+
+    "Build a repeatable process you can apply to real projects.",
+
+    "Develop professional skills you can continue improving."
+
+  ];
+
+
+  outcomes.innerHTML =
+    (
+      items.length >= 4
+        ? items
+        : fallback
+    )
+    .slice(0,4)
+    .map(x => `
+
+      <div class="outcome">
+
+        <div class="check">
+          ✓
+        </div>
+
+        <span>
+          ${esc(x)}
+        </span>
+
+      </div>
+
+    `)
+    .join("");
+
 }
+
+
+function renderCurriculum(modules){
+
+  if(!modules.length){
+
+    curriculum.innerHTML =
+      '<div style="color:var(--muted);font-size:11px">Curriculum is being prepared.</div>';
+
+    return;
+
+  }
+
+
+  curriculum.innerHTML =
+    modules
+      .map((m,i) => {
+
+        const lessons =
+          m.lessons || [];
+
+        const count =
+          Number(
+            m.lesson_count ||
+            lessons.length ||
+            0
+          );
+
+
+        return `
+
+          <div class="module">
+
+            <div
+              class="module-head"
+              onclick="this.parentElement.classList.toggle('open')"
+            >
+
+              <div class="module-title">
+                ${i+1}. ${esc(m.title || "Module")}
+              </div>
+
+              <div class="module-count">
+                ${count}
+                ${count === 1 ? "lesson" : "lessons"}
+                · +
+              </div>
+
+            </div>
+
+
+            <div class="lesson-list">
+
+              ${
+                lessons.length
+
+                ? lessons
+                    .map((l,j) => `
+
+                      <div class="lesson">
+
+                        <span>
+                          ${esc(
+                            l.title ||
+                            `Lesson ${j+1}`
+                          )}
+                        </span>
+
+                        <span class="lesson-no">
+                          ${
+                            l.duration_minutes
+                              ? `${Number(l.duration_minutes)} min`
+                              : ""
+                          }
+                        </span>
+
+                      </div>
+
+                    `)
+                    .join("")
+
+                : `
+
+                  <div class="lesson">
+
+                    <span>
+                      Lessons available after enrollment
+                    </span>
+
+                    <span class="lesson-no">
+                      Locked
+                    </span>
+
+                  </div>
+
+                `
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+async function createAffiliateLink(){
+
+  const msg =
+    affiliateMessage;
+
+
+  if(!token()){
+
+    msg.style.display =
+      "block";
+
+    msg.style.color =
+      "var(--danger)";
+
+    msg.textContent =
+      "Please log in first to create your affiliate link.";
+
+    return;
+
+  }
+
+
+  const id =
+    courseData?.course?.id ||
+    courseData?.id ||
+    courseId;
+
+
+  try{
+
+    const r =
+      await fetch(
+        `${API_BASE}/courses/${encodeURIComponent(id)}/affiliate-link`,
+        {
+          method:"POST",
+          headers:{
+            Authorization:`Bearer ${token()}`,
+            "Content-Type":"application/json"
+          }
+        }
+      );
+
+
+    const d =
+      await r.json();
+
+
+    if(!r.ok){
+
+      throw new Error(
+        d.message ||
+        d.error ||
+        "Could not create affiliate link."
+      );
+
+    }
+
+
+    const link =
+      d.url ||
+      d.link ||
+      d.affiliate_url;
+
+
+    if(!link){
+
+      throw new Error(
+        "Affiliate link was not returned."
+      );
+
+    }
+
+
+    affiliateArea.innerHTML = `
+
+      <div class="link-box">
+
+        <input
+          id="affiliateLink"
+          value="${esc(link)}"
+          readonly
+        >
+
+        <button
+          class="copy-btn"
+          onclick="copyAffiliateLink()"
+        >
+          Copy
+        </button>
+
+      </div>
+
+    `;
+
+
+    msg.style.display =
+      "block";
+
+    msg.style.color =
+      "var(--green)";
+
+    msg.textContent =
+      "Your unique affiliate link is ready.";
+
+  }catch(e){
+
+    msg.style.display =
+      "block";
+
+    msg.style.color =
+      "var(--danger)";
+
+    msg.textContent =
+      e.message ||
+      "Could not create affiliate link.";
+
+  }
+
+}
+
+
 async function copyAffiliateLink(){
-  const input=document.getElementById("affiliateLink");if(!input)return;
-  try{await navigator.clipboard.writeText(input.value)}catch{input.select();document.execCommand("copy")}
-  affiliateMessage.style.display="block";affiliateMessage.style.color="var(--green)";affiliateMessage.textContent="Affiliate link copied.";
+
+  const input =
+    document.getElementById(
+      "affiliateLink"
+    );
+
+  if(!input)return;
+
+
+  try{
+
+    await navigator.clipboard
+      .writeText(input.value);
+
+  }catch{
+
+    input.select();
+
+    document.execCommand("copy");
+
+  }
+
+
+  affiliateMessage.style.display =
+    "block";
+
+  affiliateMessage.style.color =
+    "var(--green)";
+
+  affiliateMessage.textContent =
+    "Affiliate link copied.";
+
 }
+
+
 load();
+
 </script>
+
 </body>
-</html>
+  </html>
