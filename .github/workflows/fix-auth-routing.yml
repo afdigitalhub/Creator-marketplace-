@@ -1,0 +1,131 @@
+name: Fix AF Digital Hub auth routing
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  normalize-auth-routing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize all authentication routes
+        shell: bash
+        run: |
+          set -e
+
+          python3 <<'PY'
+          from pathlib import Path
+
+          changed = False
+
+          # All frontend files that may contain navigation or redirect links.
+          frontend_extensions = {
+              ".html",
+              ".js",
+              ".json",
+              ".xml",
+              ".txt"
+          }
+
+          frontend = Path("frontend")
+
+          if frontend.exists():
+              for path in frontend.rglob("*"):
+                  if not path.is_file():
+                      continue
+
+                  # login.html becomes only a compatibility redirect.
+                  if path.name == "login.html":
+                      continue
+
+                  if path.suffix.lower() not in frontend_extensions:
+                      continue
+
+                  try:
+                      original = path.read_text(encoding="utf-8")
+                  except UnicodeDecodeError:
+                      continue
+
+                  updated = original.replace("login.html", "signin.html")
+
+                  if updated != original:
+                      path.write_text(updated, encoding="utf-8")
+                      changed = True
+                      print(f"Updated: {path}")
+
+          # Backend-generated links must also use signin.html.
+          backend_file = Path("backend/routes/payments.js")
+
+          if backend_file.exists():
+              original = backend_file.read_text(encoding="utf-8")
+              updated = original.replace("login.html", "signin.html")
+
+              if updated != original:
+                  backend_file.write_text(updated, encoding="utf-8")
+                  changed = True
+                  print(f"Updated: {backend_file}")
+
+          # Keep login.html only as a compatibility redirect.
+          # Nobody inside AF Digital Hub should navigate to it.
+          login_file = frontend / "login.html"
+
+          redirect_page = """<!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="refresh" content="0;url=signin.html">
+            <title>AF Digital Hub Sign In</title>
+            <script>
+              window.location.replace("signin.html" + window.location.search + window.location.hash);
+            </script>
+          </head>
+          <body>
+            <p>Redirecting to AF Digital Hub Sign In...</p>
+          </body>
+          </html>
+          """
+
+          redirect_page = "\n".join(
+              line.strip()
+              for line in redirect_page.strip().splitlines()
+          ) + "\n"
+
+          if login_file.exists():
+              current = login_file.read_text(encoding="utf-8")
+              if current != redirect_page:
+                  login_file.write_text(redirect_page, encoding="utf-8")
+                  changed = True
+                  print("Updated: frontend/login.html")
+          else:
+              login_file.write_text(redirect_page, encoding="utf-8")
+              changed = True
+              print("Created: frontend/login.html")
+
+          print(f"Changes made: {changed}")
+          PY
+
+      - name: Commit authentication routing fixes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Authentication routing is already correct."
+            exit 0
+          fi
+
+          git config user.name "AF Digital Hub Auth Fix"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add frontend backend/routes/payments.js
+          git commit -m "Standardize authentication routing to signin page"
+          git push
