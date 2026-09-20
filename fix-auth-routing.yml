@@ -1,0 +1,57 @@
+name: Fix AF Digital Hub auth routing
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-auth-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize auth routes
+        shell: bash
+        run: |
+          set -e
+          changed=0
+
+          # Every frontend login redirect/link must use the verified working signin.html route.
+          while IFS= read -r -d '' file; do
+            if grep -q 'login\\.html' "$file"; then
+              sed -i 's/login\\.html/signin.html/g' "$file"
+              changed=1
+            fi
+          done < <(find frontend -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.xml' -o -name '*.txt' \) -print0)
+
+          # Keep a real login.html file in the frontend as a compatibility copy,
+          # but do not use it as the navigation target anywhere.
+          if [ -f frontend/signin.html ]; then
+            cp frontend/signin.html frontend/login.html
+            git add frontend/login.html
+            changed=1
+          fi
+
+          # Update backend-generated course email links if the current payments route contains them.
+          if [ -f backend/routes/payments.js ] && grep -q 'login\\.html' backend/routes/payments.js; then
+            sed -i 's/login\\.html/signin.html/g' backend/routes/payments.js
+            changed=1
+          fi
+
+          git add frontend backend/routes/payments.js 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo 'No auth-routing changes needed.'
+            exit 0
+          fi
+
+          git config user.name 'AF Digital Hub Auth Fix'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Fix authentication routing to signin page'
+          git push
