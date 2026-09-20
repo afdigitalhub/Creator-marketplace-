@@ -6,6 +6,7 @@
 <title>AF Digital Hub | Sign In</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#05050a">
+
 <style>
   :root {
     --bg: #05050a;
@@ -27,7 +28,12 @@
     --error: #f87171;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
 
   html, body {
     height: 100%;
@@ -110,7 +116,10 @@
     display: block;
   }
 
-  .password-field-wrap { position: relative; }
+  .password-field-wrap {
+    position: relative;
+  }
+
   .password-toggle {
     position: absolute;
     right: 14px;
@@ -125,8 +134,15 @@
     align-items: center;
     justify-content: center;
   }
-  .password-toggle svg { width: 20px; height: 20px; }
-  .password-toggle.visible { color: var(--af-yellow); }
+
+  .password-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .password-toggle.visible {
+    color: var(--af-yellow);
+  }
 
   .logo-text {
     font-size: 19px;
@@ -135,8 +151,14 @@
     color: var(--text-light);
   }
 
-  .logo-text .dim { color: var(--text-muted); font-weight: 500; }
-  .logo-text .hub { color: var(--af-yellow); }
+  .logo-text .dim {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .logo-text .hub {
+    color: var(--af-yellow);
+  }
 
   .card {
     background: linear-gradient(180deg, var(--card-bg) 0%, #0c0c16 100%);
@@ -145,7 +167,9 @@
     padding: 32px 24px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.02) inset;
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255,255,255,0.02) inset;
   }
 
   h1 {
@@ -176,7 +200,8 @@
     letter-spacing: 0.04em;
   }
 
-  input, select {
+  input,
+  select {
     width: 100%;
     padding: 13px 15px;
     background: var(--input-bg);
@@ -189,11 +214,16 @@
     font-family: inherit;
   }
 
-  .password-field-wrap input { padding-right: 44px; }
+  .password-field-wrap input {
+    padding-right: 44px;
+  }
 
-  input::placeholder { color: var(--text-dim); }
+  input::placeholder {
+    color: var(--text-dim);
+  }
 
-  input:focus, select:focus {
+  input:focus,
+  select:focus {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
   }
@@ -299,7 +329,9 @@
     margin-top: -8px;
   }
 
-  .hidden { display: none !important; }
+  .hidden {
+    display: none !important;
+  }
 
   .footer-tag {
     margin-top: 28px;
@@ -310,232 +342,850 @@
   }
 </style>
 </head>
+
 <body>
 
 <div class="content-wrap">
 
   <a href="index.html" class="logo-row">
-    <div class="logo-mark"><img src="icons/logo-mark.png" alt="AF Digital Hub"></div>
-    <div class="logo-text">Digital<span class="hub">Hub</span></div>
+    <div class="logo-mark">
+      <img src="icons/logo-mark.png" alt="AF Digital Hub">
+    </div>
+
+    <div class="logo-text">
+      Digital<span class="hub">Hub</span>
+    </div>
   </a>
 
   <div class="card">
+
     <h1 id="form-title">Welcome back</h1>
-    <p class="subtitle" id="form-subtitle">Sign in to continue to your AF Digital Hub account.</p>
+
+    <p class="subtitle" id="form-subtitle">
+      Sign in to continue to your AF Digital Hub account.
+    </p>
 
     <div class="error-msg" id="error-box"></div>
 
     <div class="role-toggle hidden" id="role-toggle">
-      <div class="role-btn active" data-role="creator" onclick="selectRole('creator')">I'm a Creator</div>
-      <div class="role-btn" data-role="business" onclick="selectRole('business')">I'm a Business</div>
+      <div
+        class="role-btn active"
+        data-role="creator"
+        onclick="selectRole('creator')"
+      >
+        I'm a Creator
+      </div>
+
+      <div
+        class="role-btn"
+        data-role="business"
+        onclick="selectRole('business')"
+      >
+        I'm a Business
+      </div>
     </div>
 
     <div class="role-hint hidden" id="role-hint"></div>
 
     <form id="auth-form">
+
       <div class="field hidden" id="name-field">
         <label>Full Name</label>
-        <input type="text" id="full_name" placeholder="Your full name">
+
+        <input
+          type="text"
+          id="full_name"
+          placeholder="Your full name"
+        >
       </div>
 
       <div class="field">
         <label>Email</label>
-        <input type="email" id="email" placeholder="you@example.com" required>
+
+        <input
+          type="email"
+          id="email"
+          placeholder="you@example.com"
+          required
+        >
       </div>
 
       <div class="field" id="password-field">
+
         <label>Password</label>
+
         <div class="password-field-wrap">
-          <input type="password" id="password" placeholder="••••••••">
-          <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword()" aria-label="Show password">
-            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+          <input
+            type="password"
+            id="password"
+            placeholder="••••••••"
+          >
+
+          <button
+            type="button"
+            class="password-toggle"
+            id="passwordToggle"
+            onclick="togglePassword()"
+            aria-label="Show password"
+          >
+
+            <svg
+              id="eyeIcon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
+
           </button>
+
         </div>
+
       </div>
 
       <div class="field hidden" id="pin-field">
+
         <label>PIN</label>
-        <input type="password" id="pin" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+
+        <input
+          type="password"
+          id="pin"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="••••"
+          autocomplete="off"
+        >
+
       </div>
 
-      <button type="submit" class="btn-primary" id="submit-btn">Log In</button>
+      <button
+        type="submit"
+        class="btn-primary"
+        id="submit-btn"
+      >
+        Log In
+      </button>
+
     </form>
 
     <div class="pin-toggle-row" id="pin-toggle-row">
-      <a href="#" onclick="togglePinMode(event)" id="pin-toggle-link">Log in with PIN instead</a>
+
+      <a
+        href="#"
+        onclick="togglePinMode(event)"
+        id="pin-toggle-link"
+      >
+        Log in with PIN instead
+      </a>
+
     </div>
 
     <div class="switch-row">
-      <span id="switch-text">Don't have an account?</span>
-      <a href="#" onclick="toggleMode(event)" id="switch-link">Sign up</a>
+
+      <span id="switch-text">
+        Don't have an account?
+      </span>
+
+      <a
+        href="#"
+        onclick="toggleMode(event)"
+        id="switch-link"
+      >
+        Sign up
+      </a>
+
     </div>
+
   </div>
 
-  <div class="footer-tag">AF Digital Hub &copy; 2026</div>
+  <div class="footer-tag">
+    AF Digital Hub &copy; 2026
+  </div>
 
 </div>
 
+
 <script>
+
   const API_BASE = "https://creator-marketplace-71rb.onrender.com";
+
   let isLogin = true;
   let isPinMode = false;
   let selectedRole = "creator";
 
+
+  /*
+   * ---------------------------------------------------------
+   * LOGIN REDIRECT SUPPORT
+   * ---------------------------------------------------------
+   *
+   * This allows links such as:
+   *
+   * login.html?redirect=dashboard.html
+   *
+   * or:
+   *
+   * login.html?redirect=course-learn.html?id=123
+   *
+   * After successful login, the user is returned to that page.
+   *
+   * This is used by the AF Digital Hub course email flow.
+   * ---------------------------------------------------------
+   */
+
+  function getSafeRedirectFromUrl() {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const redirect = params.get("redirect");
+
+    if (!redirect) {
+      return null;
+    }
+
+    /*
+     * Only allow local AF Digital Hub pages.
+     * Prevents external websites from being used as redirects.
+     */
+
+    if (
+      redirect.startsWith("/") ||
+      redirect.startsWith("https://afdigitalhub.net/") ||
+      redirect.startsWith("http://afdigitalhub.net/")
+    ) {
+
+      try {
+
+        const parsed = new URL(
+          redirect,
+          window.location.origin
+        );
+
+        if (
+          parsed.origin === window.location.origin ||
+          parsed.origin === "https://afdigitalhub.net"
+        ) {
+          return parsed.pathname + parsed.search + parsed.hash;
+        }
+
+      } catch (err) {
+        return null;
+      }
+    }
+
+    /*
+     * Allow normal relative frontend pages.
+     */
+
+    if (
+      !redirect.includes("://") &&
+      !redirect.startsWith("//")
+    ) {
+      return redirect;
+    }
+
+    return null;
+  }
+
+
+  /*
+   * Save redirect destination immediately when arriving
+   * from an email or another protected page.
+   */
+
+  const redirectFromUrl = getSafeRedirectFromUrl();
+
+  if (redirectFromUrl) {
+
+    localStorage.setItem(
+      "af_redirect_after_login",
+      redirectFromUrl
+    );
+
+  }
+
+
   const ROLE_HINTS = {
-    creator: "As a creator, you can build your professional profile and apply to campaigns posted by businesses.",
-    business: "As a business, you can present your business and post campaigns to find the right creators."
+
+    creator:
+      "As a creator, you can build your professional profile and apply to campaigns posted by businesses.",
+
+    business:
+      "As a business, you can present your business and post campaigns to find the right creators."
+
   };
 
+
   function togglePassword() {
-    const input = document.getElementById('password');
-    const btn = document.getElementById('passwordToggle');
-    const isHidden = input.type === 'password';
-    input.type = isHidden ? 'text' : 'password';
-    btn.classList.toggle('visible', isHidden);
-    btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+
+    const input = document.getElementById("password");
+    const btn = document.getElementById("passwordToggle");
+
+    const isHidden = input.type === "password";
+
+    input.type = isHidden ? "text" : "password";
+
+    btn.classList.toggle("visible", isHidden);
+
+    btn.setAttribute(
+      "aria-label",
+      isHidden ? "Hide password" : "Show password"
+    );
+
   }
+
 
   function selectRole(role) {
+
     selectedRole = role;
-    document.querySelectorAll('.role-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.role === role);
+
+    document.querySelectorAll(".role-btn").forEach(btn => {
+
+      btn.classList.toggle(
+        "active",
+        btn.dataset.role === role
+      );
+
     });
-    document.getElementById('role-hint').textContent = ROLE_HINTS[role];
+
+    document.getElementById("role-hint").textContent =
+      ROLE_HINTS[role];
+
   }
+
 
   function setMode(login) {
-    isLogin = login;
-    document.getElementById('form-title').textContent = isLogin ? 'Welcome back' : 'Create your account';
-    document.getElementById('form-subtitle').textContent = isLogin
-      ? 'Sign in to continue to your AF Digital Hub account.'
-      : 'Join AF Digital Hub as a creator or a business.';
-    document.getElementById('name-field').classList.toggle('hidden', isLogin);
-    document.getElementById('role-toggle').classList.toggle('hidden', isLogin);
-    document.getElementById('role-hint').classList.toggle('hidden', isLogin);
-    document.getElementById('submit-btn').textContent = isLogin ? 'Log In' : 'Create Account';
-    document.getElementById('switch-text').textContent = isLogin ? "Don't have an account?" : "Already have an account?";
-    document.getElementById('switch-link').textContent = isLogin ? 'Sign up' : 'Log in';
-    if (!isLogin) document.getElementById('role-hint').textContent = ROLE_HINTS[selectedRole];
 
-    // PIN login only makes sense when signing in, not when creating an account.
-    document.getElementById('pin-toggle-row').classList.toggle('hidden', !isLogin);
+    isLogin = login;
+
+    document.getElementById("form-title").textContent =
+      isLogin
+        ? "Welcome back"
+        : "Create your account";
+
+    document.getElementById("form-subtitle").textContent =
+      isLogin
+        ? "Sign in to continue to your AF Digital Hub account."
+        : "Join AF Digital Hub as a creator or a business.";
+
+    document
+      .getElementById("name-field")
+      .classList
+      .toggle("hidden", isLogin);
+
+    document
+      .getElementById("role-toggle")
+      .classList
+      .toggle("hidden", isLogin);
+
+    document
+      .getElementById("role-hint")
+      .classList
+      .toggle("hidden", isLogin);
+
+    document.getElementById("submit-btn").textContent =
+      isLogin
+        ? "Log In"
+        : "Create Account";
+
+    document.getElementById("switch-text").textContent =
+      isLogin
+        ? "Don't have an account?"
+        : "Already have an account?";
+
+    document.getElementById("switch-link").textContent =
+      isLogin
+        ? "Sign up"
+        : "Log in";
+
+
+    if (!isLogin) {
+
+      document.getElementById("role-hint").textContent =
+        ROLE_HINTS[selectedRole];
+
+    }
+
+
+    /*
+     * PIN login only makes sense when signing in.
+     */
+
+    document
+      .getElementById("pin-toggle-row")
+      .classList
+      .toggle("hidden", !isLogin);
+
+
     if (!isLogin && isPinMode) {
+
       isPinMode = false;
+
       applyPinMode();
+
     }
 
     hideError();
+
   }
+
 
   function toggleMode(e) {
-    if (e) e.preventDefault();
+
+    if (e) {
+      e.preventDefault();
+    }
+
     setMode(!isLogin);
+
   }
+
 
   function applyPinMode() {
-    document.getElementById('password-field').classList.toggle('hidden', isPinMode);
-    document.getElementById('pin-field').classList.toggle('hidden', !isPinMode);
-    document.getElementById('password').required = !isPinMode;
-    document.getElementById('pin-toggle-link').textContent = isPinMode
-      ? 'Use password instead'
-      : 'Log in with PIN instead';
+
+    document
+      .getElementById("password-field")
+      .classList
+      .toggle("hidden", isPinMode);
+
+    document
+      .getElementById("pin-field")
+      .classList
+      .toggle("hidden", !isPinMode);
+
+    document.getElementById("password").required =
+      !isPinMode;
+
+    document.getElementById("pin-toggle-link").textContent =
+      isPinMode
+        ? "Use password instead"
+        : "Log in with PIN instead";
+
     hideError();
+
   }
+
 
   function togglePinMode(e) {
-    if (e) e.preventDefault();
+
+    if (e) {
+      e.preventDefault();
+    }
+
     isPinMode = !isPinMode;
+
     applyPinMode();
+
   }
+
 
   function showError(msg, isSuccess) {
-    const box = document.getElementById('error-box');
+
+    const box = document.getElementById("error-box");
+
     box.textContent = msg;
-    box.classList.toggle('success', !!isSuccess);
-    box.style.display = 'block';
+
+    box.classList.toggle(
+      "success",
+      !!isSuccess
+    );
+
+    box.style.display = "block";
+
   }
+
 
   function hideError() {
-    document.getElementById('error-box').style.display = 'none';
+
+    document.getElementById("error-box").style.display =
+      "none";
+
   }
 
-  // If arriving from a "Create an Account" link, open directly in signup mode.
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('mode') === 'signup') {
+
+  /*
+   * ---------------------------------------------------------
+   * INITIAL PAGE MODE
+   * ---------------------------------------------------------
+   */
+
+  const urlParams =
+    new URLSearchParams(window.location.search);
+
+
+  if (urlParams.get("mode") === "signup") {
+
     setMode(false);
+
   }
 
-  document.getElementById('auth-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    hideError();
 
-    const email = document.getElementById('email').value.trim();
+  /*
+   * ---------------------------------------------------------
+   * LOGIN / REGISTRATION
+   * ---------------------------------------------------------
+   */
+
+  document
+    .getElementById("auth-form")
+    .addEventListener("submit", async function(e) {
+
+      e.preventDefault();
+
+      hideError();
+
+      const email =
+        document.getElementById("email").value.trim();
+
+
+      try {
+
+        let response;
+        let data;
+
+
+        /*
+         * ---------------------------------------------------
+         * PIN LOGIN
+         * ---------------------------------------------------
+         */
+
+        if (isLogin && isPinMode) {
+
+          const pin =
+            document.getElementById("pin").value.trim();
+
+
+          if (!/^\d{4,6}$/.test(pin)) {
+
+            showError(
+              "Please enter your 4-6 digit PIN."
+            );
+
+            return;
+
+          }
+
+
+          response = await fetch(
+            `${API_BASE}/auth/pin-login`,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json"
+              },
+
+              body: JSON.stringify({
+                email,
+                pin
+              })
+            }
+          );
+
+        }
+
+
+        /*
+         * ---------------------------------------------------
+         * PASSWORD LOGIN
+         * ---------------------------------------------------
+         */
+
+        else if (isLogin) {
+
+          const password =
+            document.getElementById("password").value;
+
+
+          response = await fetch(
+            `${API_BASE}/auth/login`,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json"
+              },
+
+              body: JSON.stringify({
+                email,
+                password
+              })
+            }
+          );
+
+        }
+
+
+        /*
+         * ---------------------------------------------------
+         * REGISTRATION
+         * ---------------------------------------------------
+         */
+
+        else {
+
+          const password =
+            document.getElementById("password").value;
+
+          const full_name =
+            document
+              .getElementById("full_name")
+              .value
+              .trim();
+
+
+          if (!full_name) {
+
+            showError(
+              "Please enter your full name"
+            );
+
+            return;
+
+          }
+
+
+          response = await fetch(
+            `${API_BASE}/auth/register`,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type": "application/json"
+              },
+
+              body: JSON.stringify({
+                full_name,
+                email,
+                password,
+                role: selectedRole
+              })
+            }
+          );
+
+        }
+
+
+        data = await response.json();
+
+
+        /*
+         * ---------------------------------------------------
+         * SERVER ERROR
+         * ---------------------------------------------------
+         */
+
+        if (!response.ok) {
+
+          showError(
+            data.error || "Something went wrong"
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * ---------------------------------------------------
+         * SUCCESSFUL LOGIN
+         * ---------------------------------------------------
+         */
+
+        if (isLogin) {
+
+          /*
+           * Store the same authentication information
+           * already used throughout AF Digital Hub.
+           */
+
+          localStorage.setItem(
+            "af_token",
+            data.token
+          );
+
+          localStorage.setItem(
+            "af_role",
+            data.user.role
+          );
+
+          localStorage.setItem(
+            "af_name",
+            data.user.full_name
+          );
+
+
+          /*
+           * ------------------------------------------------
+           * RETURN USER TO ORIGINAL DESTINATION
+           * ------------------------------------------------
+           *
+           * Priority:
+           *
+           * 1. Saved redirect from email/protected page
+           * 2. Normal dashboard
+           */
+
+          const redirect =
+            localStorage.getItem(
+              "af_redirect_after_login"
+            );
+
+
+          if (redirect) {
+
+            localStorage.removeItem(
+              "af_redirect_after_login"
+            );
+
+
+            /*
+             * Small protection against accidental
+             * external redirects.
+             */
+
+            const safeRedirect =
+              getSafeRedirectDestination(redirect);
+
+
+            if (safeRedirect) {
+
+              window.location.href =
+                safeRedirect;
+
+              return;
+
+            }
+
+          }
+
+
+          /*
+           * Normal login destination.
+           */
+
+          window.location.href =
+            "dashboard.html";
+
+        }
+
+
+        /*
+         * ---------------------------------------------------
+         * SUCCESSFUL REGISTRATION
+         * ---------------------------------------------------
+         */
+
+        else {
+
+          showError(
+            "Account created. Please log in.",
+            true
+          );
+
+          setMode(true);
+
+        }
+
+      }
+
+
+      catch (err) {
+
+        console.error(
+          "AF Digital Hub authentication error:",
+          err
+        );
+
+        showError(
+          "Could not connect to server. Please try again."
+        );
+
+      }
+
+    });
+
+
+  /*
+   * ---------------------------------------------------------
+   * SAFE REDIRECT VALIDATION
+   * ---------------------------------------------------------
+   */
+
+  function getSafeRedirectDestination(redirect) {
+
+    if (!redirect) {
+      return null;
+    }
+
 
     try {
-      let response, data;
 
-      if (isLogin && isPinMode) {
-        const pin = document.getElementById('pin').value.trim();
-        if (!/^\d{4,6}$/.test(pin)) {
-          showError('Please enter your 4-6 digit PIN.');
-          return;
-        }
-        response = await fetch(`${API_BASE}/auth/pin-login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, pin })
-        });
-      } else if (isLogin) {
-        const password = document.getElementById('password').value;
-        response = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-      } else {
-        const password = document.getElementById('password').value;
-        const full_name = document.getElementById('full_name').value.trim();
-        if (!full_name) {
-          showError('Please enter your full name');
-          return;
-        }
-        response = await fetch(`${API_BASE}/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ full_name, email, password, role: selectedRole })
-        });
+      const parsed =
+        new URL(
+          redirect,
+          window.location.origin
+        );
+
+
+      /*
+       * Only allow AF Digital Hub itself.
+       */
+
+      const allowedOrigins = [
+        window.location.origin,
+        "https://afdigitalhub.net"
+      ];
+
+
+      if (!allowedOrigins.includes(parsed.origin)) {
+        return null;
       }
 
-      data = await response.json();
 
-      if (!response.ok) {
-        showError(data.error || 'Something went wrong');
-        return;
-      }
+      /*
+       * Never allow login to redirect back to another
+       * external website.
+       */
 
-      if (isLogin) {
-        localStorage.setItem('af_token', data.token);
-        localStorage.setItem('af_role', data.user.role);
-        localStorage.setItem('af_name', data.user.full_name);
-        const redirect = localStorage.getItem('af_redirect_after_login');
-        if (redirect) {
-          localStorage.removeItem('af_redirect_after_login');
-          window.location.href = redirect;
-        } else {
-          window.location.href = 'dashboard.html';
-        }
-      } else {
-        showError('Account created. Please log in.', true);
-        setMode(true);
-      }
+      return (
+        parsed.pathname +
+        parsed.search +
+        parsed.hash
+      );
 
-    } catch (err) {
-      showError('Could not connect to server. Please try again.');
     }
-  });
+
+
+    catch (err) {
+
+      /*
+       * Relative paths such as dashboard.html
+       * are acceptable.
+       */
+
+      if (
+        !redirect.includes("://") &&
+        !redirect.startsWith("//")
+      ) {
+
+        return redirect;
+
+      }
+
+      return null;
+
+    }
+
+  }
+
 </script>
 
 </body>
