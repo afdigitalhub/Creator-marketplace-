@@ -34,6 +34,7 @@ async function sendCourseAccessEmail({
     console.error(
       "Course access email skipped: user email is missing."
     );
+
     return {
       ok: false,
       skipped: true,
@@ -45,6 +46,7 @@ async function sendCourseAccessEmail({
     console.error(
       "Course access email skipped: RESEND_API_KEY is not configured."
     );
+
     return {
       ok: false,
       skipped: true,
@@ -56,6 +58,7 @@ async function sendCourseAccessEmail({
     console.error(
       "Course access email skipped: RESEND_FROM_EMAIL is not configured."
     );
+
     return {
       ok: false,
       skipped: true,
@@ -67,6 +70,7 @@ async function sendCourseAccessEmail({
     console.error(
       "Course access email skipped: course ID is missing."
     );
+
     return {
       ok: false,
       skipped: true,
@@ -77,6 +81,15 @@ async function sendCourseAccessEmail({
   const courseUrl =
     `${PUBLIC_APP_URL}/course-learn.html?id=` +
     encodeURIComponent(courseId);
+
+  /*
+   * Existing AF Digital Hub sign-in page.
+   * The redirect parameter sends the customer to the dashboard
+   * after successful login.
+   */
+  const dashboardUrl =
+    `${PUBLIC_APP_URL}/signin.html?redirect=` +
+    encodeURIComponent("dashboard.html");
 
   const safeName =
     fullName ||
@@ -188,14 +201,17 @@ async function sendCourseAccessEmail({
       line-height:1.7;
       margin:0 0 24px;
     ">
-      You can start learning immediately from your AF Digital Hub
-      account.
+      Your access is active. Open your dashboard or start
+      learning now.
     </p>
 
-    <div style="text-align:center;margin:28px 0;">
+    <div style="
+      text-align:center;
+      margin:28px 0 12px;
+    ">
 
       <a
-        href="${escapeAttributeEmail(courseUrl)}"
+        href="${escapeAttributeEmail(dashboardUrl)}"
         style="
           display:inline-block;
           background:#ffd21a;
@@ -205,9 +221,35 @@ async function sendCourseAccessEmail({
           border-radius:10px;
           font-size:14px;
           font-weight:800;
+          margin:5px;
         "
       >
-        Access My Course
+        Open My Dashboard
+      </a>
+
+    </div>
+
+    <div style="
+      text-align:center;
+      margin:12px 0 28px;
+    ">
+
+      <a
+        href="${escapeAttributeEmail(courseUrl)}"
+        style="
+          display:inline-block;
+          background:#1b1e2c;
+          color:#ffffff;
+          text-decoration:none;
+          border:1px solid #34384d;
+          padding:13px 24px;
+          border-radius:10px;
+          font-size:14px;
+          font-weight:800;
+          margin:5px;
+        "
+      >
+        Start Learning
       </a>
 
     </div>
@@ -218,8 +260,9 @@ async function sendCourseAccessEmail({
       line-height:1.6;
       margin-top:25px;
     ">
-      If the button does not work, you can access your course from
-      your AF Digital Hub account.
+      If you are not currently signed in, AF Digital Hub will
+      take you through the normal sign-in process before
+      opening your account.
     </p>
 
     <div style="
@@ -250,7 +293,10 @@ Your payment was successfully verified and your course access is now active.
 Course:
 ${safeCourseTitle}
 
-Access your course:
+Open My Dashboard:
+${dashboardUrl}
+
+Start Learning:
 ${courseUrl}
 
 You can start learning immediately from your AF Digital Hub account.
@@ -264,14 +310,18 @@ Learn. Create. Sell. Connect.
       "https://api.resend.com/emails",
       {
         method: "POST",
+
         headers: {
           Authorization:
             `Bearer ${RESEND_API_KEY}`,
+
           "Content-Type":
             "application/json",
+
           "Idempotency-Key":
             `course-access-${paymentReference}`
         },
+
         body: JSON.stringify({
           from: RESEND_FROM_EMAIL,
           to: [email],
@@ -502,824 +552,4 @@ async function verifyAndComplete(reference) {
       return {
         ok: false,
         reason:
-          "payment_not_successful",
-        status:
-          txn.status
-      };
-    }
-
-    /* =====================================================
-       CURRENCY CHECK
-    ===================================================== */
-
-    if (
-      String(txn.currency).toUpperCase() !==
-      String(order.currency).toUpperCase()
-    ) {
-
-      await client.query(
-        `UPDATE payments
-         SET status = 'failed',
-             raw_response = $1
-         WHERE id = $2`,
-        [
-          JSON.stringify(txn),
-          payment.id
-        ]
-      );
-
-      await client.query(
-        "COMMIT"
-      );
-
-      console.error(
-        "Currency mismatch:",
-        {
-          expected:
-            order.currency,
-          received:
-            txn.currency,
-          reference
-        }
-      );
-
-      return {
-        ok: false,
-        reason:
-          "currency_mismatch",
-        expected:
-          order.currency,
-        received:
-          txn.currency
-      };
-    }
-
-    /* =====================================================
-       AMOUNT CHECK
-    ===================================================== */
-
-    const expectedMinor =
-      toMinorUnit(
-        order.gross_amount
-      );
-
-    if (
-      Number(txn.amount) !==
-      expectedMinor
-    ) {
-
-      await client.query(
-        `UPDATE payments
-         SET status = 'failed',
-             raw_response = $1
-         WHERE id = $2`,
-        [
-          JSON.stringify(txn),
-          payment.id
-        ]
-      );
-
-      await client.query(
-        "COMMIT"
-      );
-
-      return {
-        ok: false,
-        reason:
-          "amount_mismatch",
-        expected:
-          expectedMinor,
-        received:
-          txn.amount
-      };
-    }
-
-    /* =====================================================
-       MARK PAYMENT SUCCESSFUL
-    ===================================================== */
-
-    await client.query(
-      `UPDATE payments
-       SET status = 'successful',
-           raw_response = $1,
-           verified_at = now()
-       WHERE id = $2`,
-      [
-        JSON.stringify(txn),
-        payment.id
-      ]
-    );
-
-    /* =====================================================
-       MARK ORDER PAID
-    ===================================================== */
-
-    await client.query(
-      `UPDATE orders
-       SET status = 'paid',
-           updated_at = now()
-       WHERE id = $1`,
-      [order.id]
-    );
-
-    /* =====================================================
-       PRODUCT ENTITLEMENT
-    ===================================================== */
-
-    await client.query(
-      `INSERT INTO entitlements
-        (user_id, product_id, order_id, status)
-       VALUES
-        ($1, $2, $3, 'active')
-       ON CONFLICT (user_id, product_id)
-       DO UPDATE SET
-         status = 'active'`,
-      [
-        order.buyer_id,
-        order.product_id,
-        order.id
-      ]
-    );
-
-    /* =====================================================
-       COURSE ENROLLMENT
-       
-       If the purchased product is attached to a course,
-       enroll the buyer immediately.
-    ===================================================== */
-
-    const courseResult =
-      await client.query(
-        `SELECT
-           c.id,
-           c.title
-         FROM courses c
-         WHERE c.product_id = $1
-         LIMIT 1`,
-        [order.product_id]
-      );
-
-    if (
-      courseResult.rows.length > 0
-    ) {
-
-      const course =
-        courseResult.rows[0];
-
-      await client.query(
-        `INSERT INTO course_enrollments
-          (
-            course_id,
-            user_id,
-            product_id,
-            order_id,
-            status
-          )
-         VALUES
-          ($1, $2, $3, $4, 'active')
-         ON CONFLICT
-          (course_id, user_id)
-         DO UPDATE SET
-           status = 'active',
-           order_id = COALESCE(
-             course_enrollments.order_id,
-             EXCLUDED.order_id
-           ),
-           updated_at = now()`,
-        [
-          course.id,
-          order.buyer_id,
-          order.product_id,
-          order.id
-        ]
-      );
-
-      /*
-       * Get the buyer's email and name while the
-       * verified transaction is still being processed.
-       *
-       * The actual email is NOT sent until after COMMIT.
-       */
-      const userResult =
-        await client.query(
-          `SELECT
-             email,
-             full_name
-           FROM users
-           WHERE id = $1
-           LIMIT 1`,
-          [order.buyer_id]
-        );
-
-      if (
-        userResult.rows.length > 0
-      ) {
-
-        courseEmailData = {
-          email:
-            userResult.rows[0].email,
-          fullName:
-            userResult.rows[0].full_name,
-          courseTitle:
-            course.title,
-          courseId:
-            course.id,
-          paymentReference:
-            reference
-        };
-      }
-    }
-
-    /* =====================================================
-       SELLER EARNING
-    ===================================================== */
-
-    const existingEarning =
-      await client.query(
-        `SELECT id
-         FROM earnings
-         WHERE source_type = 'product_sale'
-         AND source_id = $1`,
-        [order.id]
-      );
-
-    if (
-      existingEarning.rows.length === 0
-    ) {
-
-      await client.query(
-        `INSERT INTO earnings
-          (
-            user_id,
-            source_type,
-            source_id,
-            gross_amount,
-            platform_fee,
-            net_amount,
-            currency,
-            status,
-            available_at
-          )
-         VALUES
-          (
-            $1,
-            'product_sale',
-            $2,
-            $3,
-            $4,
-            $5,
-            $6,
-            'pending',
-            now() + interval '7 days'
-          )`,
-        [
-          order.seller_id,
-          order.id,
-          order.gross_amount,
-          order.commission_amount,
-          order.seller_amount,
-          order.currency
-        ]
-      );
-    }
-
-    /* =====================================================
-       AFFILIATE EARNING
-    ===================================================== */
-
-    if (
-      order.referrer_id &&
-      Number(order.affiliate_amount) > 0
-    ) {
-
-      const existingAffiliateEarning =
-        await client.query(
-          `SELECT id
-           FROM earnings
-           WHERE source_type =
-             'affiliate_commission'
-           AND source_id = $1`,
-          [order.id]
-        );
-
-      if (
-        existingAffiliateEarning.rows.length === 0
-      ) {
-
-        await client.query(
-          `INSERT INTO earnings
-            (
-              user_id,
-              source_type,
-              source_id,
-              gross_amount,
-              platform_fee,
-              net_amount,
-              currency,
-              status,
-              available_at
-            )
-           VALUES
-            (
-              $1,
-              'affiliate_commission',
-              $2,
-              $3,
-              $4,
-              $5,
-              $6,
-              'pending',
-              now() + interval '7 days'
-            )`,
-          [
-            order.referrer_id,
-            order.id,
-            order.gross_amount,
-            0,
-            order.affiliate_amount,
-            order.currency
-          ]
-        );
-      }
-    }
-
-    /* =====================================================
-       COMMIT VERIFIED PAYMENT
-    ===================================================== */
-
-    await client.query(
-      "COMMIT"
-    );
-
-    /*
-     * IMPORTANT:
-     * Email is sent only AFTER the database transaction
-     * has successfully committed.
-     */
-    if (courseEmailData) {
-
-      try {
-
-        await sendCourseAccessEmail(
-          courseEmailData
-        );
-
-      } catch (emailError) {
-
-        /*
-         * Email failure must NOT turn a successful
-         * payment into a failed payment.
-         */
-        console.error(
-          "Course access email failed after successful payment:",
-          emailError
-        );
-      }
-    }
-
-    return {
-      ok: true,
-      order_id:
-        order.id,
-      product_id:
-        order.product_id,
-      course_enrolled:
-        Boolean(courseEmailData),
-      course_id:
-        courseEmailData
-          ? courseEmailData.courseId
-          : null
-    };
-
-  } catch (err) {
-
-    try {
-      await client.query(
-        "ROLLBACK"
-      );
-    } catch (rollbackError) {
-      console.error(
-        "Rollback error:",
-        rollbackError
-      );
-    }
-
-    throw err;
-
-  } finally {
-
-    client.release();
-  }
-}
-
-/* =========================================================
-   PAYSTACK WEBHOOK
-========================================================= */
-
-router.post(
-  "/webhook",
-  express.raw({
-    type: "*/*"
-  }),
-  async (req, res) => {
-
-    try {
-
-      const signature =
-        req.headers[
-          "x-paystack-signature"
-        ];
-
-      const rawBody =
-        req.body;
-
-      const expected =
-        crypto
-          .createHmac(
-            "sha512",
-            PAYSTACK_SECRET
-          )
-          .update(rawBody)
-          .digest("hex");
-
-      if (
-        signature !== expected
-      ) {
-
-        console.error(
-          "Webhook signature mismatch, ignoring request"
-        );
-
-        return res.sendStatus(
-          401
-        );
-      }
-
-      const event =
-        JSON.parse(
-          rawBody.toString()
-        );
-
-      /*
-       * Acknowledge Paystack immediately.
-       */
-      res.sendStatus(
-        200
-      );
-
-      if (
-        event.event ===
-        "charge.success"
-      ) {
-
-        try {
-
-          await verifyAndComplete(
-            event.data.reference
-          );
-
-        } catch (err) {
-
-          console.error(
-            "Webhook processing error:",
-            err
-          );
-        }
-      }
-
-    } catch (err) {
-
-      console.error(
-        "Webhook error:",
-        err
-      );
-
-      if (
-        !res.headersSent
-      ) {
-        res.sendStatus(
-          500
-        );
-      }
-    }
-  }
-);
-
-/* =========================================================
-   JSON BODY PARSER
-========================================================= */
-
-router.use(
-  express.json()
-);
-
-/* =========================================================
-   INITIALISE PAYMENT
-========================================================= */
-
-router.post(
-  "/initialise",
-  requireAuth,
-  async (req, res) => {
-
-    const {
-      order_id
-    } = req.body;
-
-    if (!order_id) {
-
-      return res.status(400).json({
-        error:
-          "order_id is required"
-      });
-    }
-
-    if (!PAYSTACK_SECRET) {
-
-      return res.status(500).json({
-        error:
-          "Payments are not configured yet"
-      });
-    }
-
-    try {
-
-      const orderResult =
-        await pool.query(
-          "SELECT * FROM orders WHERE id = $1",
-          [order_id]
-        );
-
-      if (
-        orderResult.rows.length === 0
-      ) {
-
-        return res.status(404).json({
-          error:
-            "Order not found"
-        });
-      }
-
-      const order =
-        orderResult.rows[0];
-
-      if (
-        order.buyer_id !==
-        req.user.id
-      ) {
-
-        return res.status(403).json({
-          error:
-            "Not authorized to pay for this order"
-        });
-      }
-
-      if (
-        order.status === "paid"
-      ) {
-
-        return res.status(400).json({
-          error:
-            "This order has already been paid"
-        });
-      }
-
-      if (
-        order.status !== "pending"
-      ) {
-
-        return res.status(400).json({
-          error:
-            "This order can no longer be paid"
-        });
-      }
-
-      const userResult =
-        await pool.query(
-          "SELECT email FROM users WHERE id = $1",
-          [req.user.id]
-        );
-
-      const email =
-        userResult.rows[0].email;
-
-      const orderCurrency =
-        String(
-          order.currency ||
-          "GHS"
-        ).toUpperCase();
-
-      const initRes =
-        await fetch(
-          `${PAYSTACK_BASE}/transaction/initialize`,
-          {
-            method: "POST",
-
-            headers: {
-              Authorization:
-                `Bearer ${PAYSTACK_SECRET}`,
-
-              "Content-Type":
-                "application/json"
-            },
-
-            body:
-              JSON.stringify({
-                email,
-
-                amount:
-                  toMinorUnit(
-                    order.gross_amount
-                  ),
-
-                currency:
-                  orderCurrency,
-
-                channels: [
-                  "card",
-                  "mobile_money",
-                  "bank",
-                  "bank_transfer",
-                  "ussd"
-                ],
-
-                metadata: {
-                  order_id:
-                    order.id,
-
-                  product_title:
-                    order.product_title,
-
-                  expected_currency:
-                    orderCurrency
-                }
-              })
-          }
-        );
-
-      const initData =
-        await initRes.json();
-
-      if (
-        !initRes.ok ||
-        !initData.status
-      ) {
-
-        console.error(
-          "Paystack init failed:",
-          initData
-        );
-
-        return res.status(502).json({
-          error:
-            "Could not start payment",
-
-          detail:
-            initData.message ||
-            "Payment provider rejected the request"
-        });
-      }
-
-      const reference =
-        initData.data.reference;
-
-      await pool.query(
-        `INSERT INTO payments
-          (
-            order_id,
-            provider,
-            provider_reference,
-            amount,
-            currency,
-            status
-          )
-         VALUES
-          (
-            $1,
-            'paystack',
-            $2,
-            $3,
-            $4,
-            'pending'
-          )`,
-        [
-          order.id,
-          reference,
-          order.gross_amount,
-          orderCurrency
-        ]
-      );
-
-      res.json({
-
-        authorization_url:
-          initData.data.authorization_url,
-
-        reference,
-
-        currency:
-          orderCurrency,
-
-        amount:
-          order.gross_amount
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        "Initialise payment error:",
-        err
-      );
-
-      res.status(500).json({
-        error:
-          "Could not start payment"
-      });
-    }
-  }
-);
-
-/* =========================================================
-   VERIFY PAYMENT
-========================================================= */
-
-router.get(
-  "/verify/:reference",
-  requireAuth,
-  async (req, res) => {
-
-    try {
-
-      const result =
-        await verifyAndComplete(
-          req.params.reference
-        );
-
-      if (!result.ok) {
-
-        if (
-          result.reason ===
-          "currency_mismatch"
-        ) {
-
-          return res.status(400).json({
-
-            error:
-              "Payment was charged in the wrong currency and has not been accepted",
-
-            reason:
-              result.reason
-
-          });
-        }
-
-        return res.status(400).json({
-
-          error:
-            "Payment not confirmed",
-
-          reason:
-            result.reason
-
-        });
-      }
-
-      res.json({
-
-        success:
-          true,
-
-        order_id:
-          result.order_id,
-
-        product_id:
-          result.product_id,
-
-        course_enrolled:
-          Boolean(
-            result.course_enrolled
-          ),
-
-        course_id:
-          result.course_id || null
-
-      });
-
-    } catch (err) {
-
-      console.error(
-        "Verify payment error:",
-        err
-      );
-
-      res.status(500).json({
-        error:
-          "Could not verify payment"
-      });
-    }
-  }
-);
-
-module.exports =
-  router;
+          "payment
