@@ -27,5 +27,7 @@ Disallow: /sell-product.html
 Disallow: /edit-product.html
 Disallow: /payouts.html
 Disallow: /payment-complete.html
+# Paid eBook files must never appear in search results
+Disallow: /*.pdf$
 
 Sitemap: https://afdigitalhub.net/sitemap.xml
