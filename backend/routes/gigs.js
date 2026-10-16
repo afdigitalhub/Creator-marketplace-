@@ -5,6 +5,8 @@ const { requireAuth } = require("../middleware/auth");
 const router = express.Router();
 
 const PAYSTACK_SECRET = (process.env.PAYSTACK_SECRET_KEY || "").trim();
+// New purchases are paused unless PAYMENTS_PAUSED is set to "false" (verifying earlier payments still works).
+const PAYMENTS_PAUSED = (process.env.PAYMENTS_PAUSED || "true").trim().toLowerCase() !== "false";
 const PAYSTACK_BASE = "https://api.paystack.co";
 const PLATFORM_COMMISSION_RATE = 0.10; // same 10% used across the platform
 
@@ -93,6 +95,10 @@ router.post("/", requireAuth, async (req, res) => {
   conversion, same channel restriction, same reference storage.
 */
 router.post("/:id/pay", requireAuth, async (req, res) => {
+  if (PAYMENTS_PAUSED) {
+    return res.status(503).json({ error: "Online payments are paused for now. Please check back soon." });
+  }
+
   if (!PAYSTACK_SECRET) {
     return res.status(500).json({ error: "Payments are not configured yet" });
   }

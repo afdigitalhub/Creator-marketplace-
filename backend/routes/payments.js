@@ -5,6 +5,8 @@ const { requireAuth } = require("../middleware/auth");
 const crypto = require("crypto");
 
 const PAYSTACK_SECRET = (process.env.PAYSTACK_SECRET_KEY || "").trim();
+// New purchases are paused unless PAYMENTS_PAUSED is set to "false" (verifying earlier payments still works).
+const PAYMENTS_PAUSED = (process.env.PAYMENTS_PAUSED || "true").trim().toLowerCase() !== "false";
 const PAYSTACK_BASE = "https://api.paystack.co";
 
 const RESEND_API_KEY = (process.env.RESEND_API_KEY || "").trim();
@@ -1076,6 +1078,10 @@ router.post(
         error:
           "order_id is required"
       });
+    }
+
+    if (PAYMENTS_PAUSED) {
+      return res.status(503).json({ error: "Online payments are paused for now. Please check back soon." });
     }
 
     if (!PAYSTACK_SECRET) {
